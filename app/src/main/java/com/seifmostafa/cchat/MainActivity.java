@@ -1,5 +1,6 @@
 package com.seifmostafa.cchat;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -14,9 +15,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.media.Image;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -27,11 +28,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
@@ -47,7 +45,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
@@ -59,27 +56,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.Vector;
-import java.util.concurrent.ExecutionException;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
 import static org.opencv.core.Core.CMP_NE;
 import static org.opencv.core.Core.compare;
 import static org.opencv.core.Core.countNonZero;
-import static org.opencv.core.Core.findNonZero;
 import static org.opencv.core.CvType.CV_32FC1;
-import static org.opencv.core.CvType.CV_8UC;
 import static org.opencv.core.CvType.CV_8UC1;
 import static org.opencv.core.CvType.CV_8UC3;
 import static org.opencv.core.Mat.zeros;
 import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.opencv.imgcodecs.Imgcodecs.imread;
 import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;
-import static org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY;
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2BGR555;
 import static org.opencv.imgproc.Imgproc.Canny;
 import static org.opencv.imgproc.Imgproc.RETR_TREE;
 import static org.opencv.imgproc.Imgproc.circle;
@@ -96,10 +91,9 @@ public class MainActivity extends Activity {
     private static final int MY_DATA_CHECK_CODE = 0;
     private static final int RESULT_SPEECH = 1;
 
-    TextView textView;
+    CustTextView textView;
     ArrayList<String > SpeechRec_results;
     FrameLayout frameLayout;
-    String res;
     DrawingView dv ;
     private Paint mPaint;
     public static String tempDir;
@@ -137,8 +131,9 @@ public class MainActivity extends Activity {
         // Log.v("ABSPATH" , mypath.getAbsolutePath());
 
 
-        textView = (TextView) findViewById(R.id.textView_text);
-        res=textView.getText().toString();
+       textView = (CustTextView) findViewById(R.id.textView_text);
+//        textView.setText("لُلو");
+       // res=textView.getText().toString();
         frameLayout = (FrameLayout)findViewById(R.id.overtext);
 
         dv = new DrawingView(this);
@@ -146,12 +141,13 @@ public class MainActivity extends Activity {
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
-        mPaint.setColor(Color.GREEN);
+        mPaint.setColor(Color.RED);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(12);
         frameLayout.addView(dv);
+      //  Log.i("Touched","X: "+textView.getTop()+" Y: "+textView.getLeft());
 
     }
 
@@ -170,22 +166,22 @@ public class MainActivity extends Activity {
 
     public void checkfill(View view) {
 
-        // prepare -- Create mat from the bitmap
+        // prepare -- Calculate  black OriginalPoints
+//        getTotalNonZero(getBitmapFromView(textView),OriginalPoints);
+//        Log.i("blackpoints_Original",""+ OriginalPoints.size());
+
+
         Bitmap mBitmap = null;
         mBitmap =  Bitmap.createBitmap (dv.getWidth(), dv.getHeight(), Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(mBitmap);
         dv.draw(canvas);
+
         try
         {
-//            Mat mat = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC1);
-//           Utils.bitmapToMat(mBitmap,mat);
-//            Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY);
-//            Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGBA, 4);
-//            Bitmap bitmap=Bitmap.createBitmap(mBitmap);
-//            Utils.matToBitmap(mat,bitmap);
-//            Mat mat1 = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC3);
-//            Utils.bitmapToMat(toBinary(bitmap),mat1);
-            checkTypo(mBitmap);
+           Mat Original = new CenterLine().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,getBitmapFromView(textView)).get();
+            Mat Drawed = new CenterLine().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,mBitmap).get();
+         int FinalPercentage =   MatchWritten(Original,Drawed,100);
+            Log.i("FinalPercentage",""+FinalPercentage);
         }
         catch(Exception e)
         {
@@ -243,7 +239,6 @@ public class MainActivity extends Activity {
         dialog.show();
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == RESULT_SPEECH && requestCode == RESULT_OK);
@@ -254,128 +249,83 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-
-
-
-
-
-
-
-
-
     /////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////check type ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
 
 
 
-    static class Point extends org.opencv.core.Point {
-        private int x;
-        private int y;
-
-        public Point(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public void setX(int x) {
-            this.x = x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        public void setY(int y) {
-            this.y = y;
-        }
-    }
-
-
-    public void checkTypo(Bitmap src) {
+    public int MatchWritten(Mat original,Mat written,int tolerance) {
+        int percentage =0;
        try {
-          // Mat dest = new Mat(src.cols(),src.rows(),CV_LOAD_IMAGE_GRAYSCALE);
-//            CENTERLINE centerline = new CENTERLINE(src,dest);
-//           centerline.prepareImage(src);
-//          // Log.i("SSSS",""+ centerline.x1 + "," +centerline.x2 +","+ centerline.y1+ "," + centerline.y2);
-//           showDialogwithMat(centerline.prepareImage(src));
-           Mat mat = new Mat();
-           Utils.bitmapToMat(src,mat);
-           MatOfPoint matOfPoint = FindContour_(mat);
-           org.opencv.core.Point[] points =  matOfPoint.toArray();
-           Log.i("MATRIX",""+points.length);
+            List<android.graphics.Point> Originalpoints = getTotalNonZero(original);
+            List<android.graphics.Point> Writtenpoints = getTotalNonZero(written);
 
-           for(org.opencv.core.Point p:points){
-             Log.i("MATRIX","X: "+ p.x+" Y: "+p.y);
+           List<android.graphics.Point> Original_copy =new ArrayList<>(Originalpoints);
+           List<android.graphics.Point> Writtern_copy = new ArrayList<>(Writtenpoints);
 
+           Log.i("MatchWritten","Original: "+Originalpoints.size());
+           Log.i("MatchWritten","Written: "+ Writtenpoints.size());
+
+           Collections.sort(Original_copy, new Comparator<android.graphics.Point>() {
+               @Override
+               public int compare(android.graphics.Point o1, android.graphics.Point o2) {
+                   return o1.x >= o2.x ? 1 : -1 ;
+               }
+           });
+           Collections.sort(Writtern_copy, new Comparator<android.graphics.Point>() {
+               @Override
+               public int compare(android.graphics.Point o1, android.graphics.Point o2) {
+                   return o1.x >= o2.x ? 1 : -1 ;
+               }
+           });
+
+            int C=0;
+           for(android.graphics.Point point:Originalpoints){
+            //   Log.i("MatchWritten","OriginalPoint: "+ point.x +" , "+ point.y);
+               for(android.graphics.Point searchpoint:Writtenpoints){
+                    if((searchpoint.x==point.x && searchpoint.y == point.y )||
+                            (searchpoint.x+tolerance==point.x && searchpoint.y+tolerance == point.y )||
+                                (searchpoint.x+tolerance==point.x && searchpoint.y == point.y )||
+                                    (searchpoint.x==point.x && searchpoint.y+tolerance == point.y )||
+                                        (searchpoint.x==point.x+tolerance && searchpoint.y == point.y+tolerance )||
+                                            (searchpoint.x==point.x+tolerance && searchpoint.y == point.y )||
+                                                (searchpoint.x==point.x && searchpoint.y == point.y +tolerance)){
+                        Original_copy.remove(point);
+                        Writtern_copy.remove(searchpoint);
+
+                    C++;
+                    }
+                 //  Log.i("MatchWritten","WrittenPoint: "+ searchpoint.x +" , "+ searchpoint.y);
+
+               }
            }
-
-
-
+           Log.i("MatchWritten","Original(after removing) : "+(Originalpoints.size()-Original_copy.size()));
+           Log.i("MatchWritten","Original(after removing) : "+(Originalpoints.size()-C));
        }catch (Exception e){
            Log.i("checkTypo",e.toString());
        }
+        return percentage;
     }
-    public Bitmap toBinary(Bitmap bmpOriginal) {
-        int width, height, threshold;
-        height = bmpOriginal.getHeight();
-        width = bmpOriginal.getWidth();
-        threshold = 127;
-        Bitmap bmpBinary = Bitmap.createBitmap(bmpOriginal);
-
-        for(int x = 0; x < width; ++x) {
-            for(int y = 0; y < height; ++y) {
-                // get one pixel color
-                int pixel = bmpOriginal.getPixel(x, y);
-                int red = Color.red(pixel);
-
-                //get binary value
-                if(red < threshold){
-                    bmpBinary.setPixel(x, y, 0xFF000000);
-                } else{
-                    bmpBinary.setPixel(x, y, 0xFFFFFFFF);
-                }
-
-            }
-        }
-        return bmpBinary;
-    }
-
-    public void OCRARA(String Word , Bitmap bitmap){
-        ///bitmap to search for Word within ..
-
-      // ITesseract instance = new Tesseract();
-        TessBaseAPI baseApi = new TessBaseAPI();
-        // DATA_PATH = Path to the storage
-        // lang for which the language data exists, usually "eng"
-        baseApi.init("sdcard/tesseract", "ara");
-                baseApi.setImage(bitmap);
-                Log.i("TextRec.","ParsingDone");
-
-//        String recognizedText = baseApi.getUTF8Text();
-//        Log.i("TextRec.",recognizedText);
-//        baseApi.end();
-    }
-
-
     // we can write or write then delete here
-    public void WriteBitmap(File mypath) throws FileNotFoundException {
-        FileOutputStream mFileOutStream = new FileOutputStream(mypath);
-//            mBitmap.compress(Bitmap.CompressFormat.PNG, 90, mFileOutStream);
-//            mFileOutStream.flush();
-//            mFileOutStream.close();
-//            String url = MediaStore.Images.Media.insertImage(getContentResolver(), mBitmap, "title", null);
-//            Log.v("log_tag","url: " + url);
-//            Log.v("log_tag","url: " + current);
-//            //Log.v("log_tag","url:REAL " + mypath);
-        //In case you want to delete the file
-        //boolean deleted = mypath.delete();
-        //Log.v("log_tag","deleted: " + mypath.toString() + deleted);
-        //If you want to convert the image to string use base64 converter
+    public void WriteBitmap(File mypath,Bitmap mBitmap)  {
+        try{
+            FileOutputStream mFileOutStream = new FileOutputStream(mypath);
+            mBitmap.compress(Bitmap.CompressFormat.PNG, 90, mFileOutStream);
+            mFileOutStream.flush();
+            mFileOutStream.close();
+            String url = MediaStore.Images.Media.insertImage(getContentResolver(), mBitmap, "title", null);
+            Log.v("log_tag","url: " + url);
+            Log.v("log_tag","url: " + current);
+            //Log.v("log_tag","url:REAL " + mypath);
+            // In case you want to delete the file
+            boolean deleted = mypath.delete();
+            Log.v("log_tag","deleted: " + mypath.toString() + deleted);
+            //If you want to convert the image to string use base64 converter
+        }catch (Exception e){
+            Log.i("WriteBitmap",e.toString());
+        }
+
     }
 
     public  List<MatOfPoint>  FindContour(Mat src){
@@ -437,7 +387,6 @@ public class MainActivity extends Activity {
 
             return chainCode.get(largest_contour_index);
         }
-
     public Mat getMatFromView(View view){
         Bitmap mBitmap = null;
         mBitmap =  Bitmap.createBitmap (view.getWidth(), view.getHeight(), Bitmap.Config.RGB_565);
@@ -451,12 +400,10 @@ public class MainActivity extends Activity {
         }
         catch(Exception e)
         {
-            Log.v("getBitmapFromView", e.toString());
+            Log.v("getMatFromView", e.toString());
             return null;
         }
     }
-
-
     public Mat DrawCenterPoint(Mat src){
 
 
@@ -482,20 +429,6 @@ public class MainActivity extends Activity {
         }
         return drawing;
     }
-
-    int[][] Thinning(Mat mat ){
-        mat.convertTo(mat, CvType.CV_64FC3); // New line added.
-        int size = (int) (mat.total() * mat.channels());
-        double[] temp = new double[size]; // use double[] instead of byte[]
-        int [][]image = new int[mat.rows()][mat.cols()];
-        for(int i=0;i<mat.rows();i++){
-            for(int j=0;j<mat.cols();j++){
-                image[i][j]= mat.get(i, j, temp);
-            }
-        }
-        return ThinningService.doZhangSuenThinning(image,false);
-    }
-
 
 
     static class ThinningService {
@@ -595,9 +528,33 @@ public class MainActivity extends Activity {
                     + binaryImage[y + 1][x + 1] + binaryImage[y + 1][x] + binaryImage[y + 1][x - 1]
                     + binaryImage[y][x - 1] + binaryImage[y - 1][x - 1];
         }
+
+        private static class Point extends org.opencv.core.Point {
+            private int x;
+            private int y;
+
+            public Point(int x, int y) {
+                this.x = x;
+                this.y = y;
+            }
+
+            public int getX() {
+                return x;
+            }
+
+            public void setX(int x) {
+                this.x = x;
+            }
+
+            public int getY() {
+                return y;
+            }
+
+            public void setY(int y) {
+                this.y = y;
+            }
+        }
     }
-
-
 
     public class DrawingView extends View {
 
@@ -701,244 +658,126 @@ public class MainActivity extends Activity {
         }
     }
 
-
-     private class CENTERLINE extends AsyncTask<Void,Void,Void>{
-
-       private Mat pSrc,pDst;
-         int x1=0,x2=0,y1=0,y2=0;
-
-        public CENTERLINE(Mat pSrc, Mat pDst) {
-            this.pSrc = pSrc;
-            this.pDst = pDst;
+    public class CenterLine extends AsyncTask<Bitmap,Void,Mat>{
+        @Override
+        protected Mat doInBackground(Bitmap... params) {
+            Log.i("CenterLine","doInBackground");
+            Mat src,dest;
+            src = RGBtoBINARY(params[0]);
+            int [][] Original = Mat22D(src);
+            ThinningService.doZhangSuenThinning(Original,false);
+             dest = TwoD2Mat(Original);
+            return dest;
+            //return TwoD2Mat(Thinning(RGBtoBINARY(params[0])));
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                Log.i("CENTERLINE:","doInBackground");
-
-                MorphologicalThinning();
-               // Thread.sleep(5000);
-            } catch (Exception e) {
-                Log.i("CENTERLINE:","doInBackground-Failed");
-
-                e.printStackTrace();
-            }
-            return null;
+        protected void onPostExecute(Mat mat) {
+            super.onPostExecute(mat);
         }
 
-        private void MorphologicalThinning() {
-        boolean bDone = false;
-        int rows = pSrc.rows();
-        int cols = pSrc.cols();
-            Mat p_enlarged_src = new Mat(rows + 2, cols + 2, CV_32FC1);
 
-            /// pad source
-            try{
-                for (int i = 0; i < (rows + 2); i++) {
-                    p_enlarged_src.put(i, 0, 0.0f);
-                    p_enlarged_src.put(i, cols + 1, 0.0f);
-                }
-                for (int j = 0; j < (cols + 2); j++) {
-                    p_enlarged_src.put(0, j, 0.0f);
-                    p_enlarged_src.put(rows + 1, j, 0.0f);
-                }
-                for (int i = 0; i < rows; i++) {
-                    for (int j = 0; j < cols; j++) {
-                        if (pSrc.get(i, j)[0] >= 0.5f) {
-                            p_enlarged_src.put(i + 1, j + 1, 1.0f);
-                        } else
-                            p_enlarged_src.put(i + 1, j + 1, 0.0f);
-                    }
-                }
-            }catch (Exception e){
-                Log.i("PadSource",e.toString());
-            }
-        /// start to thin
-        Mat p_thinMat1 = new Mat(rows + 2, cols + 2, CV_32FC1);
-        Mat p_thinMat2 = new Mat(rows + 2, cols + 2, CV_32FC1);
-        Mat p_cmp = new Mat(rows + 2, cols + 2, CV_8UC1);
-
-        while (bDone != true) {
-            /// sub-iteration 1
-
-            ThinSubiteration1(p_enlarged_src, p_thinMat1);
-            /// sub-iteration 2
-            ThinSubiteration2(p_thinMat1, p_thinMat2);
-            /// compare
-            compare(p_enlarged_src, p_thinMat2, p_cmp, CMP_NE);
-            int num_non_zero = countNonZero(p_cmp);
-            /// check
-            if (num_non_zero <= (rows ) * (cols )) {
-                bDone = true;
-                showDialogwithMat(p_enlarged_src);
-
-            }
-            /// copy
-            p_thinMat2.copyTo(p_enlarged_src);
-        }
-        /// copy result
-//        for (int i = 0; i < rows; i++) {
-//            for (int j = 0; j < cols; j++) {
-//                pDst.put(i, j, p_enlarged_src.get(i + 1, j + 1));
-//            }
-//        }
-            try{
-                p_enlarged_src.copyTo(pDst);
-            }catch (Exception e){
-                Log.i("CopyResult",e.toString());
-            }
     }
-        private void ThinSubiteration1(Mat pSrc,Mat pDst) {
-            int rows = pSrc.rows();
-            int cols = pSrc.cols();
-            pSrc.copyTo(pDst);
-            try{
-                for(int i = 1; i < rows-1; i++) {
-                    for(int j = 1; j < cols-1; j++) {
 
-                        if(pSrc.get( i, j)[0] != 0) {
-                            /// get 8 neighbors
-                            /// calculate C(p)
-                            Log.i("ThinSubiteration1","OK");
-                            double[]neighbor0 =  pSrc.get( i-1, j-1);
-                            double[]neighbor1 =  pSrc.get( i-1, j);
-                            double[]neighbor2 =  pSrc.get( i-1, j+1);
-                            double[]neighbor3 =  pSrc.get( i, j+1);
-                            double[]neighbor4 =  pSrc.get( i+1, j+1);
-                            double[]neighbor5 =  pSrc.get( i+1, j);
-                            double[]neighbor6 =  pSrc.get( i+1, j-1);
-                            double[]neighbor7 =  pSrc.get( i, j-1);
-                            int C = (~(int)neighbor1[0] & ( (int)neighbor2[0] | (int)neighbor3[0])) +
-                                    (~(int)neighbor3[0] & ( (int)neighbor4[0] | (int)neighbor5[0])) +
-                                    (~(int)neighbor5 [0]& ( (int)neighbor6[0] | (int)neighbor7[0])) +
-                                    (~(int)neighbor7[0] & ( (int)neighbor0[0] |(int) neighbor1[0]));
-                            if(C == 1) {
-                                /// calculate N
-                                int N1 = ((int)neighbor0 [0]|(int) neighbor1[0]) +
-                                        ((int)neighbor2[0] | (int)neighbor3[0]) +
-                                        ((int)neighbor4 [0]| (int)neighbor5[0]) +
-                                        ((int)neighbor6 [0]|(int) neighbor7[0]);
-                                int N2 = ((int)neighbor1 [0]| (int)neighbor2[0]) +
-                                        ((int)neighbor3 [0]|(int) neighbor4[0]) +
-                                        ((int)neighbor5[0] |(int) neighbor6[0]) +
-                                        ((int)neighbor7[0] | (int)neighbor0[0]);
-                                int N = min(N1,N2);
-                                if ((N == 2) || (N == 3)) {
-                                    /// calculate criteria 3
-                                    int c3 = ( (int)neighbor1[0] | (int)neighbor2[0] | ~(int)neighbor4[0]) & (int)neighbor3[0];
-                                    if(c3 == 0) {
-                                        pDst.put( i, j,0.0f) ;
-                                    }
-                                }
-                            }
-                        }
-                    }
+    private Mat RGBtoBINARY(Bitmap mBitmap) {
+        Mat mat = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC1);
+        Utils.bitmapToMat(mBitmap, mat);
+        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGBA, 4);
+        Bitmap bitmap = Bitmap.createBitmap(mBitmap);
+        Utils.matToBitmap(mat, bitmap);
+        Mat result = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC3);
+        Utils.bitmapToMat(bitmap, result);
+        for (int x = 0; x < result.height(); ++x) {
+            for (int y = 0; y < result.width(); ++y) {
+                // get one pixel color
+                int red = (int) result.get(x, y)[0];
+                int green = (int) result.get(x, y)[1];
+                int blue = (int) result.get(x, y)[2];
+
+                if (red != 0 || green != 0 || blue != 0) {
+                    result.put(x, y,new double[]{255.0,255.0,255.0,0});
+                } else{
+                    result.put(x, y, new double[]{0,0,0,0});
+                    //Log.i("RGBtoBINARY", "R: "+red+" G: "+green+" B: "+blue);
                 }
-            }catch (Exception e){
-                Log.i("ThinSubiteration1",e.toString());
             }
         }
-        private void ThinSubiteration2(Mat pSrc,Mat pDst) {
-            int rows = pSrc.rows();
-            int cols = pSrc.cols();
-            pSrc.copyTo(pDst);
+        return result;
+    }
 
-            try{
-                for(int i = 1; i < rows-1; i++) {
-                    for(int j = 1; j < cols-1; j++) {
-                        if ( pSrc.get( i, j)[0] != 0) {
-                            /// get 8 neighbors
-                            /// calculate C(p)
-                            double[]neighbor0 =  pSrc.get( i-1, j-1);
-                            double[]neighbor1 =  pSrc.get( i-1, j);
-                            double[]neighbor2 =  pSrc.get( i-1, j+1);
-                            double[]neighbor3 =  pSrc.get( i, j+1);
-                            double[]neighbor4 =  pSrc.get( i+1, j+1);
-                            double[]neighbor5 =  pSrc.get( i+1, j);
-                            double[]neighbor6 =  pSrc.get( i+1, j-1);
-                            double[]neighbor7 =  pSrc.get( i, j-1);
-                            double C = (~(int)neighbor1 [0]& ( (int)neighbor2[0] | (int)neighbor3[0])) +
-                                    (~(int)neighbor3[0] & ( (int)neighbor4[0] |(int) neighbor5[0])) +
-                                    (~(int)neighbor5 [0]& ( (int)neighbor6 [0]|(int) neighbor7[0])) +
-                                    (~(int)neighbor7 [0]& ( (int)neighbor0[0] | (int)neighbor1[0]));
-                            if(C == 1) {
-                                /// calculate N
-                                int N1 = ((int)neighbor0 [0]| (int)neighbor1[0]) +
-                                        ((int)neighbor2[0] | (int)neighbor3[0]) +
-                                        ((int)neighbor4[0] |(int) neighbor5[0]) +
-                                        ((int)neighbor6 [0]| (int)neighbor7[0]);
-                                int N2 = ((int)neighbor1[0] |(int) neighbor2[0]) +
-                                        ((int)neighbor3 [0]| (int)neighbor4[0]) +
-                                        ((int)neighbor5 [0]| (int)neighbor6[0]) +
-                                        ((int)neighbor7 [0]| (int)neighbor0[0]);
-                                int N = min(N1,N2);
-                                if((N == 2) || (N == 3)) {
-                                    int E = ((int)neighbor5[0] | (int)neighbor6[0] | ~(int)neighbor0[0]) & (int)neighbor7[0];
-                                    if(E == 0) {
-                                        pDst.put( i, j,0.0f) ;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }catch (Exception e){
-                Log.i("ThinSubiteration2",e.toString());
+    private int [][] Mat22D(Mat mat){
+        int [][] result = new int[mat.rows()][mat.cols()];
+        for(int i=0;i<mat.rows();i++){
+            for(int j=0;j<mat.cols();j++){
+                if((int) mat.get(i,j)[0]==255 &&(int) mat.get(i,j)[1]==255 &&(int) mat.get(i,j)[2]==255){
+                    result[i][j] = 1;
+                }else  result[i][j] = 0;
             }
         }
+        return result;
+    }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
+    private Mat TwoD2Mat(int [][] source){
+        Mat mat = new Mat(source.length,source[0].length,CV_8UC1);
+        for(int i=0;i<source.length;i++){
+            for(int j=0;j<source[i].length;j++){
+                if(source[i][j]==1){
+                    mat.put(i,j,new double[]{255,255,255});
+                }else mat.put(i,j,new double[]{0,0,0});
+            }
         }
+        Log.i("TwoD2Mat","Finished");
+        return mat;
+    }
 
-         public Mat prepareImage(Mat mat){
-             int thres = 1;
-             outterloop:
-             for(int i=0;i<mat.cols();i++){
-                 for(int j=0;j<mat.rows();j++){
-                     if(mat.get(j,i)[1]!=0){
-                         y1=j;
-                         break outterloop;
+    public void LOGPOINTS(List<android.graphics.Point>points){
 
-                     }
-                 }
-             }
-             outterloop:
-             for(int i=0;i<mat.rows();i++){
-                 for(int j=0;j<mat.cols();j++){
-                     if(mat.get(i,j)[1]!=0){
-                         x1=j;
-                         break outterloop;
+        Log.i("LOGPOINTS",""+points.size());
 
-                     }
-                 }
-             }
-             outterloop:
-             for(int i=mat.cols()-1; i>0 ;i--) {
-                     for (int j = mat.rows()-1;  j>0 ; j--) {
-                         if (mat.get(j, i)[1] != 0) {
-                             y2 = j;
-                             break outterloop;
-                         }
-                     }
-                 }
-             outterloop:
-             for(int i=mat.rows()-1; i>0 ;i--) {
-                 for (int j = mat.cols()-1;  j>0 ; j--) {
-                     if (mat.get(i, j)[1] != 0) {
-                         x2 = j;
-                         break outterloop;
-                     }
-                 }
-             }
-            Log.i("SSSS",""+x1 + "," +x2 +","+ y1+ "," + y2);
-            Rect rectCrop = new Rect(x1,y1,abs(x2-x1),abs(y2-y1));
-            return new Mat(mat,rectCrop);
+        for(android.graphics.Point point : points){
+            Log.i("LOGPOINTS","X: "+point.x+" Y: "+point.y);
         }
     }
 
+    public List<android.graphics.Point> getTotalNonZero(Mat mat){
+        Log.i("getTotalNonZero","X: "+mat.width()+" Y: "+mat.height());
+        List<android.graphics.Point>points = new ArrayList<>();
+        for(int x = 1; x < mat.height(); x++)
+            for(int y = 1; y < mat.width(); y++) {
+                int pixelvalue = (int) mat.get(x,y)[0];
+                if(pixelvalue != 0) {
+                    points.add(new android.graphics.Point(x,y));
+                }
+            }
+        return points;
+    }
+
+    public Bitmap toBinary(Bitmap bmpOriginal) {
+        int width, height, threshold;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+        threshold = 8;
+        Bitmap bmpBinary = Bitmap.createBitmap(bmpOriginal);
+
+        for(int x = 0; x < width; ++x) {
+            for(int y = 0; y < height; ++y) {
+                // get one pixel color
+                int pixel = bmpOriginal.getPixel(x, y);
+                int red = Color.red(pixel);
+                int green = Color.green(pixel);
+                int blue = Color.blue(pixel);
+                if(red!=0||green!=0||blue!=0){
+                    bmpBinary.setPixel(x, y, Color.WHITE);
+                } else{
+                    bmpBinary.setPixel(x, y, Color.BLACK);
+
+                }
+
+            }
+        }
+        return bmpBinary;
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////voice offer ///////////////////////////////////
@@ -951,8 +790,6 @@ public class MainActivity extends Activity {
     /////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////voice rec ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
-
-
 
     public void checkIfSpeechRec_resultsContainsTheWord(String Word,ArrayList<String> SpeechRec_results){
         if(SpeechRec_results.size()>0){
@@ -1004,6 +841,13 @@ public class MainActivity extends Activity {
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////// Utility ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
+    public static Bitmap getBitmapFromView(View v) {
+        Bitmap b = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        v.draw(c);
+        return b;
+    }
+
 
     public void SaveBitmap(){
         String filename ="typo";
@@ -1102,5 +946,8 @@ public class MainActivity extends Activity {
 
         return bitmap;
     }
+
+
+
 }
 
