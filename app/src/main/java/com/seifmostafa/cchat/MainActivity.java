@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.util.Log;
@@ -30,6 +31,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
@@ -54,17 +56,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
 import static org.opencv.core.Core.CMP_NE;
+import static org.opencv.core.Core.add;
 import static org.opencv.core.Core.compare;
 import static org.opencv.core.Core.countNonZero;
 import static org.opencv.core.CvType.CV_32FC1;
@@ -83,21 +89,30 @@ import static org.opencv.imgproc.Imgproc.findContours;
 import static org.opencv.imgproc.Imgproc.moments;
 public class MainActivity extends Activity {
 
+    int BigCounter_WordsTeached=0;
+    Mat  Original;
     Mat imageMat;
     Mat matObject ;
+
     public int count = 1;
+    public int TOLERANCE =8;
+    public int MAX_TOLERANCE =200;
+
     public String current = null;
     private String uniqueId;
     private static final int MY_DATA_CHECK_CODE = 0;
     private static final int RESULT_SPEECH = 1;
 
-    CustTextView textView;
+
     ArrayList<String > SpeechRec_results;
     FrameLayout frameLayout;
     DrawingView dv ;
     private Paint mPaint;
     public static String tempDir;
     File mypath;
+
+    TextView textViewPercentage;
+    CustTextView textView;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -130,7 +145,7 @@ public class MainActivity extends Activity {
         mypath= new File(directory,current);
         // Log.v("ABSPATH" , mypath.getAbsolutePath());
 
-
+        textViewPercentage =(TextView)findViewById(R.id.textView_percentage);
        textView = (CustTextView) findViewById(R.id.textView_text);
 //        textView.setText("لُلو");
        // res=textView.getText().toString();
@@ -145,11 +160,29 @@ public class MainActivity extends Activity {
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPaint.setStrokeWidth(12);
+        mPaint.setStrokeWidth(28);
         frameLayout.addView(dv);
       //  Log.i("Touched","X: "+textView.getTop()+" Y: "+textView.getLeft());
-
+//        try {
+//            Original = new CenterLineForOriginal().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,getBitmapFromView(textView)).get();
+//        } catch (InterruptedException e) {
+//            Log.i("MatfromOriginalText",e.toString());
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            Log.i("MatfromOriginalText",e.toString());
+//        }
+        //generate_series("لُلو")   ;
+        try {
+            LOGSTRINGARRAY( new TreeGenerator(25).execute("سيف").get());
+        } catch (InterruptedException e) {
+            Log.i("TreeGenerator",e.toString());
+        } catch (ExecutionException e) {
+            Log.i("TreeGenerator",e.toString());
+        }
     }
+
+
+
 
     @Override
     protected void onResume() {
@@ -161,16 +194,13 @@ public class MainActivity extends Activity {
             Log.d("OpenCV", "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+
+
+
     }
 
 
     public void checkfill(View view) {
-
-        // prepare -- Calculate  black OriginalPoints
-//        getTotalNonZero(getBitmapFromView(textView),OriginalPoints);
-//        Log.i("blackpoints_Original",""+ OriginalPoints.size());
-
-
         Bitmap mBitmap = null;
         mBitmap =  Bitmap.createBitmap (dv.getWidth(), dv.getHeight(), Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(mBitmap);
@@ -178,14 +208,26 @@ public class MainActivity extends Activity {
 
         try
         {
-           Mat Original = new CenterLine().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,getBitmapFromView(textView)).get();
+            Original = new CenterLineForOriginal().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,getBitmapFromView(textView)).get();
             Mat Drawed = new CenterLine().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,mBitmap).get();
-         int FinalPercentage =   MatchWritten(Original,Drawed,100);
+            double FinalPercentage =   MatchWritten(Original,Drawed,TOLERANCE);
+            textViewPercentage.setText(""+Math.floor(FinalPercentage+'%'));
+            textViewPercentage.setVisibility(View.VISIBLE);
             Log.i("FinalPercentage",""+FinalPercentage);
+            //MatchWritten_(Original,Drawed);
+
         }
         catch(Exception e)
         {
             Log.v("checkfill", e.toString());
+        }
+    }
+    public void invisiblepercentage(){
+                try{
+            Thread.sleep(5000);
+            textViewPercentage.setVisibility(View.INVISIBLE);
+        }catch (Exception e){
+            Log.i("checkfill-try_to_sleep",e.toString());
         }
     }
 
@@ -250,13 +292,13 @@ public class MainActivity extends Activity {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////check type ///////////////////////////////////
+    /////////////////////////////////////////// check type ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
 
 
 
-    public int MatchWritten(Mat original,Mat written,int tolerance) {
-        int percentage =0;
+    public double MatchWritten(Mat original,Mat written,int tolerance) {
+        double percentage =0;
        try {
             List<android.graphics.Point> Originalpoints = getTotalNonZero(original);
             List<android.graphics.Point> Writtenpoints = getTotalNonZero(written);
@@ -280,32 +322,56 @@ public class MainActivity extends Activity {
                }
            });
 
-            int C=0;
+            int C=0,BigMistakesCounter=0;
+
            for(android.graphics.Point point:Originalpoints){
             //   Log.i("MatchWritten","OriginalPoint: "+ point.x +" , "+ point.y);
+               nextpoint:
                for(android.graphics.Point searchpoint:Writtenpoints){
-                    if((searchpoint.x==point.x && searchpoint.y == point.y )||
-                            (searchpoint.x+tolerance==point.x && searchpoint.y+tolerance == point.y )||
-                                (searchpoint.x+tolerance==point.x && searchpoint.y == point.y )||
-                                    (searchpoint.x==point.x && searchpoint.y+tolerance == point.y )||
-                                        (searchpoint.x==point.x+tolerance && searchpoint.y == point.y+tolerance )||
-                                            (searchpoint.x==point.x+tolerance && searchpoint.y == point.y )||
-                                                (searchpoint.x==point.x && searchpoint.y == point.y +tolerance)){
-                        Original_copy.remove(point);
-                        Writtern_copy.remove(searchpoint);
-
+                   if(abs(searchpoint.x-point.x)<= tolerance && abs(searchpoint.y-point.y)<= tolerance){
+                       Original_copy.remove(point);
+                       Writtern_copy.remove(searchpoint);
                     C++;
-                    }
-                 //  Log.i("MatchWritten","WrittenPoint: "+ searchpoint.x +" , "+ searchpoint.y);
+                       // enter multple times for single one !!! (cause of the nested loop) so let's
+                       break nextpoint;
 
+                   }
+                   if(abs(searchpoint.x-point.x)>= MAX_TOLERANCE && abs(searchpoint.y-point.y)>= MAX_TOLERANCE){
+                       BigMistakesCounter++;
+                       break nextpoint;
+
+                   }
                }
            }
-           Log.i("MatchWritten","Original(after removing) : "+(Originalpoints.size()-Original_copy.size()));
-           Log.i("MatchWritten","Original(after removing) : "+(Originalpoints.size()-C));
+           // scalling
+           // original , C , bigMistakesCounter
+            double okay = (double)C/Writtenpoints.size(),notOkay = (double)BigMistakesCounter/Writtenpoints.size();
+
+            Log.i("MatchWritten","Mistakes:"+notOkay);
+            Log.i("MatchWritten","Okay:"+okay);
+
+           percentage=okay*100;
+
+           if((notOkay*100)>=25){
+               Log.i("MatchWritten","hola big wrong");
+               // test toast display arabic
+               Toast.makeText(MainActivity.this,"Try again",Toast.LENGTH_LONG).show();
+               dv.reset();
+           }else{
+               // test toast display arabic
+               Toast.makeText(MainActivity.this,"Thanks",Toast.LENGTH_LONG).show();
+           }
        }catch (Exception e){
            Log.i("checkTypo",e.toString());
        }
         return percentage;
+    }
+
+    public void MatchWritten_(Mat original,Mat written){
+        Mat result = new Mat();
+        Core.compare(original,written,result,Core.CMP_NE);
+        int val = Core.countNonZero(result);
+        Log.i("MatchWritten_","Vary in : "+val);
     }
     // we can write or write then delete here
     public void WriteBitmap(File mypath,Bitmap mBitmap)  {
@@ -589,7 +655,11 @@ public class MainActivity extends Activity {
             mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
         }
-
+        public void reset(){
+            mBitmap.recycle();
+            mBitmap = Bitmap.createBitmap(this.mBitmap.getWidth(), this.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+            mCanvas = new Canvas(mBitmap);
+        }
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
@@ -653,10 +723,12 @@ public class MainActivity extends Activity {
             return true;
         }
 
+
         public Path getmPath() {
             return mPath;
         }
     }
+
 
     public class CenterLine extends AsyncTask<Bitmap,Void,Mat>{
         @Override
@@ -673,11 +745,35 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(Mat mat) {
+            Log.i("CenterLine","onPostExecute");
+
             super.onPostExecute(mat);
         }
 
 
     }
+    public class CenterLineForOriginal extends AsyncTask<Bitmap,Void,Mat>{
+        @Override
+        protected Mat doInBackground(Bitmap... params) {
+            Log.i("CenterLineForOriginal","doInBackground");
+            Mat src,dest;
+            src = RGBtoBINARY(params[0]);
+            int [][] Original = Mat22D(src);
+            ThinningService.doZhangSuenThinning(Original,false);
+            dest = TwoD2Mat(Original);
+            return dest;
+            //return TwoD2Mat(Thinning(RGBtoBINARY(params[0])));
+        }
+
+        @Override
+        protected void onPostExecute(Mat mat) {
+            Log.i("CenterLineForOriginal","onPostExecute");
+            super.onPostExecute(mat);
+        }
+
+
+    }
+
 
     private Mat RGBtoBINARY(Bitmap mBitmap) {
         Mat mat = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC1);
@@ -778,7 +874,9 @@ public class MainActivity extends Activity {
         }
         return bmpBinary;
     }
-
+    public void retry(View view){
+        dv.reset();
+    }
     /////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////voice offer ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -811,6 +909,66 @@ public class MainActivity extends Activity {
     /////////////////////////////////////////// AI ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
 
+    private String[] GenerateName_Characters(String name){
+        String[] Name_Characters = name.split("");
+        return Name_Characters;
+    }
+
+    private class TreeGenerator extends AsyncTask<String,Void,ArrayList<String> >{
+
+       public int NumberOfWordsToBeTeached;
+
+        public TreeGenerator(int numberOfWordsToBeTeached) {
+            NumberOfWordsToBeTeached = numberOfWordsToBeTeached;
+        }
+
+        private ArrayList<String> GenerateWordsTree(String Name, int number_of_words){
+            int levels=0;
+            int added=0;
+
+            ArrayList<String> tree = new ArrayList<>();
+            ArrayList<String> AvailableWords = GenerateDummy();
+            sortfolders(AvailableWords);
+            tree.add(Name);
+            added++;
+            while (number_of_words>tree.size()){
+                for(int i=0;i<added;i++){
+                    added=0;
+                    String []Word_characters =GenerateName_Characters(tree.get((i)+levels));
+                    for(String CH:Word_characters){
+                        for(String searchword:AvailableWords){
+                            if(searchword.substring(0,1).equals(CH)){
+                                tree.add(searchword);
+                                added++;
+                                AvailableWords.remove(searchword);
+                                break;
+                            }
+                        }
+                    }
+                }
+                levels++;
+            }
+            return tree;
+        }
+
+        @Override
+        protected ArrayList<String> doInBackground(String... params) {
+            return GenerateWordsTree(params[0],NumberOfWordsToBeTeached);
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<String> strings) {
+            super.onPostExecute(strings);
+        }
+    }
+
+
+
+
+
+
+
+
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////// Photo Help ///////////////////////////////////
@@ -842,7 +1000,7 @@ public class MainActivity extends Activity {
     /////////////////////////////////////////// Utility ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
     public static Bitmap getBitmapFromView(View v) {
-        Bitmap b = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(b);
         v.draw(c);
         return b;
@@ -947,7 +1105,130 @@ public class MainActivity extends Activity {
         return bitmap;
     }
 
+   private void sortfolders(List <String>arr_items){
 
+       // give path of folders and sort the inside folders by their names
+       Locale lithuanian = new Locale("ar");
+       Collator lithuanianCollator = Collator.getInstance(lithuanian);
+       Collections.sort(arr_items,lithuanianCollator);
+   }
 
+    private ArrayList<String> GenerateDummy(){
+        ArrayList<String> dummy = new ArrayList<>();
+        dummy.add("من");
+        dummy.add("في");
+        dummy.add("عن");
+        dummy.add("على");
+        dummy.add("اب");
+        dummy.add("ابن");
+        dummy.add("عم");
+        dummy.add("خال");
+        dummy.add("خالة");
+        dummy.add("جد");
+        dummy.add("ام");
+        dummy.add("صديق");
+        dummy.add("صبر");
+        dummy.add("سور");
+        dummy.add("صبور");
+        dummy.add("فوق");
+        dummy.add("أسبوع");
+        dummy.add("سنة");
+        dummy.add("اليوم");
+        dummy.add("أمس");
+        dummy.add("ثانية");
+        dummy.add("ساعة");
+        dummy.add("دقيقة");
+        dummy.add("قام");
+        dummy.add("ذهب");
+        dummy.add("يضحك");
+        dummy.add("جيد");
+        dummy.add("قبيح");
+        dummy.add("صعب");
+        dummy.add("سهل");
+        dummy.add("سييء");
+        dummy.add("مرحباً");
+        dummy.add("شكرا");
+        dummy.add("لا");
+        dummy.add("يناير");
+        dummy.add("قهوة");
+        dummy.add("خَرُوْف");
+        dummy.add("مبرمج");
+        dummy.add("خَرُوْف");
+        dummy.add("دهب");
+        dummy.add("نون");
+        dummy.add("برد");
+        dummy.add("قلب");
+        dummy.add("براد");
+        dummy.add("يرد");
+        dummy.add("حب");
+        dummy.add("حرف");
+        dummy.add("حرق");
+        dummy.add("لو");
+        dummy.add("ولد");
+        dummy.add("لبن");
+        dummy.add("برق");
+        dummy.add("جاموسة");
+        dummy.add("سوس");
+        dummy.add("من");
+        dummy.add("في");
+        dummy.add("عن");
+        dummy.add("على");
+        dummy.add("اب");
+        dummy.add("ابن");
+        dummy.add("عم");
+        dummy.add("خال");
+        dummy.add("خالة");
+        dummy.add("جد");
+        dummy.add("ام");
+        dummy.add("صديق");
+        dummy.add("صبر");
+        dummy.add("سور");
+        dummy.add("صبور");
+        dummy.add("فوق");
+        dummy.add("أسبوع");
+        dummy.add("سنة");
+        dummy.add("اليوم");
+        dummy.add("أمس");
+        dummy.add("ثانية");
+        dummy.add("ساعة");
+        dummy.add("دقيقة");
+        dummy.add("قام");
+        dummy.add("ذهب");
+        dummy.add("يضحك");
+        dummy.add("جيد");
+        dummy.add("قبيح");
+        dummy.add("صعب");
+        dummy.add("سهل");
+        dummy.add("سييء");
+        dummy.add("مرحباً");
+        dummy.add("شكرا");
+        dummy.add("لا");
+        dummy.add("يناير");
+        dummy.add("قهوة");
+        dummy.add("خَرُوْف");
+        dummy.add("مبرمج");
+        dummy.add("خَرُوْف");
+        dummy.add("دهب");
+        dummy.add("نون");
+        dummy.add("برد");
+        dummy.add("قلب");
+        dummy.add("براد");
+        dummy.add("يرد");
+        dummy.add("حب");
+        dummy.add("حرف");
+        dummy.add("حرق");
+        dummy.add("لو");
+        dummy.add("ولد");
+        dummy.add("لبن");
+        dummy.add("برق");
+        dummy.add("جاموسة");
+        dummy.add("سوس");
+        return dummy;
+    }
+    private void LOGSTRINGARRAY(ArrayList<String>list){
+        for(String s:list){
+            Log.i("LOGSTRINGARRAY",s);
+        }
+    }
 }
 

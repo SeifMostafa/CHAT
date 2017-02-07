@@ -11,6 +11,18 @@
     tools:context="com.seifmostafa.cchat.MainActivity">
 
 
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_checkmine"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="30dp"
+        android:textIsSelectable="true"
+        android:visibility="invisible"
+        android:textAlignment="center"
+        android:id="@+id/textView_percentage" />
+
     <com.seifmostafa.cchat.CustTextView
         android:textDirection="rtl"
         android:elegantTextHeight="true"
@@ -21,9 +33,9 @@
         android:id="@+id/textView_text"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="70dp"
         android:text="@string/text"
-        android:textSize="100sp"
+        android:textSize="150sp"
         android:textColor="@android:color/holo_blue_dark" />
 
     <FrameLayout
@@ -71,6 +83,14 @@
         android:id="@+id/button_checkfill"
         android:onClick="checkfill"
         android:layout_alignBottom="@+id/button_checkmine" />
-
+    <Button
+        android:text="محاولة جديدة"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_checkmine"
+        android:layout_alignRight="@+id/button_checkmine"
+        android:textAlignment="center"
+        android:id="@+id/button_retry"
+        android:onClick="retry"/>
 </RelativeLayout>
 
