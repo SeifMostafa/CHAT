@@ -222,7 +222,7 @@ public class MainActivity extends Activity {
             Log.v("checkfill", e.toString());
         }
     }
-    public void invisiblepercentage(){
+    private void invisiblepercentage(){
                 try{
             Thread.sleep(5000);
             textViewPercentage.setVisibility(View.INVISIBLE);
@@ -367,14 +367,9 @@ public class MainActivity extends Activity {
         return percentage;
     }
 
-    public void MatchWritten_(Mat original,Mat written){
-        Mat result = new Mat();
-        Core.compare(original,written,result,Core.CMP_NE);
-        int val = Core.countNonZero(result);
-        Log.i("MatchWritten_","Vary in : "+val);
-    }
+
     // we can write or write then delete here
-    public void WriteBitmap(File mypath,Bitmap mBitmap)  {
+    private void WriteBitmap(File mypath,Bitmap mBitmap)  {
         try{
             FileOutputStream mFileOutStream = new FileOutputStream(mypath);
             mBitmap.compress(Bitmap.CompressFormat.PNG, 90, mFileOutStream);
@@ -394,7 +389,7 @@ public class MainActivity extends Activity {
 
     }
 
-    public  List<MatOfPoint>  FindContour(Mat src){
+    private   List<MatOfPoint>  FindContour(Mat src){
         int thresh = 100;
         int max_thresh = 255;
         Scalar color = new Scalar(100.0, 100.0, 100.0 );
@@ -418,42 +413,8 @@ public class MainActivity extends Activity {
 
         return contours;
     }
-    public MatOfPoint FindContour_(Mat src){
-             List<MatOfPoint> chainCode;
-            Mat grayImg = new Mat(src.height(), src.width(), CvType.CV_8UC1);
 
-            //turn into binary image and invert
-            Imgproc.cvtColor(src, grayImg, Imgproc.COLOR_RGB2GRAY);
-            Imgproc.threshold(grayImg, grayImg, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
-            Mat invertcolormatrix= new Mat(grayImg.rows(),grayImg.cols(), grayImg.type(), new Scalar(255,255,255));
-            Core.subtract(invertcolormatrix, grayImg, grayImg);
-
-            //get chain code
-            chainCode = new Vector<MatOfPoint>();
-            Imgproc.findContours(grayImg, chainCode, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
-
-            //loop through indices of individual contours to find largest contour
-            double largest_area = 0;
-            int largest_contour_index = 0;
-            for(int i = 0; i< chainCode.size(); i++){
-                //find the area of the contour
-                double a = Imgproc.contourArea(chainCode.get(i),false);
-                //find largest contour and it's index
-                if(a > largest_area){
-                    largest_area= a;
-                    largest_contour_index = i;
-                }
-            }
-        Log.i("MATRIX",""+chainCode.get(largest_contour_index).size());
-//        for(int j=0;j<chainCode.get(largest_contour_index).rows();j++){
-//            for(int i=0;i<chainCode.get(largest_contour_index).cols();i++){
-//                Log.i("MATRIX","+++"+j+","+i+"+++++++++"+chainCode.get(largest_contour_index).get(j,i));
-//            }
-//        }
-
-            return chainCode.get(largest_contour_index);
-        }
-    public Mat getMatFromView(View view){
+    private Mat getMatFromView(View view){
         Bitmap mBitmap = null;
         mBitmap =  Bitmap.createBitmap (view.getWidth(), view.getHeight(), Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(mBitmap);
@@ -874,7 +835,7 @@ public class MainActivity extends Activity {
         }
         return bmpBinary;
     }
-    public void retry(View view){
+    private void retry(View view){
         dv.reset();
     }
     /////////////////////////////////////////////////////////////////////////////////////////
