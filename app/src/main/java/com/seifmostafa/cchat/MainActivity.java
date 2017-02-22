@@ -34,7 +34,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.googlecode.tesseract.android.TessBaseAPI;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -87,6 +86,8 @@ import static org.opencv.imgproc.Imgproc.circle;
 import static org.opencv.imgproc.Imgproc.drawContours;
 import static org.opencv.imgproc.Imgproc.findContours;
 import static org.opencv.imgproc.Imgproc.moments;
+
+
 public class MainActivity extends Activity {
 
     int BigCounter_WordsTeached=0;
@@ -135,6 +136,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         tempDir = Environment.getExternalStorageDirectory() + "/" + "GetSignature" + "/";
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
@@ -835,9 +837,10 @@ public class MainActivity extends Activity {
         }
         return bmpBinary;
     }
-    private void retry(View view){
+    public void retry(View view){
         dv.reset();
     }
+
     /////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////voice offer ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -960,6 +963,7 @@ public class MainActivity extends Activity {
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////// Utility ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
+
     public static Bitmap getBitmapFromView(View v) {
         Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(b);
@@ -1186,10 +1190,15 @@ public class MainActivity extends Activity {
         dummy.add("سوس");
         return dummy;
     }
+
     private void LOGSTRINGARRAY(ArrayList<String>list){
         for(String s:list){
             Log.i("LOGSTRINGARRAY",s);
         }
+    }
+
+    private void FaceRec(){
+       // FaceRecognizer faceRecognizer = createFisherFaceRecognizer();
     }
 }
 

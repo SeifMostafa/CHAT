@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'com.google.gms.google-services'
 android {
     compileSdkVersion 24
     buildToolsVersion "25.0.2"
@@ -27,5 +27,4 @@ dependencies {
     })
     testCompile 'junit:junit:4.12'
     compile project(':openCVLibrary310')
-    compile 'com.rmtheis:tess-two:6.0.3'
 }
