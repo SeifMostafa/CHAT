@@ -1,12 +1,11 @@
 apply plugin: 'com.android.library'
-
 android {
     compileSdkVersion 24
     buildToolsVersion "25.0.2"
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 22
     }
 
     buildTypes {
@@ -15,4 +14,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+}
+
+dependencies {
+    compile files('src/main/jniLibs/javacpp.jar')
+    compile files('src/main/jniLibs/javacv.jar')
 }

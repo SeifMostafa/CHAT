@@ -35,6 +35,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.googlecode.javacv.cpp.opencv_contrib;
+import com.googlecode.javacv.cpp.opencv_core;
+import com.googlecode.javacv.cpp.opencv_core.CvArr;
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -49,11 +54,14 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -66,6 +74,16 @@ import java.util.Locale;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
+import static com.googlecode.javacv.cpp.opencv_contrib.createEigenFaceRecognizer;
+import static com.googlecode.javacv.cpp.opencv_contrib.createFisherFaceRecognizer;
+import static com.googlecode.javacv.cpp.opencv_core.IPL_DEPTH_8U;
+import static com.googlecode.javacv.cpp.opencv_core.cvCloneImage;
+import static com.googlecode.javacv.cpp.opencv_core.cvCopy;
+import static com.googlecode.javacv.cpp.opencv_core.cvCreateImage;
+import static com.googlecode.javacv.cpp.opencv_core.cvSize;
+import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImage;
+import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2GRAY;
+import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
 import static org.opencv.core.Core.CMP_NE;
@@ -114,6 +132,13 @@ public class MainActivity extends Activity {
 
     TextView textViewPercentage;
     CustTextView textView;
+
+    static {
+        OpenCVLoader.initDebug();
+      //  System.loadLibrary("tbb");
+    }
+
+    opencv_contrib.FaceRecognizer faceRecognizer;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -174,12 +199,21 @@ public class MainActivity extends Activity {
 //            Log.i("MatfromOriginalText",e.toString());
 //        }
         //generate_series("لُلو")   ;
+//        try {
+//            LOGSTRINGARRAY( new TreeGenerator(25).execute("سيف").get());
+//        } catch (InterruptedException e) {
+//            Log.i("TreeGenerator",e.toString());
+//        } catch (ExecutionException e) {
+//            Log.i("TreeGenerator",e.toString());
+//        }
+
+
         try {
-            LOGSTRINGARRAY( new TreeGenerator(25).execute("سيف").get());
-        } catch (InterruptedException e) {
-            Log.i("TreeGenerator",e.toString());
-        } catch (ExecutionException e) {
-            Log.i("TreeGenerator",e.toString());
+            setupFaceRec();
+            Log.i("setupFaceRec","Foll"+faceRecognizer.name());
+            capPhotoandRec();
+        } catch (Exception e) {
+            Log.i("setupFaceRec",e.toString());
         }
     }
 
@@ -1197,8 +1231,36 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void FaceRec(){
-       // FaceRecognizer faceRecognizer = createFisherFaceRecognizer();
+    public void setupFaceRec() throws IOException {
+        int num_components = 10;
+        double threshold = 10.0;
+        int c=0;
+        IplImage grayImg;
+        IplImage img;
+
+        faceRecognizer  = createFisherFaceRecognizer(num_components, threshold);
+        opencv_core.MatVector images = new opencv_core.MatVector(num_components);
+        int[] labels = new int[num_components];
+
+
+        for(int i=0;i<num_components;i++){
+
+            img = cvLoadImage("/storage/emulated/0/CCHAT/s1/"+(i+1)+".pgm");
+            grayImg = opencv_core.IplImage.create(img.width(), img.height(), IPL_DEPTH_8U, 1);
+            cvCvtColor(img, grayImg, CV_BGR2GRAY);
+            images.put(c++,grayImg); labels[i]=(i+1);
+        }
+        faceRecognizer.train(images,labels);
     }
+    public void capPhotoandRec(){
+//        Mat mat= new Mat();
+//        Bitmap bitmap = getBitmapFromAsset(this,"1.png");
+//        Utils.bitmapToMat(bitmap,mat);
+        IplImage tmp =  cvLoadImage("/storage/emulated/0/CCHAT/1.png");
+        IplImage grayImg = opencv_core.IplImage.create(tmp.width(), tmp.height(), IPL_DEPTH_8U, 1);
+        cvCvtColor(tmp, grayImg, CV_BGR2GRAY);
+        Log.i("capPhotoandRec",""+faceRecognizer.predict(grayImg));
+    }
+
 }
 
