@@ -26,7 +26,7 @@ public  class PersonRecognizer {
 	public final static int MAXIMG = 10;
 	public final static String TAG = "PersonRecognizer";
 	FaceRecognizer faceRecognizer;
-	String mPath;
+	//String mPath;		// for training
 	int count=0;
 	int[] labels;
 
@@ -37,12 +37,12 @@ public  class PersonRecognizer {
 	double threshold = 10.0;
 
 	 
-    PersonRecognizer(String path)
+    PersonRecognizer()
     {
       faceRecognizer =  com.googlecode.javacv.cpp.opencv_contrib.createLBPHFaceRecognizer(2,8,8,8,200);
   	 // path=Environment.getExternalStorageDirectory()+"/facerecog/faces/";
 		labels = new int[MAXIMG];
-     mPath=path;
+     //mPath=path;
     }
     
     void changeRecognizer(int nRec)
@@ -59,25 +59,25 @@ public  class PersonRecognizer {
     	
     }
     
-	void add(Mat m, String description) {
-		Bitmap bmp= Bitmap.createBitmap(m.width(), m.height(), Bitmap.Config.ARGB_8888);
-		 
-		Utils.matToBitmap(m,bmp);
-		bmp= Bitmap.createScaledBitmap(bmp, WIDTH, HEIGHT, false);
-		
-		FileOutputStream f;
-		try {
-			f = new FileOutputStream(mPath+description+"-"+count+".png",true);
-			count++;
-			bmp.compress(Bitmap.CompressFormat.PNG, 100, f);
-			f.close();
-
-		} catch (Exception e) {
-			Log.e("error",e.getCause()+" "+e.getMessage());
-			e.printStackTrace();
-			
-		}
-	}
+//	void add(Mat m, String description) {
+//		Bitmap bmp= Bitmap.createBitmap(m.width(), m.height(), Bitmap.Config.ARGB_8888);
+//
+//		Utils.matToBitmap(m,bmp);
+//		bmp= Bitmap.createScaledBitmap(bmp, WIDTH, HEIGHT, false);
+//
+//		FileOutputStream f;
+//		try {
+//			f = new FileOutputStream(mPath+description+"-"+count+".png",true);
+//			count++;
+//			bmp.compress(Bitmap.CompressFormat.PNG, 100, f);
+//			f.close();
+//
+//		} catch (Exception e) {
+//			Log.e("error",e.getCause()+" "+e.getMessage());
+//			e.printStackTrace();
+//
+//		}
+//	}
 	
 	public void train() {
 		MatVector images = new MatVector(MAXIMG);

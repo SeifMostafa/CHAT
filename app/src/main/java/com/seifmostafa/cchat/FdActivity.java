@@ -1,56 +1,40 @@
 package com.seifmostafa.cchat;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.os.Message;
+import android.util.Log;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Toast;
+import android.widget.ToggleButton;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
+
 import java.io.File;
-//import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.Point;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
-
-import com.googlecode.javacv.cpp.opencv_contrib;
-import com.googlecode.javacv.cpp.opencv_imgproc;
-
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
-
-import static com.googlecode.javacv.cpp.opencv_contrib.*;
-import static org.opencv.imgproc.Imgproc.rectangle;
+//import java.io.FileNotFoundException;
 
 
 public class FdActivity extends Activity implements CvCameraViewListener2 {
@@ -61,10 +45,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private static final Scalar    FACE_RECT_COLOR     = new Scalar(0, 255, 0, 255);
     public static final int        JAVA_DETECTOR       = 0;
     public static final int        NATIVE_DETECTOR     = 1;
-    
-    public static final int TRAINING= 0;
-    public static final int SEARCHING= 1;
-    public static final int IDLE= 2;
+
 
     double xCenter = -1;
     double yCenter = -1;
@@ -86,15 +67,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private int                    mAbsoluteFaceSize   = 0;
     private int mLikely=0;
     
-    String mPath="/storage/emulated/0/CCHAT/train/";
 
     private Tutorial3View   mOpenCvCameraView;
     ToggleButton buttonSearch;
-    private int mChooseCamera = frontCam;
 
     PersonRecognizer fr;
-    FaceRecognizer faceRecognizer;
-   
+
     
     static final long MAXIMG = 20;
     ArrayList<Mat> alimgs = new ArrayList<Mat>();
@@ -188,8 +166,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.face_detect_surface_view);
-        fr=new PersonRecognizer(mPath);
-        String s = getResources().getString(R.string.Straininig);
+        fr=new PersonRecognizer();
+        String s = getResources().getString(R.string.SSearching);
         Toast.makeText(getApplicationContext(),s, Toast.LENGTH_LONG).show();
         fr.load();
 
@@ -199,9 +177,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         mOpenCvCameraView.setCameraIndex(1);
         mOpenCvCameraView.enableView();
         mOpenCvCameraView.setCamFront();
-
-
-        mPath="/storage/emulated/0/CCHAT/train/";
 
         buttonSearch=(ToggleButton)findViewById(R.id.buttonBuscar);
         buttonSearch.setOnClickListener(new View.OnClickListener() {
@@ -218,12 +193,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
      				}
      			}
      		});
-        
-//        boolean success=(new File(mPath)).mkdirs();
-//        if (!success)
-//        {
-//        	Log.e("Error","Error creating directory");
-//        }
+
     }
 
 
@@ -309,6 +279,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                  Log.i("XPredict:(prob) ",""+mLikely);
 
                  if(mLikely >= 150){
+                     MainActivity.flag_new_level=false;
                      startActivity(new Intent(FdActivity.this, MainActivity.class));
                      finish();
                  }
