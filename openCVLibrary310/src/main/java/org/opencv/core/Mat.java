@@ -1,8 +1,10 @@
 package org.opencv.core;
 
+import com.googlecode.javacv.cpp.opencv_core;
+
 // C++: class Mat
 //javadoc: Mat
-public class Mat {
+public class Mat  {
 
     public final long nativeObj;
 

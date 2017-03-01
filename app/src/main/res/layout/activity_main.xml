@@ -91,6 +91,11 @@
         android:layout_alignRight="@+id/button_checkmine"
         android:textAlignment="center"
         android:id="@+id/button_retry"
-        android:onClick="retry"/>
+        android:onClick="retry" />
+    <!--<org.opencv.android.JavaCameraView-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="fill_parent"-->
+        <!--android:id="@+id/fd_activity_surface_view"-->
+        <!--android:visibility="visible"/>-->
 </RelativeLayout>
 

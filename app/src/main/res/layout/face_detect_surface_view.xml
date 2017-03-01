@@ -1,48 +1,20 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+	android:orientation="vertical">
 
-    <org.opencv.android.JavaCameraView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/fd_activity_surface_view" />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
-        android:onClick="onRecreateClick"
-        android:text="Recreate" />
+	<com.seifmostafa.cchat.Tutorial3View
+		android:id="@+id/tutorial3_activity_java_surface_view"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="0.88" />
 
-    <TextView
-        android:id="@+id/method"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/seekbars"
-        android:layout_alignParentLeft="true"
-        android:layout_margin="5dp"
-        android:text="method"
-        android:textColor="@android:color/white"
-        android:textSize="10sp" />
-
-    <LinearLayout
-        android:id="@+id/seekbars"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        >
-
-        <SeekBar
-            android:id="@+id/methodSeekBar"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:max="5"
-            android:paddingLeft="5dip"
-            android:paddingRight="10dip"
-            android:progress="500" >
-        </SeekBar>
-
-    </LinearLayout>
-</RelativeLayout>
+	<ToggleButton
+		android:id="@+id/buttonBuscar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/SSearch"
+		android:textOff="@string/SSearch"
+		android:textOn="@string/SStopSearch" />
+</LinearLayout>
