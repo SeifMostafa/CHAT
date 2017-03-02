@@ -22,7 +22,6 @@ import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -32,10 +31,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.googlecode.javacv.cpp.opencv_contrib;
-
 import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -52,8 +48,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.text.Collator;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -61,9 +57,13 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Queue;
 
-import static com.googlecode.javacv.cpp.opencv_core.MatVector;
+import com.seifmostafa.cchat.Dialog_source_from_cfr.demo.jsapi.dialog.DialogManager;
+import com.seifmostafa.cchat.Dialog_source_from_cfr.demo.jsapi.dialog.MyBehavior;
+import edu.cmu.sphinx.recognizer.Recognizer;
+import edu.cmu.sphinx.util.props.ConfigurationManager;
+import edu.cmu.sphinx.util.props.PropertyException;
+
 import static java.lang.Math.abs;
 import static org.opencv.core.CvType.CV_8UC1;
 import static org.opencv.core.CvType.CV_8UC3;
@@ -76,13 +76,17 @@ import static org.opencv.imgproc.Imgproc.circle;
 import static org.opencv.imgproc.Imgproc.drawContours;
 import static org.opencv.imgproc.Imgproc.findContours;
 import static org.opencv.imgproc.Imgproc.moments;
-
+import java.net.URI;
+import java.net.URL;
 
 public class MainActivity extends Activity {
 
     static {
         OpenCVLoader.initDebug();
     }
+
+    private URL VoiceRec_ConfigFile_URL;
+
 
     private static final String    TAG                 = "CCHAT::MainActivity";
     public static final int        JAVA_DETECTOR       = 0;
@@ -227,6 +231,7 @@ public class MainActivity extends Activity {
         if(flag_new_level){
             faceRec();
         }
+        initialize_VoiceRec();
     }
 
 
@@ -908,11 +913,43 @@ public class MainActivity extends Activity {
     /////////////////////////////////////////////////////////////////////////////////////////
 
         // make it offline
+    public void initialize_VoiceRec(){
+        //DialogManager dialogManager = new DialogManager();
+        append();
+    }
+    public void append() {
+        try {
 
-    public void checkIfSpeechRec_resultsContainsTheWord(String Word,ArrayList<String> SpeechRec_results){
+            URL url= new File("/storage/emulated/0/CCHAT/dialog.config.xml").toURI().toURL();
+            ConfigurationManager cm = new ConfigurationManager(url);
+            DialogManager dialogManager = (DialogManager) cm.lookup("dialogManager");
+            Recognizer weatherRecognizer = (Recognizer) cm.lookup("weatherRecognizer");
+            dialogManager.addNode("\u0645\u064e\u0644\u064e\u0641\u0652", new MyBehavior());
+            dialogManager.addNode("\u0633\u064A\u0641", new MyBehavior());
+            dialogManager.addNode("\u0627\u0644\u0631\u0626\u064a\u0633\u0629", new MyBehavior());
+            dialogManager.addNode("\u062a\u064e\u062d\u0652\u0631\u064a\u0631", new MyBehavior());
+            dialogManager.addNode("\u0625\u0650\u063a\u0652\u0644\u0627\u0642\u0652", new MyBehavior());
+            dialogManager.addNode("\u0645\u064f\u0633\u064e\u0627\u0639\u064e\u062f\u064e\u0629\u0652", new MyBehavior());
+            dialogManager.addNode("\u062c\u064e\u062f\u0652\u0648\u064e\u0644\u0652", new MyBehavior());
+            dialogManager.setInitialNode("\u0627\u0644\u0631\u0626\u064a\u0633\u0629");
+            dialogManager.allocate();
+            weatherRecognizer.allocate();
+            dialogManager.go();
+            Log.i("VoiceRec:append","\u062a\u0646\u0638\u064a\u0641  ...");
+            dialogManager.deallocate();
+        } catch (IOException e) {
+            Log.i("VoiceRec:append","\u062d\u062f\u062b \u062e\u0644\u0644 \u062e\u0644\u0627\u0644 \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u062d\u0648\u0627\u0631: " + e);
+        } catch (PropertyException e) {
+            Log.i("VoiceRec:append","\u062d\u062f\u062b \u062e\u0644\u0644 \u062e\u0644\u0627\u0644 \u062a\u0648\u0636\u064a\u0628 \u0627\u0644\u062d\u0648\u0627\u0631: " + (Object) e);
+        } catch (InstantiationException e) {
+            Log.i("VoiceRec:append","\u062d\u062f\u062b \u062e\u0644\u0644 \u062e\u0644\u0627\u0644 \u062a\u0643\u0648\u064a\u0646 \u0627\u0644\u062d\u0648\u0627\u0631: " + e);
+        }
+    }
+
+        public void checkIfSpeechRec_resultsContainsTheWord(String word,ArrayList<String> SpeechRec_results){
         if(SpeechRec_results.size()>0){
             for(String i:SpeechRec_results){
-                if(i==Word){
+                if(i==word){
                     Toast.makeText(this,"Well Done!",Toast.LENGTH_SHORT).show();
                     return;
                 }
