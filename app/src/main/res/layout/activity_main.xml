@@ -45,9 +45,11 @@
 
     </FrameLayout>
 
-    <Button
+    <ImageButton
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
+        android:background="@android:color/transparent"
+        android:src="@drawable/voice"
         android:layout_height="wrap_content"
         android:text="انطق"
         android:id="@+id/button_speak"
@@ -55,43 +57,57 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:onClick="voiceoffer" />
-    <Button
+    <ImageButton
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:src="@drawable/help"
+        android:background="@android:color/transparent"
         android:text="ساعدني بصورة"
         android:id="@+id/button_help"
         android:onClick="helpbypic"
         android:layout_alignTop="@+id/button_speak" />
 
-    <Button
+    <ImageButton
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="افحص نطقي"
+        android:src="@drawable/microphone"
+        android:background="@android:color/transparent"
         android:id="@+id/button_checkmine"
         android:onClick="voicerec"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <Button
+    <ImageButton
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="افحص ما كتبت"
+        android:src="@drawable/check"
+        android:background="@android:color/transparent"
         android:id="@+id/button_checkfill"
         android:onClick="checkfill"
         android:layout_alignBottom="@+id/button_checkmine" />
-    <Button
+
+
+    <RelativeLayout android:id="@+id/RelativeLayout01"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageButton
         android:text="محاولة جديدة"
+        android:src="@drawable/autorenew"
+        android:background="@android:color/transparent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button_checkmine"
-        android:layout_alignRight="@+id/button_checkmine"
         android:textAlignment="center"
         android:id="@+id/button_retry"
-        android:onClick="retry" />
+        android:onClick="retry"
+        android:layout_centerHorizontal="true" />
+    </RelativeLayout>
     <!--<org.opencv.android.JavaCameraView-->
         <!--android:layout_width="fill_parent"-->
         <!--android:layout_height="fill_parent"-->
