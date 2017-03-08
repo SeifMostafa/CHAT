@@ -35,8 +35,4 @@ dependencies {
     })
     testCompile 'junit:junit:4.12'
     compile project(':openCVLibrary310')
-    compile files('src/main/jniLibs/an4.jar')
-    compile files('src/main/jniLibs/Dialog.jar')
-    compile files('src/main/jniLibs/jsapi.jar')
-    compile files('src/main/jniLibs/sphinx4.jar')
 }

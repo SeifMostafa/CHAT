@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,6 +28,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -59,10 +62,14 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
+import java.util.Vector;
 
 
-import demo.jsapi.dialog.Dialog;
-
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.TargetDataLine;
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static java.lang.Math.abs;
 import static org.opencv.core.CvType.CV_8UC1;
 import static org.opencv.core.CvType.CV_8UC3;
@@ -117,6 +124,12 @@ public class MainActivity extends Activity {
 
     TextView textViewPercentage;
     CustTextView textView;
+
+    MediaRecorder mediaRecorder ;
+    MediaPlayer mediaPlayer ;
+    String RandomAudioFileName = "ABCDEFGHIJKLMNOP";
+    Random random ;
+    String AudioSavePathInDevice = "/storage/emulated/0/CCHAT/v";
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -196,7 +209,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         tempDir = Environment.getExternalStorageDirectory() + "/" + "GetSignature" + "/";
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
@@ -233,6 +245,7 @@ public class MainActivity extends Activity {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+
     }
 
 
@@ -915,13 +928,139 @@ public class MainActivity extends Activity {
 
         // make it offline
     public void initialize_VoiceRec() throws MalformedURLException {
-
+        prepareMic();
 //        String filepath = "/storage/emulated/0/CCHAT/dialog.config.xml";
 //        Dialog dialog = new Dialog(new File(filepath).toURI().toURL());
 //        dialog.append();
     }
+    public void prepareMic(){
+        Button buttonStart, buttonStop, buttonPlayLastRecordAudio,
+                buttonStopPlayingRecording ;
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
 
+            }
+        });
+        final AlertDialog dialog = builder.create();
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogLayout = inflater.inflate(R.layout.checkspelling, null);
+
+        buttonStart = (Button) dialogLayout.findViewById(R.id.button);
+        buttonStop = (Button) dialogLayout.findViewById(R.id.button2);
+        buttonPlayLastRecordAudio = (Button) dialogLayout.findViewById(R.id.button3);
+        buttonStopPlayingRecording = (Button)dialogLayout.findViewById(R.id.button4);
+
+        buttonStop.setEnabled(false);
+        buttonPlayLastRecordAudio.setEnabled(false);
+        buttonStopPlayingRecording.setEnabled(false);
+        dialog.setView(dialogLayout);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.show();
+
+    buttonStart.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+                MediaRecorderReady();
+                try {
+                    mediaRecorder.prepare();
+                    mediaRecorder.start();
+//                                      String filepath = "/storage/emulated/0/CCHAT/dialog.config.xml";
+//                                      Dialog voiceDialog = new Dialog(new File(filepath).toURI().toURL());
+//                                     voiceDialog.append();
+                } catch (IllegalStateException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                buttonStart.setEnabled(false);
+                buttonStop.setEnabled(true);
+
+                Toast.makeText(MainActivity.this, "Recording started",
+                        Toast.LENGTH_LONG).show();
+        }
+    });
+
+    buttonStop.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            mediaRecorder.stop();
+            buttonStop.setEnabled(false);
+            buttonPlayLastRecordAudio.setEnabled(true);
+            buttonStart.setEnabled(true);
+            buttonStopPlayingRecording.setEnabled(false);
+
+            Toast.makeText(MainActivity.this, "Recording Completed",
+                    Toast.LENGTH_LONG).show();
+        }
+    });
+
+    buttonPlayLastRecordAudio.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) throws IllegalArgumentException,
+                SecurityException, IllegalStateException {
+
+            buttonStop.setEnabled(false);
+            buttonStart.setEnabled(false);
+            buttonStopPlayingRecording.setEnabled(true);
+
+            mediaPlayer = new MediaPlayer();
+            try {
+                mediaPlayer.setDataSource(AudioSavePathInDevice);
+                mediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            mediaPlayer.start();
+            Toast.makeText(MainActivity.this, "Recording Playing",
+                    Toast.LENGTH_LONG).show();
+        }
+    });
+
+    buttonStopPlayingRecording.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            buttonStop.setEnabled(false);
+            buttonStart.setEnabled(true);
+            buttonStopPlayingRecording.setEnabled(false);
+            buttonPlayLastRecordAudio.setEnabled(true);
+
+            if(mediaPlayer != null){
+                mediaPlayer.stop();
+                mediaPlayer.release();
+                MediaRecorderReady();
+            }
+        }
+    });
+
+}
+
+    public void MediaRecorderReady(){
+        mediaRecorder=new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+        mediaRecorder.setOutputFile(AudioSavePathInDevice);
+    }
+
+    public String CreateRandomAudioFileName(int string){
+        StringBuilder stringBuilder = new StringBuilder( string );
+        int i = 0 ;
+        while(i < string ) {
+            stringBuilder.append(RandomAudioFileName.
+                    charAt(random.nextInt(RandomAudioFileName.length())));
+
+            i++ ;
+        }
+        return stringBuilder.toString();
+    }
 
         public void checkIfSpeechRec_resultsContainsTheWord(String word,ArrayList<String> SpeechRec_results){
         if(SpeechRec_results.size()>0){

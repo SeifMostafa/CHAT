@@ -1408,7 +1408,7 @@ public class AudioSystem {
     /**
      * Obtains the set of audio file writers that are currently installed on the system.
      * @return a List of
-     * {@link javax.sound.samples.spi.AudioFileWriter AudioFileWriter}
+     * {@link javax.sound.sampled.spi.AudioFileWriter AudioFileWriter}
      * objects representing the available audio file writers.  If no audio file
      * writers are available on the system, an empty List is returned.
      */
