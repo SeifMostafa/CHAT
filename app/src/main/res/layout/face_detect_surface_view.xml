@@ -1,20 +1,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-	android:orientation="vertical">
+    android:orientation="vertical">
 
-	<com.seifmostafa.cchat.Tutorial3View
-		android:id="@+id/tutorial3_activity_java_surface_view"
-		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		android:layout_weight="0.88" />
+    <com.seifmostafa.cchat.Tutorial3View
+        android:id="@+id/tutorial3_activity_java_surface_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.88" />
 
-	<ToggleButton
-		android:id="@+id/buttonBuscar"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:text="@string/SSearch"
-		android:textOff="@string/SSearch"
-		android:textOn="@string/SStopSearch" />
+    <ToggleButton
+        android:id="@+id/buttonBuscar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SSearch"
+        android:textOff="@string/SSearch"
+        android:textOn="@string/SStopSearch" />
 </LinearLayout>

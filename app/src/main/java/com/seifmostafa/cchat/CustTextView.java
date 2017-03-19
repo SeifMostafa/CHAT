@@ -28,7 +28,7 @@ public class CustTextView extends TextView {
 
     public void init() {
         Typeface tf = Typeface.createFromAsset(getContext().getAssets(), "font/Helvetica_Neue.ttf");
-        setTypeface(tf ,1);
+        setTypeface(tf, 1);
 
     }
 

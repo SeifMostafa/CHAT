@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -16,7 +15,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,12 +26,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -52,8 +48,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -62,14 +56,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
-import java.util.Vector;
 
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.TargetDataLine;
-import static android.Manifest.permission.RECORD_AUDIO;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static java.lang.Math.abs;
 import static org.opencv.core.CvType.CV_8UC1;
 import static org.opencv.core.CvType.CV_8UC3;
@@ -85,61 +72,43 @@ import static org.opencv.imgproc.Imgproc.moments;
 
 public class MainActivity extends Activity {
 
+    public static final int JAVA_DETECTOR = 0;
+    private static final String TAG = "CCHAT::MainActivity";
+    private static final int RESULT_SPEECH = 1;
+    public static boolean flag_new_level = true;
+    public static String tempDir;
+
     static {
         OpenCVLoader.initDebug();
     }
 
-    private URL VoiceRec_ConfigFile_URL;
-
-
-    private static final String    TAG                 = "CCHAT::MainActivity";
-    public static final int        JAVA_DETECTOR       = 0;
-
-    private File                   mCascadeFile;
-    private File                   mCascadeFileEye;
-    private CascadeClassifier mJavaDetector;
-    private CascadeClassifier      mJavaDetectorEye;
-    private String[]               mDetectorName;
-
-
-    Mat  Original;
-    Mat imageMat;
-
     public int count = 1;
-    public int TOLERANCE =8;
-    public int MAX_TOLERANCE =200;
-   public static boolean  flag_new_level = true;
-
+    public int TOLERANCE = 8;
+    public int MAX_TOLERANCE = 200;
     public String current = null;
-    private String uniqueId;
-    private static final int RESULT_SPEECH = 1;
-
-
-    ArrayList<String > SpeechRec_results;
+    Mat Original;
+    Mat imageMat;
+    ArrayList<String> SpeechRec_results;
     FrameLayout frameLayout;
-    DrawingView dv ;
-    private Paint mPaint;
-    public static String tempDir;
+    DrawingView dv;
     File mypath;
-
     TextView textViewPercentage;
     CustTextView textView;
-
-    MediaRecorder mediaRecorder ;
-    MediaPlayer mediaPlayer ;
-    String RandomAudioFileName = "ABCDEFGHIJKLMNOP";
-    Random random ;
-    String AudioSavePathInDevice = "/storage/emulated/0/CCHAT/v";
-
+    private File mCascadeFile;
+    private File mCascadeFileEye;
+    private CascadeClassifier mJavaDetector;
+    private CascadeClassifier mJavaDetectorEye;
+    private String[] mDetectorName;
+    private String uniqueId;
+    private Paint mPaint;
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
 
-                case LoaderCallbackInterface.SUCCESS:
-                {
+                case LoaderCallbackInterface.SUCCESS: {
                     Log.i("OpenCV", "OpenCV loaded successfully");
-                    imageMat=new Mat();
+                    imageMat = new Mat();
                     try {
                         // load cascade file from application resources
                         InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
@@ -189,11 +158,12 @@ public class MainActivity extends Activity {
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                } break;
-                default:
-                {
+                }
+                break;
+                default: {
                     super.onManagerConnected(status);
-                } break;
+                }
+                break;
             }
         }
     };
@@ -203,6 +173,28 @@ public class MainActivity extends Activity {
         mDetectorName[JAVA_DETECTOR] = "Java";
 
         Log.i(TAG, "Instantiated new " + this.getClass());
+    }
+
+    public static Bitmap getBitmapFromView(View v) {
+        Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        v.draw(c);
+        return b;
+    }
+
+    public static Bitmap getBitmapFromAsset(Context context, String filePath) {
+        AssetManager assetManager = context.getAssets();
+
+        InputStream istr;
+        Bitmap bitmap = null;
+        try {
+            istr = assetManager.open(filePath);
+            bitmap = BitmapFactory.decodeStream(istr);
+        } catch (IOException e) {
+            // handle exception
+        }
+
+        return bitmap;
     }
 
     @Override
@@ -216,14 +208,12 @@ public class MainActivity extends Activity {
         prepareDirectory();
         uniqueId = getTodaysDate() + "_" + getCurrentTime() + "_" + Math.random();
         current = uniqueId + ".png";
-        mypath= new File(directory,current);
-        // Log.v("ABSPATH" , mypath.getAbsolutePath());
+        mypath = new File(directory, current);
 
-        textViewPercentage =(TextView)findViewById(R.id.textView_percentage);
-       textView = (CustTextView) findViewById(R.id.textView_text);
-//        textView.setText("لُلو");
-       // res=textView.getText().toString();
-        frameLayout = (FrameLayout)findViewById(R.id.overtext);
+        textViewPercentage = (TextView) findViewById(R.id.textView_percentage);
+        textView = (CustTextView) findViewById(R.id.textView_text);
+
+        frameLayout = (FrameLayout) findViewById(R.id.overtext);
 
         dv = new DrawingView(this);
         //setContentView(dv);
@@ -237,18 +227,11 @@ public class MainActivity extends Activity {
         mPaint.setStrokeWidth(28);
         frameLayout.addView(dv);
 
-        if(flag_new_level){
-            faceRec();
-        }
-        try {
-            initialize_VoiceRec();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        if (flag_new_level) {
+           faceRec();
         }
 
     }
-
-
 
     @Override
     protected void onPause() {
@@ -272,52 +255,50 @@ public class MainActivity extends Activity {
         }
     }
 
-
     public void checkfill(View view) {
         Bitmap mBitmap = null;
-        mBitmap =  Bitmap.createBitmap (dv.getWidth(), dv.getHeight(), Bitmap.Config.RGB_565);
+        mBitmap = Bitmap.createBitmap(dv.getWidth(), dv.getHeight(), Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(mBitmap);
         dv.draw(canvas);
 
-        try
-        {
-            Original = new CenterLineForOriginal().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,getBitmapFromView(textView)).get();
-            Mat Drawed = new CenterLine().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,mBitmap).get();
-            double FinalPercentage =   MatchWritten(Original,Drawed,TOLERANCE);
-            textViewPercentage.setText(""+Math.floor(FinalPercentage+'%'));
+        try {
+            Original = new CenterLineForOriginal().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, getBitmapFromView(textView)).get();
+            Mat Drawed = new CenterLine().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mBitmap).get();
+            double FinalPercentage = MatchWritten(Original, Drawed, TOLERANCE);
+            textViewPercentage.setText("" + Math.floor(FinalPercentage + '%'));
             textViewPercentage.setVisibility(View.VISIBLE);
-            Log.i("FinalPercentage",""+FinalPercentage);
+            Log.i("FinalPercentage", "" + FinalPercentage);
             //MatchWritten_(Original,Drawed);
 
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             Log.v("checkfill", e.toString());
         }
     }
-    private void invisiblepercentage(){
-                try{
+
+    private void invisiblepercentage() {
+        try {
             Thread.sleep(5000);
             textViewPercentage.setVisibility(View.INVISIBLE);
-        }catch (Exception e){
-            Log.i("checkfill-try_to_sleep",e.toString());
+        } catch (Exception e) {
+            Log.i("checkfill-try_to_sleep", e.toString());
         }
     }
 
     public void voicerec(View view) {
-        Intent voicerecogize = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        voicerecogize.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
-        voicerecogize.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        voicerecogize.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
-        voicerecogize.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE,false);
-        startActivityForResult(voicerecogize, RESULT_SPEECH);
+//        Intent voicerecogize = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+//        voicerecogize.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+//        voicerecogize.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+//                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+//        voicerecogize.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
+//        voicerecogize.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE,false);
+//        startActivityForResult(voicerecogize, RESULT_SPEECH);
+
+        VoiceRecOffline();
     }
 
     public void voiceoffer(View view) {
         final MediaPlayer mp = new MediaPlayer();
-        if(mp.isPlaying())
-        {
+        if (mp.isPlaying()) {
             mp.stop();
         }
 
@@ -325,7 +306,7 @@ public class MainActivity extends Activity {
             mp.reset();
             AssetFileDescriptor afd;
             afd = getAssets().openFd("swan_lake.mp3");
-            mp.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+            mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             mp.prepare();
             mp.start();
         } catch (IllegalStateException e) {
@@ -334,7 +315,20 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
-    public void helpbypic(View view){
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////voice offer ///////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    // play sounds are created by editor
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////voice rec ///////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    public void helpbypic(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
             @Override
@@ -354,10 +348,9 @@ public class MainActivity extends Activity {
         dialog.show();
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == RESULT_SPEECH && requestCode == RESULT_OK);
+        if (requestCode == RESULT_SPEECH && requestCode == RESULT_OK) ;
         {
             SpeechRec_results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 
@@ -366,118 +359,147 @@ public class MainActivity extends Activity {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////// check type ///////////////////////////////////
+    /////////////////////////////////////////// Face Rec ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
 
+    // wanna fire only if new levels , first open and never close till rec. The owner..
 
-
-    public double MatchWritten(Mat original,Mat written,int tolerance) {
-        double percentage =0;
-       try {
-            List<android.graphics.Point> Originalpoints = getTotalNonZero(original);
-            List<android.graphics.Point> Writtenpoints = getTotalNonZero(written);
-
-           List<android.graphics.Point> Original_copy =new ArrayList<>(Originalpoints);
-           List<android.graphics.Point> Writtern_copy = new ArrayList<>(Writtenpoints);
-
-           Log.i("MatchWritten","Original: "+Originalpoints.size());
-           Log.i("MatchWritten","Written: "+ Writtenpoints.size());
-
-           Collections.sort(Original_copy, new Comparator<android.graphics.Point>() {
-               @Override
-               public int compare(android.graphics.Point o1, android.graphics.Point o2) {
-                   return o1.x >= o2.x ? 1 : -1 ;
-               }
-           });
-           Collections.sort(Writtern_copy, new Comparator<android.graphics.Point>() {
-               @Override
-               public int compare(android.graphics.Point o1, android.graphics.Point o2) {
-                   return o1.x >= o2.x ? 1 : -1 ;
-               }
-           });
-
-            int C=0,BigMistakesCounter=0;
-
-           for(android.graphics.Point point:Originalpoints){
-            //   Log.i("MatchWritten","OriginalPoint: "+ point.x +" , "+ point.y);
-               nextpoint:
-               for(android.graphics.Point searchpoint:Writtenpoints){
-                   if(abs(searchpoint.x-point.x)<= tolerance && abs(searchpoint.y-point.y)<= tolerance){
-                       Original_copy.remove(point);
-                       Writtern_copy.remove(searchpoint);
-                    C++;
-                       // enter multple times for single one !!! (cause of the nested loop) so let's
-                       break nextpoint;
-
-                   }
-                   if(abs(searchpoint.x-point.x)>= MAX_TOLERANCE && abs(searchpoint.y-point.y)>= MAX_TOLERANCE){
-                       BigMistakesCounter++;
-                       break nextpoint;
-
-                   }
-               }
-           }
-           // scalling
-           // original , C , bigMistakesCounter
-            double okay = (double)C/Writtenpoints.size(),notOkay = (double)BigMistakesCounter/Writtenpoints.size();
-
-            Log.i("MatchWritten","Mistakes:"+notOkay);
-            Log.i("MatchWritten","Okay:"+okay);
-
-           percentage=okay*100;
-
-           if((notOkay*100)>=25){
-               Log.i("MatchWritten","hola big wrong");
-               // test toast display arabic
-               Toast.makeText(MainActivity.this,"Try again",Toast.LENGTH_LONG).show();
-               dv.reset();
-           }else{
-               // test toast display arabic
-               Toast.makeText(MainActivity.this,"Thanks",Toast.LENGTH_LONG).show();
-           }
-       }catch (Exception e){
-           Log.i("checkTypo",e.toString());
-       }
-        return percentage;
+    // make it offline
+    public void VoiceRecOffline() {
+        startActivity(new Intent(MainActivity.this, VrActivity.class));
     }
 
 
+    /////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////// check type ///////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    public void checkIfSpeechRec_resultsContainsTheWord(String word, ArrayList<String> SpeechRec_results) {
+        if (SpeechRec_results.size() > 0) {
+            for (String i : SpeechRec_results) {
+                if (i == word) {
+                    Toast.makeText(this, "Well Done!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Log.i("SpeechResults", i);
+            }
+
+        }
+        Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show();
+
+    }
+
+    public void faceRec() {
+         startActivity(new Intent(MainActivity.this,FdActivity.class));
+
+    }
+
+    public double MatchWritten(Mat original, Mat written, int tolerance) {
+        double percentage = 0;
+        try {
+            List<android.graphics.Point> Originalpoints = getTotalNonZero(original);
+            List<android.graphics.Point> Writtenpoints = getTotalNonZero(written);
+
+            List<android.graphics.Point> Original_copy = new ArrayList<>(Originalpoints);
+            List<android.graphics.Point> Writtern_copy = new ArrayList<>(Writtenpoints);
+
+            Log.i("MatchWritten", "Original: " + Originalpoints.size());
+            Log.i("MatchWritten", "Written: " + Writtenpoints.size());
+
+            Collections.sort(Original_copy, new Comparator<android.graphics.Point>() {
+                @Override
+                public int compare(android.graphics.Point o1, android.graphics.Point o2) {
+                    return o1.x >= o2.x ? 1 : -1;
+                }
+            });
+            Collections.sort(Writtern_copy, new Comparator<android.graphics.Point>() {
+                @Override
+                public int compare(android.graphics.Point o1, android.graphics.Point o2) {
+                    return o1.x >= o2.x ? 1 : -1;
+                }
+            });
+
+            int C = 0, BigMistakesCounter = 0;
+
+            for (android.graphics.Point point : Originalpoints) {
+                //   Log.i("MatchWritten","OriginalPoint: "+ point.x +" , "+ point.y);
+                nextpoint:
+                for (android.graphics.Point searchpoint : Writtenpoints) {
+                    if (abs(searchpoint.x - point.x) <= tolerance && abs(searchpoint.y - point.y) <= tolerance) {
+                        Original_copy.remove(point);
+                        Writtern_copy.remove(searchpoint);
+                        C++;
+                        // enter multple times for single one !!! (cause of the nested loop) so let's
+                        break nextpoint;
+
+                    }
+                    if (abs(searchpoint.x - point.x) >= MAX_TOLERANCE && abs(searchpoint.y - point.y) >= MAX_TOLERANCE) {
+                        BigMistakesCounter++;
+                        break nextpoint;
+
+                    }
+                }
+            }
+            // scalling
+            // original , C , bigMistakesCounter
+            double okay = (double) C / Writtenpoints.size(), notOkay = (double) BigMistakesCounter / Writtenpoints.size();
+
+            Log.i("MatchWritten", "Mistakes:" + notOkay);
+            Log.i("MatchWritten", "Okay:" + okay);
+
+            percentage = okay * 100;
+
+            if ((notOkay * 100) >= 25) {
+                Log.i("MatchWritten", "hola big wrong");
+                // test toast display arabic
+                Toast.makeText(MainActivity.this, "Try again", Toast.LENGTH_LONG).show();
+                dv.reset();
+            } else {
+                // test toast display arabic
+                Toast.makeText(MainActivity.this, "Thanks", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            Log.i("checkTypo", e.toString());
+        }
+        return percentage;
+    }
+
     // we can write or write then delete here
-    private void WriteBitmap(File mypath,Bitmap mBitmap)  {
-        try{
+    private void WriteBitmap(File mypath, Bitmap mBitmap) {
+        try {
             FileOutputStream mFileOutStream = new FileOutputStream(mypath);
             mBitmap.compress(Bitmap.CompressFormat.PNG, 90, mFileOutStream);
             mFileOutStream.flush();
             mFileOutStream.close();
             String url = MediaStore.Images.Media.insertImage(getContentResolver(), mBitmap, "title", null);
-            Log.v("log_tag","url: " + url);
-            Log.v("log_tag","url: " + current);
+            Log.v("log_tag", "url: " + url);
+            Log.v("log_tag", "url: " + current);
             //Log.v("log_tag","url:REAL " + mypath);
             // In case you want to delete the file
             boolean deleted = mypath.delete();
-            Log.v("log_tag","deleted: " + mypath.toString() + deleted);
+            Log.v("log_tag", "deleted: " + mypath.toString() + deleted);
             //If you want to convert the image to string use base64 converter
-        }catch (Exception e){
-            Log.i("WriteBitmap",e.toString());
+        } catch (Exception e) {
+            Log.i("WriteBitmap", e.toString());
         }
 
     }
 
-    private   List<MatOfPoint>  FindContour(Mat src){
+    private List<MatOfPoint> FindContour(Mat src) {
         int thresh = 100;
         int max_thresh = 255;
-        Scalar color = new Scalar(100.0, 100.0, 100.0 );
+        Scalar color = new Scalar(100.0, 100.0, 100.0);
 
         Mat mat = new Mat();
         Mat canny_output = new Mat();
         src.convertTo(mat, CV_LOAD_IMAGE_GRAYSCALE);
         List<MatOfPoint> contours = new ArrayList<>();
         double[] val = new double[4];
-        Canny( mat , canny_output , thresh ,max_thresh, 3);
+        Canny(mat, canny_output, thresh, max_thresh, 3);
         Mat hierarchy = new Mat();
-        findContours( canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        findContours(canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
-       // Log.i("SSSS",""+contours.size());
+        // Log.i("SSSS",""+contours.size());
 //        Mat drawing = zeros( canny_output.size(), CV_8UC3 );
 //        Mat grayRnd = new Mat( canny_output.size(), CvType.CV_8U);
 //        Core.randu(grayRnd, 0, 255);
@@ -488,49 +510,396 @@ public class MainActivity extends Activity {
         return contours;
     }
 
-    private Mat getMatFromView(View view){
+    private Mat getMatFromView(View view) {
         Bitmap mBitmap = null;
-        mBitmap =  Bitmap.createBitmap (view.getWidth(), view.getHeight(), Bitmap.Config.RGB_565);
+        mBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(mBitmap);
         view.draw(canvas);
-        try
-        {
+        try {
             Mat mat = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC3);
-            Utils.bitmapToMat(mBitmap,mat);
+            Utils.bitmapToMat(mBitmap, mat);
             return mat;
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             Log.v("getMatFromView", e.toString());
             return null;
         }
     }
-    public Mat DrawCenterPoint(Mat src){
+
+    public Mat DrawCenterPoint(Mat src) {
 
 
         int thresh = 100;
         int max_thresh = 255;
-        Scalar color = new Scalar(255, 255, 255 );
+        Scalar color = new Scalar(255, 255, 255);
         List<MatOfPoint> contours = new ArrayList<>();
         Mat canny_output = new Mat();
         Mat hierarchy = new Mat();
 
-        Canny( src, canny_output, thresh, thresh*2, 3 );
-        Mat drawing = zeros( canny_output.size(), CV_8UC3 );
-        findContours(canny_output,contours,hierarchy,RETR_TREE,CHAIN_APPROX_SIMPLE,new Point(0,0));
-        for(int i = 0; i< contours.size(); i++){
+        Canny(src, canny_output, thresh, thresh * 2, 3);
+        Mat drawing = zeros(canny_output.size(), CV_8UC3);
+        findContours(canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, new Point(0, 0));
+        for (int i = 0; i < contours.size(); i++) {
             MatOfPoint matOfPoint = contours.get(i);
-            Moments m =moments(matOfPoint);
-            int x  = (int) (m.get_m10() / m.get_m00());
+            Moments m = moments(matOfPoint);
+            int x = (int) (m.get_m10() / m.get_m00());
             int y = (int) (m.get_m01() / m.get_m00());
-            drawContours( drawing, contours, -1, color, 2);
-            circle(drawing,new Point(x ,y),7,color);
+            drawContours(drawing, contours, -1, color, 2);
+            circle(drawing, new Point(x, y), 7, color);
             // putText(drawing,textView.getText().toString(),new Point(x-20 ,y-20),7,7,color);
 
         }
         return drawing;
     }
 
+    private Mat RGBtoBINARY(Bitmap mBitmap) {
+        Mat mat = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC1);
+        Utils.bitmapToMat(mBitmap, mat);
+        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGBA, 4);
+        Bitmap bitmap = Bitmap.createBitmap(mBitmap);
+        Utils.matToBitmap(mat, bitmap);
+        Mat result = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC3);
+        Utils.bitmapToMat(bitmap, result);
+        for (int x = 0; x < result.height(); ++x) {
+            for (int y = 0; y < result.width(); ++y) {
+                // get one pixel color
+                int red = (int) result.get(x, y)[0];
+                int green = (int) result.get(x, y)[1];
+                int blue = (int) result.get(x, y)[2];
+
+                if (red != 0 || green != 0 || blue != 0) {
+                    result.put(x, y, new double[]{255.0, 255.0, 255.0, 0});
+                } else {
+                    result.put(x, y, new double[]{0, 0, 0, 0});
+                    //Log.i("RGBtoBINARY", "R: "+red+" G: "+green+" B: "+blue);
+                }
+            }
+        }
+        return result;
+    }
+
+    private int[][] Mat22D(Mat mat) {
+        int[][] result = new int[mat.rows()][mat.cols()];
+        for (int i = 0; i < mat.rows(); i++) {
+            for (int j = 0; j < mat.cols(); j++) {
+                if ((int) mat.get(i, j)[0] == 255 && (int) mat.get(i, j)[1] == 255 && (int) mat.get(i, j)[2] == 255) {
+                    result[i][j] = 1;
+                } else result[i][j] = 0;
+            }
+        }
+        return result;
+    }
+
+    private Mat TwoD2Mat(int[][] source) {
+        Mat mat = new Mat(source.length, source[0].length, CV_8UC1);
+        for (int i = 0; i < source.length; i++) {
+            for (int j = 0; j < source[i].length; j++) {
+                if (source[i][j] == 1) {
+                    mat.put(i, j, new double[]{255, 255, 255});
+                } else mat.put(i, j, new double[]{0, 0, 0});
+            }
+        }
+        Log.i("TwoD2Mat", "Finished");
+        return mat;
+    }
+
+    public void LOGPOINTS(List<android.graphics.Point> points) {
+
+        Log.i("LOGPOINTS", "" + points.size());
+
+        for (android.graphics.Point point : points) {
+            Log.i("LOGPOINTS", "X: " + point.x + " Y: " + point.y);
+        }
+    }
+
+    public List<android.graphics.Point> getTotalNonZero(Mat mat) {
+        Log.i("getTotalNonZero", "X: " + mat.width() + " Y: " + mat.height());
+        List<android.graphics.Point> points = new ArrayList<>();
+        for (int x = 1; x < mat.height(); x++)
+            for (int y = 1; y < mat.width(); y++) {
+                int pixelvalue = (int) mat.get(x, y)[0];
+                if (pixelvalue != 0) {
+                    points.add(new android.graphics.Point(x, y));
+                }
+            }
+        return points;
+    }
+
+    public Bitmap toBinary(Bitmap bmpOriginal) {
+        int width, height, threshold;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+        threshold = 8;
+        Bitmap bmpBinary = Bitmap.createBitmap(bmpOriginal);
+
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                // get one pixel color
+                int pixel = bmpOriginal.getPixel(x, y);
+                int red = Color.red(pixel);
+                int green = Color.green(pixel);
+                int blue = Color.blue(pixel);
+                if (red != 0 || green != 0 || blue != 0) {
+                    bmpBinary.setPixel(x, y, Color.WHITE);
+                } else {
+                    bmpBinary.setPixel(x, y, Color.BLACK);
+
+                }
+
+            }
+        }
+        return bmpBinary;
+    }
+
+    public void retry(View view) {
+        dv.reset();
+    }
+
+    private String[] GenerateName_Characters(String name) {
+        String[] Name_Characters = name.split("");
+        return Name_Characters;
+    }
+
+    public void showDialogwithMat(Mat matObject) {
+        Bitmap bitmap = Bitmap.createBitmap(matObject.width(), matObject.height(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(matObject, bitmap);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        final AlertDialog dialog = builder.create();
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
+        ImageView imageView = (ImageView) dialogLayout.findViewById(R.id.picsample);
+        imageView.setImageBitmap(bitmap);
+        dialog.setView(dialogLayout);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////// AI ///////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    public void SaveBitmap() {
+        String filename = "typo";
+        Bitmap mBitmap = null;
+        mBitmap = Bitmap.createBitmap(dv.getWidth(), dv.getHeight(), Bitmap.Config.RGB_565);
+        ;
+        String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+        OutputStream outStream = null;
+        File file = new File(filename + ".png");
+        if (file.exists()) {
+            file.delete();
+            file = new File(extStorageDirectory, filename + ".png");
+            Log.e("file exist", "" + file + ",Bitmap= " + filename);
+        }
+        try {
+            // make a new bitmap from your file
+            Bitmap bitmap = BitmapFactory.decodeFile(file.getName());
+
+            outStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+            outStream.flush();
+            outStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean prepareDirectory() {
+        try {
+            if (makedirs()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Could not initiate File System.. Is Sdcard mounted properly?", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////// Photo Help ///////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    private String getTodaysDate() {
+
+        final Calendar c = Calendar.getInstance();
+        int todaysDate = (c.get(Calendar.YEAR) * 10000) +
+                ((c.get(Calendar.MONTH) + 1) * 100) +
+                (c.get(Calendar.DAY_OF_MONTH));
+        Log.w("DATE:", String.valueOf(todaysDate));
+        return (String.valueOf(todaysDate));
+
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////// Utility ///////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    private String getCurrentTime() {
+
+        final Calendar c = Calendar.getInstance();
+        int currentTime = (c.get(Calendar.HOUR_OF_DAY) * 10000) +
+                (c.get(Calendar.MINUTE) * 100) +
+                (c.get(Calendar.SECOND));
+        Log.w("TIME:", String.valueOf(currentTime));
+        return (String.valueOf(currentTime));
+
+    }
+
+    private boolean makedirs() {
+        File tempdir = new File(tempDir);
+        if (!tempdir.exists())
+            tempdir.mkdirs();
+
+        if (tempdir.isDirectory()) {
+            File[] files = tempdir.listFiles();
+            for (File file : files) {
+                if (!file.delete()) {
+                    System.out.println("Failed to delete " + file);
+                }
+            }
+        }
+        return (tempdir.isDirectory());
+    }
+
+    private void sortfolders(List<String> arr_items) {
+
+        // give path of folders and sort the inside folders by their names
+        Locale lithuanian = new Locale("ar");
+        Collator lithuanianCollator = Collator.getInstance(lithuanian);
+        Collections.sort(arr_items, lithuanianCollator);
+    }
+
+    private ArrayList<String> GenerateDummy() {
+        ArrayList<String> dummy = new ArrayList<>();
+        dummy.add("من");
+        dummy.add("في");
+        dummy.add("عن");
+        dummy.add("على");
+        dummy.add("اب");
+        dummy.add("ابن");
+        dummy.add("عم");
+        dummy.add("خال");
+        dummy.add("خالة");
+        dummy.add("جد");
+        dummy.add("ام");
+        dummy.add("صديق");
+        dummy.add("صبر");
+        dummy.add("سور");
+        dummy.add("صبور");
+        dummy.add("فوق");
+        dummy.add("أسبوع");
+        dummy.add("سنة");
+        dummy.add("اليوم");
+        dummy.add("أمس");
+        dummy.add("ثانية");
+        dummy.add("ساعة");
+        dummy.add("دقيقة");
+        dummy.add("قام");
+        dummy.add("ذهب");
+        dummy.add("يضحك");
+        dummy.add("جيد");
+        dummy.add("قبيح");
+        dummy.add("صعب");
+        dummy.add("سهل");
+        dummy.add("سييء");
+        dummy.add("مرحباً");
+        dummy.add("شكرا");
+        dummy.add("لا");
+        dummy.add("يناير");
+        dummy.add("قهوة");
+        dummy.add("خَرُوْف");
+        dummy.add("مبرمج");
+        dummy.add("خَرُوْف");
+        dummy.add("دهب");
+        dummy.add("نون");
+        dummy.add("برد");
+        dummy.add("قلب");
+        dummy.add("براد");
+        dummy.add("يرد");
+        dummy.add("حب");
+        dummy.add("حرف");
+        dummy.add("حرق");
+        dummy.add("لو");
+        dummy.add("ولد");
+        dummy.add("لبن");
+        dummy.add("برق");
+        dummy.add("جاموسة");
+        dummy.add("سوس");
+        dummy.add("من");
+        dummy.add("في");
+        dummy.add("عن");
+        dummy.add("على");
+        dummy.add("اب");
+        dummy.add("ابن");
+        dummy.add("عم");
+        dummy.add("خال");
+        dummy.add("خالة");
+        dummy.add("جد");
+        dummy.add("ام");
+        dummy.add("صديق");
+        dummy.add("صبر");
+        dummy.add("سور");
+        dummy.add("صبور");
+        dummy.add("فوق");
+        dummy.add("أسبوع");
+        dummy.add("سنة");
+        dummy.add("اليوم");
+        dummy.add("أمس");
+        dummy.add("ثانية");
+        dummy.add("ساعة");
+        dummy.add("دقيقة");
+        dummy.add("قام");
+        dummy.add("ذهب");
+        dummy.add("يضحك");
+        dummy.add("جيد");
+        dummy.add("قبيح");
+        dummy.add("صعب");
+        dummy.add("سهل");
+        dummy.add("سييء");
+        dummy.add("مرحباً");
+        dummy.add("شكرا");
+        dummy.add("لا");
+        dummy.add("يناير");
+        dummy.add("قهوة");
+        dummy.add("خَرُوْف");
+        dummy.add("مبرمج");
+        dummy.add("خَرُوْف");
+        dummy.add("دهب");
+        dummy.add("نون");
+        dummy.add("برد");
+        dummy.add("قلب");
+        dummy.add("براد");
+        dummy.add("يرد");
+        dummy.add("حب");
+        dummy.add("حرف");
+        dummy.add("حرق");
+        dummy.add("لو");
+        dummy.add("ولد");
+        dummy.add("لبن");
+        dummy.add("برق");
+        dummy.add("جاموسة");
+        dummy.add("سوس");
+        return dummy;
+    }
+
+    private void LOGSTRINGARRAY(ArrayList<String> list) {
+        for (String s : list) {
+            Log.i("LOGSTRINGARRAY", s);
+        }
+    }
 
     static class ThinningService {
         /**
@@ -659,19 +1028,21 @@ public class MainActivity extends Activity {
 
     public class DrawingView extends View {
 
+        private static final float TOUCH_TOLERANCE = 4;
         public int width;
-        public  int height;
-        private Bitmap  mBitmap;
-        private Canvas  mCanvas;
-        private Path mPath;
-        private Paint   mBitmapPaint;
+        public int height;
         Context context;
+        private Bitmap mBitmap;
+        private Canvas mCanvas;
+        private Path mPath;
+        private Paint mBitmapPaint;
         private Paint circlePaint;
         private Path circlePath;
+        private float mX, mY;
 
         public DrawingView(Context c) {
             super(c);
-            context=c;
+            context = c;
             mPath = new Path();
             mBitmapPaint = new Paint(Paint.DITHER_FLAG);
             circlePaint = new Paint();
@@ -690,22 +1061,21 @@ public class MainActivity extends Activity {
             mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
         }
-        public void reset(){
+
+        public void reset() {
             mBitmap.recycle();
             mBitmap = Bitmap.createBitmap(this.mBitmap.getWidth(), this.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
         }
+
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
 
-            canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
-            canvas.drawPath( mPath,  mPaint);
-            canvas.drawPath( circlePath,  circlePaint);
+            canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+            canvas.drawPath(mPath, mPaint);
+            canvas.drawPath(circlePath, circlePaint);
         }
-
-        private float mX, mY;
-        private static final float TOUCH_TOLERANCE = 4;
 
         private void touch_start(float x, float y) {
             mPath.reset();
@@ -718,7 +1088,7 @@ public class MainActivity extends Activity {
             float dx = Math.abs(x - mX);
             float dy = Math.abs(y - mY);
             if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-                mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+                mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
                 mX = x;
                 mY = y;
 
@@ -731,7 +1101,7 @@ public class MainActivity extends Activity {
             mPath.lineTo(mX, mY);
             circlePath.reset();
             // commit the path to our offscreen
-            mCanvas.drawPath(mPath,  mPaint);
+            mCanvas.drawPath(mPath, mPaint);
             // kill this so we don't double draw
             mPath.reset();
         }
@@ -764,37 +1134,14 @@ public class MainActivity extends Activity {
         }
     }
 
-
-    public class CenterLine extends AsyncTask<Bitmap,Void,Mat>{
+    public class CenterLine extends AsyncTask<Bitmap, Void, Mat> {
         @Override
         protected Mat doInBackground(Bitmap... params) {
-            Log.i("CenterLine","doInBackground");
-            Mat src,dest;
+            Log.i("CenterLine", "doInBackground");
+            Mat src, dest;
             src = RGBtoBINARY(params[0]);
-            int [][] Original = Mat22D(src);
-            ThinningService.doZhangSuenThinning(Original,false);
-             dest = TwoD2Mat(Original);
-            return dest;
-            //return TwoD2Mat(Thinning(RGBtoBINARY(params[0])));
-        }
-
-        @Override
-        protected void onPostExecute(Mat mat) {
-            Log.i("CenterLine","onPostExecute");
-
-            super.onPostExecute(mat);
-        }
-
-
-    }
-    public class CenterLineForOriginal extends AsyncTask<Bitmap,Void,Mat>{
-        @Override
-        protected Mat doInBackground(Bitmap... params) {
-            Log.i("CenterLineForOriginal","doInBackground");
-            Mat src,dest;
-            src = RGBtoBINARY(params[0]);
-            int [][] Original = Mat22D(src);
-            ThinningService.doZhangSuenThinning(Original,false);
+            int[][] Original = Mat22D(src);
+            ThinningService.doZhangSuenThinning(Original, false);
             dest = TwoD2Mat(Original);
             return dest;
             //return TwoD2Mat(Thinning(RGBtoBINARY(params[0])));
@@ -802,328 +1149,60 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(Mat mat) {
-            Log.i("CenterLineForOriginal","onPostExecute");
+            Log.i("CenterLine", "onPostExecute");
+
             super.onPostExecute(mat);
         }
 
 
     }
 
-
-    private Mat RGBtoBINARY(Bitmap mBitmap) {
-        Mat mat = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC1);
-        Utils.bitmapToMat(mBitmap, mat);
-        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGBA, 4);
-        Bitmap bitmap = Bitmap.createBitmap(mBitmap);
-        Utils.matToBitmap(mat, bitmap);
-        Mat result = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CV_8UC3);
-        Utils.bitmapToMat(bitmap, result);
-        for (int x = 0; x < result.height(); ++x) {
-            for (int y = 0; y < result.width(); ++y) {
-                // get one pixel color
-                int red = (int) result.get(x, y)[0];
-                int green = (int) result.get(x, y)[1];
-                int blue = (int) result.get(x, y)[2];
-
-                if (red != 0 || green != 0 || blue != 0) {
-                    result.put(x, y,new double[]{255.0,255.0,255.0,0});
-                } else{
-                    result.put(x, y, new double[]{0,0,0,0});
-                    //Log.i("RGBtoBINARY", "R: "+red+" G: "+green+" B: "+blue);
-                }
-            }
-        }
-        return result;
-    }
-
-    private int [][] Mat22D(Mat mat){
-        int [][] result = new int[mat.rows()][mat.cols()];
-        for(int i=0;i<mat.rows();i++){
-            for(int j=0;j<mat.cols();j++){
-                if((int) mat.get(i,j)[0]==255 &&(int) mat.get(i,j)[1]==255 &&(int) mat.get(i,j)[2]==255){
-                    result[i][j] = 1;
-                }else  result[i][j] = 0;
-            }
-        }
-        return result;
-    }
-
-    private Mat TwoD2Mat(int [][] source){
-        Mat mat = new Mat(source.length,source[0].length,CV_8UC1);
-        for(int i=0;i<source.length;i++){
-            for(int j=0;j<source[i].length;j++){
-                if(source[i][j]==1){
-                    mat.put(i,j,new double[]{255,255,255});
-                }else mat.put(i,j,new double[]{0,0,0});
-            }
-        }
-        Log.i("TwoD2Mat","Finished");
-        return mat;
-    }
-
-    public void LOGPOINTS(List<android.graphics.Point>points){
-
-        Log.i("LOGPOINTS",""+points.size());
-
-        for(android.graphics.Point point : points){
-            Log.i("LOGPOINTS","X: "+point.x+" Y: "+point.y);
-        }
-    }
-
-    public List<android.graphics.Point> getTotalNonZero(Mat mat){
-        Log.i("getTotalNonZero","X: "+mat.width()+" Y: "+mat.height());
-        List<android.graphics.Point>points = new ArrayList<>();
-        for(int x = 1; x < mat.height(); x++)
-            for(int y = 1; y < mat.width(); y++) {
-                int pixelvalue = (int) mat.get(x,y)[0];
-                if(pixelvalue != 0) {
-                    points.add(new android.graphics.Point(x,y));
-                }
-            }
-        return points;
-    }
-
-    public Bitmap toBinary(Bitmap bmpOriginal) {
-        int width, height, threshold;
-        height = bmpOriginal.getHeight();
-        width = bmpOriginal.getWidth();
-        threshold = 8;
-        Bitmap bmpBinary = Bitmap.createBitmap(bmpOriginal);
-
-        for(int x = 0; x < width; ++x) {
-            for(int y = 0; y < height; ++y) {
-                // get one pixel color
-                int pixel = bmpOriginal.getPixel(x, y);
-                int red = Color.red(pixel);
-                int green = Color.green(pixel);
-                int blue = Color.blue(pixel);
-                if(red!=0||green!=0||blue!=0){
-                    bmpBinary.setPixel(x, y, Color.WHITE);
-                } else{
-                    bmpBinary.setPixel(x, y, Color.BLACK);
-
-                }
-
-            }
-        }
-        return bmpBinary;
-    }
-    public void retry(View view){
-        dv.reset();
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////voice offer ///////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////
-
-    // play sounds are created by editor
-
-
-
-
-    /////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////voice rec ///////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////
-
-        // make it offline
-    public void initialize_VoiceRec() throws MalformedURLException {
-        prepareMic();
-//        String filepath = "/storage/emulated/0/CCHAT/dialog.config.xml";
-//        Dialog dialog = new Dialog(new File(filepath).toURI().toURL());
-//        dialog.append();
-    }
-    public void prepareMic(){
-        Button buttonStart, buttonStop, buttonPlayLastRecordAudio,
-                buttonStopPlayingRecording ;
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        final AlertDialog dialog = builder.create();
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogLayout = inflater.inflate(R.layout.checkspelling, null);
-
-        buttonStart = (Button) dialogLayout.findViewById(R.id.button);
-        buttonStop = (Button) dialogLayout.findViewById(R.id.button2);
-        buttonPlayLastRecordAudio = (Button) dialogLayout.findViewById(R.id.button3);
-        buttonStopPlayingRecording = (Button)dialogLayout.findViewById(R.id.button4);
-
-        buttonStop.setEnabled(false);
-        buttonPlayLastRecordAudio.setEnabled(false);
-        buttonStopPlayingRecording.setEnabled(false);
-        dialog.setView(dialogLayout);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
-        dialog.show();
-
-    buttonStart.setOnClickListener(new View.OnClickListener() {
+    public class CenterLineForOriginal extends AsyncTask<Bitmap, Void, Mat> {
         @Override
-        public void onClick(View view) {
-                MediaRecorderReady();
-                try {
-                    mediaRecorder.prepare();
-                    mediaRecorder.start();
-//                                      String filepath = "/storage/emulated/0/CCHAT/dialog.config.xml";
-//                                      Dialog voiceDialog = new Dialog(new File(filepath).toURI().toURL());
-//                                     voiceDialog.append();
-                } catch (IllegalStateException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-                buttonStart.setEnabled(false);
-                buttonStop.setEnabled(true);
-
-                Toast.makeText(MainActivity.this, "Recording started",
-                        Toast.LENGTH_LONG).show();
+        protected Mat doInBackground(Bitmap... params) {
+            Log.i("CenterLineForOriginal", "doInBackground");
+            Mat src, dest;
+            src = RGBtoBINARY(params[0]);
+            int[][] Original = Mat22D(src);
+            ThinningService.doZhangSuenThinning(Original, false);
+            dest = TwoD2Mat(Original);
+            return dest;
+            //return TwoD2Mat(Thinning(RGBtoBINARY(params[0])));
         }
-    });
 
-    buttonStop.setOnClickListener(new View.OnClickListener() {
         @Override
-        public void onClick(View view) {
-            mediaRecorder.stop();
-            buttonStop.setEnabled(false);
-            buttonPlayLastRecordAudio.setEnabled(true);
-            buttonStart.setEnabled(true);
-            buttonStopPlayingRecording.setEnabled(false);
-
-            Toast.makeText(MainActivity.this, "Recording Completed",
-                    Toast.LENGTH_LONG).show();
+        protected void onPostExecute(Mat mat) {
+            Log.i("CenterLineForOriginal", "onPostExecute");
+            super.onPostExecute(mat);
         }
-    });
 
-    buttonPlayLastRecordAudio.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) throws IllegalArgumentException,
-                SecurityException, IllegalStateException {
-
-            buttonStop.setEnabled(false);
-            buttonStart.setEnabled(false);
-            buttonStopPlayingRecording.setEnabled(true);
-
-            mediaPlayer = new MediaPlayer();
-            try {
-                mediaPlayer.setDataSource(AudioSavePathInDevice);
-                mediaPlayer.prepare();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            mediaPlayer.start();
-            Toast.makeText(MainActivity.this, "Recording Playing",
-                    Toast.LENGTH_LONG).show();
-        }
-    });
-
-    buttonStopPlayingRecording.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            buttonStop.setEnabled(false);
-            buttonStart.setEnabled(true);
-            buttonStopPlayingRecording.setEnabled(false);
-            buttonPlayLastRecordAudio.setEnabled(true);
-
-            if(mediaPlayer != null){
-                mediaPlayer.stop();
-                mediaPlayer.release();
-                MediaRecorderReady();
-            }
-        }
-    });
-
-}
-
-    public void MediaRecorderReady(){
-        mediaRecorder=new MediaRecorder();
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
-        mediaRecorder.setOutputFile(AudioSavePathInDevice);
-    }
-
-    public String CreateRandomAudioFileName(int string){
-        StringBuilder stringBuilder = new StringBuilder( string );
-        int i = 0 ;
-        while(i < string ) {
-            stringBuilder.append(RandomAudioFileName.
-                    charAt(random.nextInt(RandomAudioFileName.length())));
-
-            i++ ;
-        }
-        return stringBuilder.toString();
-    }
-
-        public void checkIfSpeechRec_resultsContainsTheWord(String word,ArrayList<String> SpeechRec_results){
-        if(SpeechRec_results.size()>0){
-            for(String i:SpeechRec_results){
-                if(i==word){
-                    Toast.makeText(this,"Well Done!",Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Log.i("SpeechResults",i);
-            }
-
-        }
-        Toast.makeText(this,"Failed",Toast.LENGTH_SHORT).show();
 
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////// Face Rec ///////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////
+    private class TreeGenerator extends AsyncTask<String, Void, ArrayList<String>> {
 
-    // wanna fire only if new levels , first open and never close till rec. The owner..
-
-    public void faceRec(){
-     //   startActivity(new Intent(MainActivity.this,FdActivity.class));
-
-    }
-
-
-
-
-    /////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////// AI ///////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////
-
-    private String[] GenerateName_Characters(String name){
-        String[] Name_Characters = name.split("");
-        return Name_Characters;
-    }
-
-    private class TreeGenerator extends AsyncTask<String,Void,ArrayList<String> >{
-
-       public int NumberOfWordsToBeTeached;
+        public int NumberOfWordsToBeTeached;
 
         public TreeGenerator(int numberOfWordsToBeTeached) {
             NumberOfWordsToBeTeached = numberOfWordsToBeTeached;
         }
 
-        private ArrayList<String> GenerateWordsTree(String Name, int number_of_words){
-            int levels=0;
-            int added=0;
+        private ArrayList<String> GenerateWordsTree(String Name, int number_of_words) {
+            int levels = 0;
+            int added = 0;
 
             ArrayList<String> tree = new ArrayList<>();
             ArrayList<String> AvailableWords = GenerateDummy();
             sortfolders(AvailableWords);
             tree.add(Name);
             added++;
-            while (number_of_words>tree.size()){
-                for(int i=0;i<added;i++){
-                    added=0;
-                    String []Word_characters =GenerateName_Characters(tree.get((i)+levels));
-                    for(String CH:Word_characters){
-                        for(String searchword:AvailableWords){
-                            if(searchword.substring(0,1).equals(CH)){
+            while (number_of_words > tree.size()) {
+                for (int i = 0; i < added; i++) {
+                    added = 0;
+                    String[] Word_characters = GenerateName_Characters(tree.get((i) + levels));
+                    for (String CH : Word_characters) {
+                        for (String searchword : AvailableWords) {
+                            if (searchword.substring(0, 1).equals(CH)) {
                                 tree.add(searchword);
                                 added++;
                                 AvailableWords.remove(searchword);
@@ -1139,283 +1218,12 @@ public class MainActivity extends Activity {
 
         @Override
         protected ArrayList<String> doInBackground(String... params) {
-            return GenerateWordsTree(params[0],NumberOfWordsToBeTeached);
+            return GenerateWordsTree(params[0], NumberOfWordsToBeTeached);
         }
 
         @Override
         protected void onPostExecute(ArrayList<String> strings) {
             super.onPostExecute(strings);
-        }
-    }
-
-
-
-
-
-
-
-
-
-    /////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////// Photo Help ///////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////
-
-    public void showDialogwithMat(Mat matObject){
-        Bitmap bitmap =Bitmap.createBitmap (matObject.width(), matObject.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(matObject,bitmap);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        final AlertDialog dialog = builder.create();
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
-        ImageView imageView = (ImageView) dialogLayout.findViewById(R.id.picsample);
-        imageView.setImageBitmap(bitmap);
-        dialog.setView(dialogLayout);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
-        dialog.show();
-    }
-
-
-    /////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////// Utility ///////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////
-
-    public static Bitmap getBitmapFromView(View v) {
-        Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(b);
-        v.draw(c);
-        return b;
-    }
-
-
-    public void SaveBitmap(){
-        String filename ="typo";
-        Bitmap mBitmap =null;
-        mBitmap =  Bitmap.createBitmap (dv.getWidth(), dv.getHeight(), Bitmap.Config.RGB_565);;
-        String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-        OutputStream outStream = null;
-        File file = new File(filename + ".png");
-        if (file.exists()) {
-            file.delete();
-            file = new File(extStorageDirectory, filename + ".png");
-            Log.e("file exist", "" + file + ",Bitmap= " + filename);
-        }
-        try {
-            // make a new bitmap from your file
-            Bitmap bitmap = BitmapFactory.decodeFile(file.getName());
-
-            outStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
-            outStream.flush();
-            outStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean prepareDirectory() {
-        try
-        {
-            if (makedirs())
-            {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-            Toast.makeText(this, "Could not initiate File System.. Is Sdcard mounted properly?", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-    }
-
-    private String getTodaysDate() {
-
-        final Calendar c = Calendar.getInstance();
-        int todaysDate =     (c.get(Calendar.YEAR) * 10000) +
-                ((c.get(Calendar.MONTH) + 1) * 100) +
-                (c.get(Calendar.DAY_OF_MONTH));
-        Log.w("DATE:",String.valueOf(todaysDate));
-        return(String.valueOf(todaysDate));
-
-    }
-
-    private String getCurrentTime() {
-
-        final Calendar c = Calendar.getInstance();
-        int currentTime =     (c.get(Calendar.HOUR_OF_DAY) * 10000) +
-                (c.get(Calendar.MINUTE) * 100) +
-                (c.get(Calendar.SECOND));
-        Log.w("TIME:",String.valueOf(currentTime));
-        return(String.valueOf(currentTime));
-
-    }
-
-    private boolean makedirs() {
-        File tempdir = new File(tempDir);
-        if (!tempdir.exists())
-            tempdir.mkdirs();
-
-        if (tempdir.isDirectory())
-        {
-            File[] files = tempdir.listFiles();
-            for (File file : files)
-            {
-                if (!file.delete())
-                {
-                    System.out.println("Failed to delete " + file);
-                }
-            }
-        }
-        return (tempdir.isDirectory());
-    }
-
-    public static Bitmap getBitmapFromAsset(Context context, String filePath) {
-        AssetManager assetManager = context.getAssets();
-
-        InputStream istr;
-        Bitmap bitmap = null;
-        try {
-            istr = assetManager.open(filePath);
-            bitmap = BitmapFactory.decodeStream(istr);
-        } catch (IOException e) {
-            // handle exception
-        }
-
-        return bitmap;
-    }
-
-   private void sortfolders(List <String>arr_items){
-
-       // give path of folders and sort the inside folders by their names
-       Locale lithuanian = new Locale("ar");
-       Collator lithuanianCollator = Collator.getInstance(lithuanian);
-       Collections.sort(arr_items,lithuanianCollator);
-   }
-
-    private ArrayList<String> GenerateDummy(){
-        ArrayList<String> dummy = new ArrayList<>();
-        dummy.add("من");
-        dummy.add("في");
-        dummy.add("عن");
-        dummy.add("على");
-        dummy.add("اب");
-        dummy.add("ابن");
-        dummy.add("عم");
-        dummy.add("خال");
-        dummy.add("خالة");
-        dummy.add("جد");
-        dummy.add("ام");
-        dummy.add("صديق");
-        dummy.add("صبر");
-        dummy.add("سور");
-        dummy.add("صبور");
-        dummy.add("فوق");
-        dummy.add("أسبوع");
-        dummy.add("سنة");
-        dummy.add("اليوم");
-        dummy.add("أمس");
-        dummy.add("ثانية");
-        dummy.add("ساعة");
-        dummy.add("دقيقة");
-        dummy.add("قام");
-        dummy.add("ذهب");
-        dummy.add("يضحك");
-        dummy.add("جيد");
-        dummy.add("قبيح");
-        dummy.add("صعب");
-        dummy.add("سهل");
-        dummy.add("سييء");
-        dummy.add("مرحباً");
-        dummy.add("شكرا");
-        dummy.add("لا");
-        dummy.add("يناير");
-        dummy.add("قهوة");
-        dummy.add("خَرُوْف");
-        dummy.add("مبرمج");
-        dummy.add("خَرُوْف");
-        dummy.add("دهب");
-        dummy.add("نون");
-        dummy.add("برد");
-        dummy.add("قلب");
-        dummy.add("براد");
-        dummy.add("يرد");
-        dummy.add("حب");
-        dummy.add("حرف");
-        dummy.add("حرق");
-        dummy.add("لو");
-        dummy.add("ولد");
-        dummy.add("لبن");
-        dummy.add("برق");
-        dummy.add("جاموسة");
-        dummy.add("سوس");
-        dummy.add("من");
-        dummy.add("في");
-        dummy.add("عن");
-        dummy.add("على");
-        dummy.add("اب");
-        dummy.add("ابن");
-        dummy.add("عم");
-        dummy.add("خال");
-        dummy.add("خالة");
-        dummy.add("جد");
-        dummy.add("ام");
-        dummy.add("صديق");
-        dummy.add("صبر");
-        dummy.add("سور");
-        dummy.add("صبور");
-        dummy.add("فوق");
-        dummy.add("أسبوع");
-        dummy.add("سنة");
-        dummy.add("اليوم");
-        dummy.add("أمس");
-        dummy.add("ثانية");
-        dummy.add("ساعة");
-        dummy.add("دقيقة");
-        dummy.add("قام");
-        dummy.add("ذهب");
-        dummy.add("يضحك");
-        dummy.add("جيد");
-        dummy.add("قبيح");
-        dummy.add("صعب");
-        dummy.add("سهل");
-        dummy.add("سييء");
-        dummy.add("مرحباً");
-        dummy.add("شكرا");
-        dummy.add("لا");
-        dummy.add("يناير");
-        dummy.add("قهوة");
-        dummy.add("خَرُوْف");
-        dummy.add("مبرمج");
-        dummy.add("خَرُوْف");
-        dummy.add("دهب");
-        dummy.add("نون");
-        dummy.add("برد");
-        dummy.add("قلب");
-        dummy.add("براد");
-        dummy.add("يرد");
-        dummy.add("حب");
-        dummy.add("حرف");
-        dummy.add("حرق");
-        dummy.add("لو");
-        dummy.add("ولد");
-        dummy.add("لبن");
-        dummy.add("برق");
-        dummy.add("جاموسة");
-        dummy.add("سوس");
-        return dummy;
-    }
-
-    private void LOGSTRINGARRAY(ArrayList<String>list){
-        for(String s:list){
-            Log.i("LOGSTRINGARRAY",s);
         }
     }
 }

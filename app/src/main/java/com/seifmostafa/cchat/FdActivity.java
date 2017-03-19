@@ -34,64 +34,49 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-//import java.io.FileNotFoundException;
-
 
 public class FdActivity extends Activity implements CvCameraViewListener2 {
 
+    public static final int JAVA_DETECTOR = 0;
+    public static final int NATIVE_DETECTOR = 1;
+    static final long MAXIMG = 20;
+    private static final String TAG = "FdActivity:Activity";
+    private static final Scalar FACE_RECT_COLOR = new Scalar(0, 255, 0, 255);
+    private static final int frontCam = 1;
+
+    static {
+        OpenCVLoader.initDebug();
+    }
+
     Mat imageMat;
-
-    private static final String    TAG                 = "FdActivity:Activity";
-    private static final Scalar    FACE_RECT_COLOR     = new Scalar(0, 255, 0, 255);
-    public static final int        JAVA_DETECTOR       = 0;
-    public static final int        NATIVE_DETECTOR     = 1;
-
-
     double xCenter = -1;
     double yCenter = -1;
-
-    private static final int frontCam =1;
-
-    private Mat                    mRgba;
-    private Mat                    mGray;
-    private File                   mCascadeFile;
-    private File                   mCascadeFileEye;
-    private CascadeClassifier mJavaDetector;
-    private CascadeClassifier      mJavaDetectorEye;
- //  private DetectionBasedTracker  mNativeDetector;
-
-    private int                    mDetectorType       = JAVA_DETECTOR;
-    private String[]               mDetectorName;
-
-    private float                  mRelativeFaceSize   = 0.2f;
-    private int                    mAbsoluteFaceSize   = 0;
-    private int mLikely=0;
-    
-
-    private Tutorial3View   mOpenCvCameraView;
     ToggleButton buttonSearch;
-
     PersonRecognizer fr;
-
-    
-    static final long MAXIMG = 20;
     ArrayList<Mat> alimgs = new ArrayList<Mat>();
-    int[] labels = new int[(int)MAXIMG];
-    int countImages=0;
-    
-	static {
-		OpenCVLoader.initDebug();            
-	}
-
+    int[] labels = new int[(int) MAXIMG];
+    //  private DetectionBasedTracker  mNativeDetector;
+    int countImages = 0;
+    private Mat mRgba;
+    private Mat mGray;
+    private File mCascadeFile;
+    private File mCascadeFileEye;
+    private CascadeClassifier mJavaDetector;
+    private CascadeClassifier mJavaDetectorEye;
+    private int mDetectorType = JAVA_DETECTOR;
+    private String[] mDetectorName;
+    private float mRelativeFaceSize = 0.2f;
+    private int mAbsoluteFaceSize = 0;
+    private int mLikely = 0;
+    private Tutorial3View mOpenCvCameraView;
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
 
-                case LoaderCallbackInterface.SUCCESS:
-                {
+                case LoaderCallbackInterface.SUCCESS: {
                     Log.i("OpenCV", "OpenCV loaded successfully");
-                    imageMat=new Mat();
+                    imageMat = new Mat();
                     try {
                         // load cascade file from application resources
                         InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
@@ -141,11 +126,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                } break;
-                default:
-                {
+                }
+                break;
+                default: {
                     super.onManagerConnected(status);
-                } break;
+                }
+                break;
             }
         }
     };
@@ -158,7 +144,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
-    /** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "called onCreate");
@@ -166,9 +154,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.face_detect_surface_view);
-        fr=new PersonRecognizer();
+        fr = new PersonRecognizer();
         String s = getResources().getString(R.string.SSearching);
-        Toast.makeText(getApplicationContext(),s, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
         fr.load();
 
         mOpenCvCameraView = (Tutorial3View) findViewById(R.id.tutorial3_activity_java_surface_view);
@@ -178,36 +166,32 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         mOpenCvCameraView.enableView();
         mOpenCvCameraView.setCamFront();
 
-        buttonSearch=(ToggleButton)findViewById(R.id.buttonBuscar);
+        buttonSearch = (ToggleButton) findViewById(R.id.buttonBuscar);
         buttonSearch.setOnClickListener(new View.OnClickListener() {
 
-     			public void onClick(View v) {
-     				if (buttonSearch.isChecked())
-     				{
-     					if (!fr.canPredict())
-     						{
-     						buttonSearch.setChecked(false);
-     			            Toast.makeText(getApplicationContext(), getResources().getString(R.string.SCanntoPredic), Toast.LENGTH_LONG).show();
-     			            return;
-     						}
-     				}
-     			}
-     		});
+            public void onClick(View v) {
+                if (buttonSearch.isChecked()) {
+                    if (!fr.canPredict()) {
+                        buttonSearch.setChecked(false);
+                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.SCanntoPredic), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                }
+            }
+        });
 
     }
 
 
-    
     @Override
-    public void onPause()
-    {
+    public void onPause() {
         super.onPause();
         if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();       
+            mOpenCvCameraView.disableView();
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d("OpenCV", "Internal OpenCV library not found. Using OpenCV Manager for initialization");
@@ -243,7 +227,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             if (Math.round(height * mRelativeFaceSize) > 0) {
                 mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
             }
-          //  mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
+            //  mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
         }
 
         MatOfRect faces = new MatOfRect();
@@ -252,48 +236,46 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             if (mJavaDetector != null)
                 mJavaDetector.detectMultiScale(mGray, faces, 1.1, 2, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
                         new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
-        }
-        else if (mDetectorType == NATIVE_DETECTOR) {
+        } else if (mDetectorType == NATIVE_DETECTOR) {
 //            if (mNativeDetector != null)
 //                mNativeDetector.detect(mGray, faces);
-        }
-        else {
+        } else {
             Log.e(TAG, "Detection method is not selected!");
         }
         Rect[] facesArray = faces.toArray();
-        	 if (facesArray.length>0) {
-                 Bitmap mBitmap;
-        	     Mat m=new Mat();
-        	  m=mGray.submat(facesArray[0]);
-        	  mBitmap = Bitmap.createBitmap(m.width(),m.height(), Bitmap.Config.ARGB_8888);
+        if (facesArray.length > 0) {
+            Bitmap mBitmap;
+            Mat m = new Mat();
+            m = mGray.submat(facesArray[0]);
+            mBitmap = Bitmap.createBitmap(m.width(), m.height(), Bitmap.Config.ARGB_8888);
 
-              Utils.matToBitmap(m, mBitmap);
-              Message msg = new Message();
-              int textTochange = 0;
-              msg.obj = textTochange;
-                 Log.i(TAG+"onCameraFrame",msg.toString());
+            Utils.matToBitmap(m, mBitmap);
+            Message msg = new Message();
+            int textTochange = 0;
+            msg.obj = textTochange;
+            Log.i(TAG + "onCameraFrame", msg.toString());
 
-              textTochange=fr.predict(m);
-                                                    Log.i("XPredict: ",""+textTochange);
-              mLikely=fr.getProb();
-                 Log.i("XPredict:(prob) ",""+mLikely);
+            textTochange = fr.predict(m);
+            Log.i("XPredict: ", "" + textTochange);
+            mLikely = fr.getProb();
+            Log.i("XPredict:(prob) ", "" + mLikely);
 
-                 if(mLikely >= 150){
-                     MainActivity.flag_new_level=false;
-                     startActivity(new Intent(FdActivity.this, MainActivity.class));
-                     finish();
-                 }
+            if (mLikely >= 150) {
+                MainActivity.flag_new_level = false;
+                startActivity(new Intent(FdActivity.this, MainActivity.class));
+                finish();
+            }
 
-                 msg = new Message();
-        	  msg.obj = textTochange;
-                 Log.i(TAG+"onCameraFrame",msg.toString());
+            msg = new Message();
+            msg.obj = textTochange;
+            Log.i(TAG + "onCameraFrame", msg.toString());
 
-          }
-        for (int i = 0; i < facesArray.length; i++){
-         //   rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(), FACE_RECT_COLOR, 3);
+        }
+        for (int i = 0; i < facesArray.length; i++) {
+            //   rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(), FACE_RECT_COLOR, 3);
 
             Imgproc.rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(),
-                FACE_RECT_COLOR, 3);
+                    FACE_RECT_COLOR, 3);
             xCenter = (facesArray[i].x + facesArray[i].width + facesArray[i].x) / 2;
             yCenter = (facesArray[i].y + facesArray[i].y + facesArray[i].height) / 2;
             Point center = new Point(xCenter, yCenter);
@@ -348,8 +330,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 //                mNativeDetector.stop();
 //            }
 //        }
-   }
-
+    }
 
 
 }
