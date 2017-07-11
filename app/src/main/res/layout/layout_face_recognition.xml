@@ -3,7 +3,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.seifmostafa.cchat.Tutorial3View
+    <com.seifmostafa.cchat.Camera3View
         android:id="@+id/tutorial3_activity_java_surface_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"

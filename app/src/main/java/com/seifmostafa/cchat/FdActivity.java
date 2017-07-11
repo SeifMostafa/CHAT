@@ -68,7 +68,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private float mRelativeFaceSize = 0.2f;
     private int mAbsoluteFaceSize = 0;
     private int mLikely = 0;
-    private Tutorial3View mOpenCvCameraView;
+    private Camera3View mOpenCvCameraView;
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -153,16 +153,16 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.face_detect_surface_view);
+        setContentView(R.layout.layout_face_recognition);
         fr = new PersonRecognizer();
         String s = getResources().getString(R.string.SSearching);
         Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
         fr.load();
 
-        mOpenCvCameraView = (Tutorial3View) findViewById(R.id.tutorial3_activity_java_surface_view);
+        mOpenCvCameraView = (Camera3View) findViewById(R.id.tutorial3_activity_java_surface_view);
         mOpenCvCameraView.setCvCameraViewListener(this);
         mOpenCvCameraView.enableFpsMeter();
-        mOpenCvCameraView.setCameraIndex(1);
+        mOpenCvCameraView.setCameraIndex(frontCam);
         mOpenCvCameraView.enableView();
         mOpenCvCameraView.setCamFront();
 
@@ -234,8 +234,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
         if (mDetectorType == JAVA_DETECTOR) {
             if (mJavaDetector != null)
-                mJavaDetector.detectMultiScale(mGray, faces, 1.1, 2, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
-                        new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
+                mJavaDetector.detectMultiScale(mGray, faces, 1.2, 3, 2,
+                        new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size(30,30));
         } else if (mDetectorType == NATIVE_DETECTOR) {
 //            if (mNativeDetector != null)
 //                mNativeDetector.detect(mGray, faces);

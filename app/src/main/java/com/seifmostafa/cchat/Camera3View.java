@@ -14,11 +14,11 @@ import org.opencv.android.JavaCameraView;
 import java.io.FileOutputStream;
 import java.util.List;
 
-public class Tutorial3View extends JavaCameraView {
+public class Camera3View extends JavaCameraView {
 
     private static final String TAG = "Sample::Tutorial3View";
 
-    public Tutorial3View(Context context, AttributeSet attrs) {
+    public Camera3View(Context context, AttributeSet attrs) {
         super(context, attrs);
 
     }
@@ -67,7 +67,7 @@ public class Tutorial3View extends JavaCameraView {
     public void setCamFront() {
         disconnectCamera();
         setCameraIndex(org.opencv.android.CameraBridgeViewBase.CAMERA_ID_FRONT);
-        connectCamera(getWidth(), getHeight());
+       connectCamera(getWidth(), getHeight());
     }
 
     public void setCamBack() {

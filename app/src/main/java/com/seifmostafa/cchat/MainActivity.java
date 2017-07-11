@@ -26,6 +26,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,6 +38,8 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.CvException;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
@@ -43,11 +48,15 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.objdetect.CascadeClassifier;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -56,7 +65,12 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Stack;
+import java.util.concurrent.ExecutionException;
 
+import static android.R.attr.height;
+import static android.R.attr.width;
+import static android.graphics.BitmapFactory.*;
 import static java.lang.Math.abs;
 import static org.opencv.core.CvType.CV_8UC1;
 import static org.opencv.core.CvType.CV_8UC3;
@@ -72,6 +86,7 @@ import static org.opencv.imgproc.Imgproc.moments;
 
 public class MainActivity extends Activity {
 
+    public Stack<String> Words;
     public static final int JAVA_DETECTOR = 0;
     private static final String TAG = "CCHAT::MainActivity";
     private static final int RESULT_SPEECH = 1;
@@ -85,7 +100,7 @@ public class MainActivity extends Activity {
     public int count = 1;
     public int TOLERANCE = 8;
     public int MAX_TOLERANCE = 200;
-    public String current = null;
+    public static String currentText = null;
     Mat Original;
     Mat imageMat;
     ArrayList<String> SpeechRec_results;
@@ -189,7 +204,7 @@ public class MainActivity extends Activity {
         Bitmap bitmap = null;
         try {
             istr = assetManager.open(filePath);
-            bitmap = BitmapFactory.decodeStream(istr);
+            bitmap = decodeStream(istr);
         } catch (IOException e) {
             // handle exception
         }
@@ -202,16 +217,18 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        tempDir = Environment.getExternalStorageDirectory() + "/" + "GetSignature" + "/";
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        File directory = cw.getDir("GetSignature", Context.MODE_PRIVATE);
-        prepareDirectory();
-        uniqueId = getTodaysDate() + "_" + getCurrentTime() + "_" + Math.random();
-        current = uniqueId + ".png";
-        mypath = new File(directory, current);
 
-        textViewPercentage = (TextView) findViewById(R.id.textView_percentage);
+//        tempDir = Environment.getExternalStorageDirectory() + "/" + "GetSignature" + "/";
+//        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+//        File directory = cw.getDir("GetSignature", Context.MODE_PRIVATE);
+//        prepareDirectory();
+//        uniqueId = getTodaysDate() + "_" + getCurrentTime() + "_" + Math.random();
+//        currentText = uniqueId + ".png";
+//        mypath = new File(directory, currentText);
+
+       /* textViewPercentage = (TextView) findViewById(R.id.textView_percentage);
         textView = (CustTextView) findViewById(R.id.textView_text);
+        currentText = (String) textView.getText();
 
         frameLayout = (FrameLayout) findViewById(R.id.overtext);
 
@@ -226,11 +243,27 @@ public class MainActivity extends Activity {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(28);
         frameLayout.addView(dv);
-
-        if (flag_new_level) {
-           faceRec();
+        Words = new Stack<>();
+        try {
+            Words = new TreeGenerator(10).execute("سيف").get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
+        if (flag_new_level) {
+          faceRec();
+        }
+        */
 
+
+    /* ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        Mat mat = RGBtoBINARY(getBitmapFromAsset(this,"bear.jpg"));
+        imageView.setImageBitmap(getBitmapFromMat(mat));*/ // or can use Utils.matToBitmap(m, mBitmap);
+
+
+
+    }
+    public void nextword(View view){
+        textView.setText(Words.pop());
     }
 
     @Override
@@ -253,9 +286,17 @@ public class MainActivity extends Activity {
             Log.d("OpenCV", "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+//        try{
+//            Original = new CenterLineForOriginal().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, getBitmapFromView(textView)).get();
+//        }catch (Exception e){
+//            Log.e("onResume:checkfill","Original: "+e.toString());
+//        }
+
     }
 
     public void checkfill(View view) {
+        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+        view.startAnimation(shake);
         Bitmap mBitmap = null;
         mBitmap = Bitmap.createBitmap(dv.getWidth(), dv.getHeight(), Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(mBitmap);
@@ -268,11 +309,10 @@ public class MainActivity extends Activity {
             textViewPercentage.setText("" + Math.floor(FinalPercentage + '%'));
             textViewPercentage.setVisibility(View.VISIBLE);
             Log.i("FinalPercentage", "" + FinalPercentage);
-            //MatchWritten_(Original,Drawed);
-
         } catch (Exception e) {
             Log.v("checkfill", e.toString());
         }
+
     }
 
     private void invisiblepercentage() {
@@ -285,6 +325,8 @@ public class MainActivity extends Activity {
     }
 
     public void voicerec(View view) {
+        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+        view.startAnimation(shake);
 //        Intent voicerecogize = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 //        voicerecogize.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
 //        voicerecogize.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -297,16 +339,15 @@ public class MainActivity extends Activity {
     }
 
     public void voiceoffer(View view) {
+        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+        view.startAnimation(shake);
+
         final MediaPlayer mp = new MediaPlayer();
         if (mp.isPlaying()) {
             mp.stop();
         }
-
         try {
-            mp.reset();
-            AssetFileDescriptor afd;
-            afd = getAssets().openFd("swan_lake.mp3");
-            mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            mp.setDataSource("/storage/emulated/0/CCHAT/helpVoice/ورد.wav");
             mp.prepare();
             mp.start();
         } catch (IllegalStateException e) {
@@ -329,6 +370,9 @@ public class MainActivity extends Activity {
     /////////////////////////////////////////////////////////////////////////////////////////
 
     public void helpbypic(View view) {
+        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+        view.startAnimation(shake);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
             @Override
@@ -339,9 +383,12 @@ public class MainActivity extends Activity {
         LayoutInflater inflater = getLayoutInflater();
         View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
         ImageView imageView = (ImageView) dialogLayout.findViewById(R.id.picsample);
-        Bitmap icon = BitmapFactory.decodeResource(MainActivity.this.getResources(),
-                R.drawable.small);
-        imageView.setImageBitmap(icon);
+        File imgFile = new  File("/storage/emulated/0/CCHAT/helpPhoto/ورد.jpg");
+        if(imgFile.exists()){
+
+            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            imageView.setImageBitmap(myBitmap);
+        }
         dialog.setView(dialogLayout);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
@@ -391,7 +438,6 @@ public class MainActivity extends Activity {
 
     public void faceRec() {
          startActivity(new Intent(MainActivity.this,FdActivity.class));
-
     }
 
     public double MatchWritten(Mat original, Mat written, int tolerance) {
@@ -456,7 +502,9 @@ public class MainActivity extends Activity {
                 dv.reset();
             } else {
                 // test toast display arabic
+               // flag_new_level=false;
                 Toast.makeText(MainActivity.this, "Thanks", Toast.LENGTH_LONG).show();
+                textView.setText("واو");
             }
         } catch (Exception e) {
             Log.i("checkTypo", e.toString());
@@ -473,7 +521,7 @@ public class MainActivity extends Activity {
             mFileOutStream.close();
             String url = MediaStore.Images.Media.insertImage(getContentResolver(), mBitmap, "title", null);
             Log.v("log_tag", "url: " + url);
-            Log.v("log_tag", "url: " + current);
+            Log.v("log_tag", "url: " + currentText);
             //Log.v("log_tag","url:REAL " + mypath);
             // In case you want to delete the file
             boolean deleted = mypath.delete();
@@ -524,10 +572,19 @@ public class MainActivity extends Activity {
             return null;
         }
     }
+    private Bitmap getBitmapFromMat(Mat mat){
+        Bitmap bmp = null;
+        Mat tmp = new Mat (mat.cols(), mat.rows(), CvType.CV_8U, new Scalar(4));
+        try {
+            Imgproc.cvtColor(mat, tmp, Imgproc.COLOR_GRAY2RGBA, 4);
+            bmp = Bitmap.createBitmap(tmp.cols(), tmp.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(tmp, bmp);
+        }
+        catch (CvException e){Log.d("Exception",e.getMessage());}
+        return bmp;
+    }
 
     public Mat DrawCenterPoint(Mat src) {
-
-
         int thresh = 100;
         int max_thresh = 255;
         Scalar color = new Scalar(255, 255, 255);
@@ -652,6 +709,12 @@ public class MainActivity extends Activity {
     }
 
     public void retry(View view) {
+        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+        view.startAnimation(shake);
+
+//        textView.animate();
+//        String s = "سيف";
+//        textView.setText(s);
         dv.reset();
     }
 
@@ -690,7 +753,7 @@ public class MainActivity extends Activity {
         String filename = "typo";
         Bitmap mBitmap = null;
         mBitmap = Bitmap.createBitmap(dv.getWidth(), dv.getHeight(), Bitmap.Config.RGB_565);
-        ;
+
         String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
         OutputStream outStream = null;
         File file = new File(filename + ".png");
@@ -701,7 +764,7 @@ public class MainActivity extends Activity {
         }
         try {
             // make a new bitmap from your file
-            Bitmap bitmap = BitmapFactory.decodeFile(file.getName());
+            Bitmap bitmap = decodeFile(file.getName());
 
             outStream = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
@@ -782,8 +845,8 @@ public class MainActivity extends Activity {
         Collections.sort(arr_items, lithuanianCollator);
     }
 
-    private ArrayList<String> GenerateDummy() {
-        ArrayList<String> dummy = new ArrayList<>();
+    private Stack<String> GenerateDummy() {
+        Stack<String> dummy = new Stack<>();
         dummy.add("من");
         dummy.add("في");
         dummy.add("عن");
@@ -1156,7 +1219,6 @@ public class MainActivity extends Activity {
 
 
     }
-
     public class CenterLineForOriginal extends AsyncTask<Bitmap, Void, Mat> {
         @Override
         protected Mat doInBackground(Bitmap... params) {
@@ -1178,8 +1240,7 @@ public class MainActivity extends Activity {
 
 
     }
-
-    private class TreeGenerator extends AsyncTask<String, Void, ArrayList<String>> {
+    private class TreeGenerator extends AsyncTask<String, Void, Stack<String>> {
 
         public int NumberOfWordsToBeTeached;
 
@@ -1187,12 +1248,12 @@ public class MainActivity extends Activity {
             NumberOfWordsToBeTeached = numberOfWordsToBeTeached;
         }
 
-        private ArrayList<String> GenerateWordsTree(String Name, int number_of_words) {
+        private Stack<String> GenerateWordsTree(String Name, int number_of_words) {
             int levels = 0;
             int added = 0;
 
-            ArrayList<String> tree = new ArrayList<>();
-            ArrayList<String> AvailableWords = GenerateDummy();
+            Stack<String> tree = new Stack<>();
+            Stack<String> AvailableWords = GenerateDummy();
             sortfolders(AvailableWords);
             tree.add(Name);
             added++;
@@ -1217,13 +1278,54 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        protected ArrayList<String> doInBackground(String... params) {
+        protected Stack<String> doInBackground(String... params) {
             return GenerateWordsTree(params[0], NumberOfWordsToBeTeached);
         }
 
         @Override
-        protected void onPostExecute(ArrayList<String> strings) {
+        protected void onPostExecute(Stack<String> strings) {
             super.onPostExecute(strings);
         }
     }
+
+    private void writeToFile(String data,Context context) {
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("config.txt", Context.MODE_PRIVATE));
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+    private String readFromFile(Context context) {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = context.openFileInput("config.txt");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        return ret;
+    }
+
 }

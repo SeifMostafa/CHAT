@@ -9,31 +9,35 @@
     tools:context=".VrActivity">
 
     <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
+        android:id="@+id/textView_req"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:textSize="@android:dimen/app_icon_size"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
-        android:text="Android PocketSphinx Implementation \n\nList of words:\n\لصق\nتحرير\nسيف"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/rec_state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
+        android:layout_below="@+id/textView_req"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
+
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#00FF00" />
+        android:textColor="#00FF00"
+        android:textSize="@android:dimen/app_icon_size"/>
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/rec_result"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView2"
+        android:layout_below="@+id/rec_state"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="84dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -43,13 +47,14 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="234dp"
         android:layout_marginTop="174dp"
-        android:text="Button"
+        android:background="@drawable/rec"
         android:visibility="visible" />
 
 

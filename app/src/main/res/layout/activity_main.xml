@@ -11,109 +11,126 @@
     tools:context="com.seifmostafa.cchat.MainActivity">
 
 
-    <TextView
-        android:id="@+id/textView_percentage"
+    <!--<TextView-->
+        <!--android:id="@+id/textView_percentage"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/button_checkmine"-->
+        <!--android:text="TextView"-->
+        <!--android:textAlignment="center"-->
+        <!--android:textColor="@color/colorPrimaryDark"-->
+        <!--android:textIsSelectable="true"-->
+        <!--android:textSize="30dp"-->
+        <!--android:visibility="invisible" />-->
+
+    <!--<com.seifmostafa.cchat.CustTextView-->
+        <!--android:id="@+id/textView_text"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:layout_marginTop="70dp"-->
+        <!--android:elegantTextHeight="true"-->
+        <!--android:text="@string/text"-->
+        <!--android:textAlignment="center"-->
+        <!--android:textAppearance="?android:attr/textAppearanceLarge"-->
+        <!--android:textColor="@android:color/holo_blue_dark"-->
+        <!--android:textDirection="rtl"-->
+        <!--android:textSize="150sp" />-->
+
+    <!--<FrameLayout-->
+        <!--android:id="@+id/overtext"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
+
+    <!--</FrameLayout>-->
+
+    <!--<ImageButton-->
+        <!--android:id="@+id/button_speak"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentEnd="true"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:background="@android:color/transparent"-->
+        <!--android:onClick="voiceoffer"-->
+        <!--android:src="@drawable/voice"-->
+        <!--android:text="انطق" />-->
+
+    <!--<ImageButton-->
+        <!--android:id="@+id/button_help"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignTop="@+id/button_speak"-->
+        <!--android:background="@android:color/transparent"-->
+        <!--android:onClick="helpbypic"-->
+        <!--android:src="@drawable/help"-->
+        <!--android:text="ساعدني بصورة" />-->
+
+    <!--<ImageButton-->
+        <!--android:id="@+id/button_checkmine"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentEnd="true"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:background="@android:color/transparent"-->
+        <!--android:onClick="voicerec"-->
+        <!--android:src="@drawable/microphone"-->
+        <!--android:text="افحص نطقي" />-->
+
+    <!--<ImageButton-->
+        <!--android:id="@+id/button_checkfill"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignBottom="@+id/button_checkmine"-->
+        <!--android:background="@android:color/transparent"-->
+        <!--android:onClick="checkfill"-->
+        <!--android:src="@drawable/check"-->
+        <!--android:text="افحص ما كتبت" />-->
+
+
+    <!--<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--android:id="@+id/RelativeLayout01"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="fill_parent">-->
+
+        <!--<ImageButton-->
+            <!--android:id="@+id/button_retry"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:background="@android:color/transparent"-->
+            <!--android:onClick="retry"-->
+            <!--android:src="@drawable/autorenew"-->
+            <!--android:text="محاولة جديدة"-->
+            <!--android:textAlignment="center" />-->
+
+        <!--&lt;!&ndash;<Button&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="Button"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_alignParentBottom="true"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_centerHorizontal="true"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/button2"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:onClick="nextword" />&ndash;&gt;-->
+    <!--</RelativeLayout>-->
+    <!--&lt;!&ndash;<org.opencv.android.JavaCameraView&ndash;&gt;-->
+    <!--&lt;!&ndash;android:layout_width="fill_parent"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:layout_height="fill_parent"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:id="@+id/fd_activity_surface_view"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:visibility="visible"/>&ndash;&gt;-->
+
+    <ImageView
+        android:src="@drawable/common_google_signin_btn_icon_light"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button_checkmine"
-        android:text="TextView"
-        android:textAlignment="center"
-        android:textColor="@color/colorPrimaryDark"
-        android:textIsSelectable="true"
-        android:textSize="30dp"
-        android:visibility="invisible" />
-
-    <com.seifmostafa.cchat.CustTextView
-        android:id="@+id/textView_text"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
-        android:elegantTextHeight="true"
-        android:text="@string/text"
-        android:textAlignment="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@android:color/holo_blue_dark"
-        android:textDirection="rtl"
-        android:textSize="150sp" />
-
-    <FrameLayout
-        android:id="@+id/overtext"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </FrameLayout>
-
-    <ImageButton
-        android:id="@+id/button_speak"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:background="@android:color/transparent"
-        android:onClick="voiceoffer"
-        android:src="@drawable/voice"
-        android:text="انطق" />
-
-    <ImageButton
-        android:id="@+id/button_help"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/button_speak"
-        android:background="@android:color/transparent"
-        android:onClick="helpbypic"
-        android:src="@drawable/help"
-        android:text="ساعدني بصورة" />
-
-    <ImageButton
-        android:id="@+id/button_checkmine"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:background="@android:color/transparent"
-        android:onClick="voicerec"
-        android:src="@drawable/microphone"
-        android:text="افحص نطقي" />
-
-    <ImageButton
-        android:id="@+id/button_checkfill"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/button_checkmine"
-        android:background="@android:color/transparent"
-        android:onClick="checkfill"
-        android:src="@drawable/check"
-        android:text="افحص ما كتبت" />
-
-
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/RelativeLayout01"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-
-        <ImageButton
-            android:id="@+id/button_retry"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:background="@android:color/transparent"
-            android:onClick="retry"
-            android:src="@drawable/autorenew"
-            android:text="محاولة جديدة"
-            android:textAlignment="center" />
-    </RelativeLayout>
-    <!--<org.opencv.android.JavaCameraView-->
-    <!--android:layout_width="fill_parent"-->
-    <!--android:layout_height="fill_parent"-->
-    <!--android:id="@+id/fd_activity_surface_view"-->
-    <!--android:visibility="visible"/>-->
+        android:id="@+id/imageView" />
 </RelativeLayout>
 

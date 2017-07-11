@@ -1,17 +1,14 @@
-package com.seifmostafa.cchat;/*
- * PocketSphinx Continue Recognition Demo
- * Developed by Luis G III
- * e-mail: loiis.x14@gmail.com
- * visit: http://hellospoonpr@gmail.com and get your own HelloSpoon robot!
- * */
-
+package com.seifmostafa.cchat;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -31,29 +28,31 @@ public class VrActivity extends Activity implements RecognitionListener {
     }
 
     SpeechRecognizer recognizer;
-    TextView recognizer_state, recognized_word;
-    Button start;
+    TextView recognizer_state, recognized_word,textView_required;
+        Button start;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_voice_recognition);
         setupRecognizer();
-        recognizer_state = (TextView) findViewById(R.id.textView2);
-        recognized_word = (TextView) findViewById(R.id.textView3);
+        recognizer_state = (TextView) findViewById(R.id.rec_state);
+        textView_required = (TextView)findViewById(R.id.textView_req) ;
+        recognized_word = (TextView) findViewById(R.id.rec_result);
         start = (Button) findViewById(R.id.button);
+        textView_required.setText(MainActivity.currentText);
         start.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 // TODO Auto-generated method stub
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        recognizer_state.setText("Recognition Started!");
+                        recognizer_state.setText("...");
                         Log.i("startbtn", "start Recording");
                         recognizer.startListening(SEARCH_KEYWORD);
                         break;
                     case MotionEvent.ACTION_UP:
-                        recognizer_state.setText("Recognition Stopped!");
+                        recognizer_state.setText(" ");
                         Log.i("startbtn", "stop Recording");
                         recognizer.stop();
 
@@ -107,9 +106,14 @@ public class VrActivity extends Activity implements RecognitionListener {
         if (arg0 != null) {
             if (arg0.getHypstr() != null) {
                 comando = arg0.getHypstr();
-                Log.i("Result", comando);
+//                if(comando.contains(MainActivity.currentText))
+//                {
+//                Log.i("Result", comando);
+//                    Toast.makeText(VrActivity.this,"جيد جدا",Toast.LENGTH_LONG).show();
+//                    startActivity(new Intent(VrActivity.this,MainActivity.class));
+//                    finish();
+//                }
                 recognized_word.setText(comando);
-
             }
         }
     }
@@ -120,7 +124,16 @@ public class VrActivity extends Activity implements RecognitionListener {
         if (hup != null) {
             if (hup.getHypstr() != null) {
                 comando = hup.getHypstr();
-                Log.i("Result", comando);
+
+                if(comando.contains(MainActivity.currentText))
+                {
+                    Log.i("Result", comando);
+                    Log.i("ResultCurrent",MainActivity.currentText);
+                    Toast.makeText(VrActivity.this,"جيد جدا",Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(VrActivity.this,MainActivity.class));
+                    recognizer.cancel();
+                    finish();
+                }
                 recognized_word.setText(comando);
             }
         }
