@@ -1,4 +1,4 @@
-package com.seifmostafa.cchat;
+package com.seifmostafa.cchat.Recognizers;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,9 +6,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.seifmostafa.cchat.MainActivity;
+import com.seifmostafa.cchat.R;
 
 import java.io.File;
 
@@ -19,7 +21,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizer;
 import static edu.cmu.pocketsphinx.SpeechRecognizerSetup.defaultSetup;
 
 
-public class VrActivity extends Activity implements RecognitionListener {
+public class VoiceRecognitionActivity extends Activity implements RecognitionListener {
     public static final String SEARCH_KEYWORD = "x";
 
     //Handler a = new Handler();
@@ -109,8 +111,8 @@ public class VrActivity extends Activity implements RecognitionListener {
 //                if(comando.contains(MainActivity.currentText))
 //                {
 //                Log.i("Result", comando);
-//                    Toast.makeText(VrActivity.this,"جيد جدا",Toast.LENGTH_LONG).show();
-//                    startActivity(new Intent(VrActivity.this,MainActivity.class));
+//                    Toast.makeText(VoiceRecognitionActivity.this,"جيد جدا",Toast.LENGTH_LONG).show();
+//                    startActivity(new Intent(VoiceRecognitionActivity.this,MainActivity.class));
 //                    finish();
 //                }
                 recognized_word.setText(comando);
@@ -129,8 +131,8 @@ public class VrActivity extends Activity implements RecognitionListener {
                 {
                     Log.i("Result", comando);
                     Log.i("ResultCurrent",MainActivity.currentText);
-                    Toast.makeText(VrActivity.this,"جيد جدا",Toast.LENGTH_LONG).show();
-                    startActivity(new Intent(VrActivity.this,MainActivity.class));
+                    Toast.makeText(VoiceRecognitionActivity.this,"جيد جدا",Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(VoiceRecognitionActivity.this,MainActivity.class));
                     recognizer.cancel();
                     finish();
                 }

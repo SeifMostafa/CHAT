@@ -1,4 +1,4 @@
-package com.seifmostafa.cchat;
+package com.seifmostafa.cchat.Recognizers;
 
 import android.graphics.Bitmap;
 import android.util.Log;

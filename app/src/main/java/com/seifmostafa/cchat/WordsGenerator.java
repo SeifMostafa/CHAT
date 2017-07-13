@@ -1,15 +1,12 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.text.Collator;
+package com.seifmostafa.cchat;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
 import java.util.Stack;
+
+import static com.seifmostafa.cchat.Utils.readfileintoStack;
+import static com.seifmostafa.cchat.Utils.writeStackTofile;
+
 
 public class WordsGenerator {
 	public enum DependentVariable { Name, Age, Gender};  // interests 
@@ -19,36 +16,13 @@ public class WordsGenerator {
 	public static final String filepathOUTPUT = "/home/azizax/Desktop/output";
 	public static final	int	 NUMBER_OF_WORDS = 1000;
 
-	private Stack<String>  readfile(String filepath){
-		
-		File file = new File(filepath);
-		 Stack<String> words = new Stack<>();
-		try {
-			Scanner scan = new Scanner(file);
-			while(scan.hasNextLine())
-			{
-				String line =null;
-				line = scan.nextLine();
-				words.push(line);		
-			}
-		} catch (FileNotFoundException e) {
-			System.out.println(e.toString());
-		}
-		return words;
-	}
-   
-	private void sortwords(List<String> arr_items) {
 
-        // give path of folders and sort the inside folders by their names
-        Locale lithuanian = new Locale("ar");
-        Collator lithuanianCollator = Collator.getInstance(lithuanian);
-        Collections.sort(arr_items, lithuanianCollator);
-    }
-    private String[] GenerateName_Characters(String name) {
+	private String[] GenerateName_Characters(String name) {
         String[] Name_Characters = name.split("");
         return Name_Characters;
     }
-    private Stack<String> GenerateWordsTree(String Name, int number_of_words) {
+
+	private Stack<String> GenerateWordsTree(String Name, int number_of_words) {
         int levels = 0;
         int added = 0;
         Stack<String> tree = new Stack<>();
@@ -73,29 +47,18 @@ public class WordsGenerator {
         }
         return tree;
     }
-	private void writefile(Stack<String> result_words) {
-		try {
-			PrintWriter writer = new PrintWriter(filepathOUTPUT, "UTF-8");
-			writer.print(result_words);
-			writer.close();
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	
+
 	public void DoProcess(String[]dependentVariables){
-		AvailableWords =  readfile(filepathINPUT);
+		AvailableWords =  readfileintoStack(filepathINPUT);
        // sortwords(AvailableWords);
 		 if(dependentVariables.length==0){
-			 writefile( GenerateWordsTree("محمد",NUMBER_OF_WORDS));
+			 writeStackTofile( GenerateWordsTree("محمد",NUMBER_OF_WORDS),filepathOUTPUT);
 
 		 }else{
-			 Stack<String> dpv = readfile(filepathdependentvariables);
+			 Stack<String> dpv = readfileintoStack(filepathdependentvariables);
 			 // works for dependent variable name only 
 			 // later will use other dependent variables ..
-			 writefile( GenerateWordsTree(dpv.pop(),NUMBER_OF_WORDS));  
+			 writeStackTofile( GenerateWordsTree(dpv.pop(),NUMBER_OF_WORDS),filepathOUTPUT);
 			 System.out.println("DONE!");
 			 Calendar cal = Calendar.getInstance();
 		        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
@@ -103,4 +66,5 @@ public class WordsGenerator {
 		 }
 		 
 	 }
+
 }

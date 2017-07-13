@@ -1,4 +1,4 @@
-package com.seifmostafa.cchat;
+package com.seifmostafa.cchat.Recognizers;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,6 +11,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import com.seifmostafa.cchat.MainActivity;
+import com.seifmostafa.cchat.R;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -35,12 +38,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 
-public class FdActivity extends Activity implements CvCameraViewListener2 {
+public class FaceDetectionActivity extends Activity implements CvCameraViewListener2 {
 
     public static final int JAVA_DETECTOR = 0;
     public static final int NATIVE_DETECTOR = 1;
     static final long MAXIMG = 20;
-    private static final String TAG = "FdActivity:Activity";
+    private static final String TAG = "FaceDetectionActivity:Activity";
     private static final Scalar FACE_RECT_COLOR = new Scalar(0, 255, 0, 255);
     private static final int frontCam = 1;
 
@@ -136,7 +139,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         }
     };
 
-    public FdActivity() {
+    public FaceDetectionActivity() {
         mDetectorName = new String[2];
         mDetectorName[JAVA_DETECTOR] = "Java";
         mDetectorName[NATIVE_DETECTOR] = "Native (tracking)";
@@ -261,8 +264,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             Log.i("XPredict:(prob) ", "" + mLikely);
 
             if (mLikely >= 150) {
-                MainActivity.flag_new_level = false;
-                startActivity(new Intent(FdActivity.this, MainActivity.class));
+              //  MainActivity.flag_new_level = false;
+                startActivity(new Intent(FaceDetectionActivity.this, MainActivity.class));
                 finish();
             }
 
