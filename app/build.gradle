@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 24
-    buildToolsVersion '24.0.0'
+    compileSdkVersion 23
+    buildToolsVersion '26.0.0'
 
     defaultConfig {
         applicationId "com.seifmostafa.cchat"
-        minSdkVersion 22
-        targetSdkVersion 22
+        minSdkVersion 19
+        targetSdkVersion 23
 
         versionCode 1
         versionName "1.0"
@@ -14,6 +14,7 @@ android {
         jackOptions {
             enabled true
         }
+
     }
     buildTypes {
         release {
@@ -21,11 +22,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    sourceSets { main { jni.srcDirs = ['src/main/jniLibs/', 'src/main/jni'] } }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    sourceSets { main { jni.srcDirs = ['src/main/jniLibs/', 'src/main/jni'] } }
+
 }
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'jniLibs')
