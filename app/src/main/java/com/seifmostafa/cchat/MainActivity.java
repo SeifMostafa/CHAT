@@ -219,8 +219,13 @@ public class MainActivity extends Activity {
      //   imageView = (ImageView)findViewById(R.id.imageview_textpoints);
         // TextasMat sexy ,,
 //        imageView.setImageBitmap(getBitmapFromMat(FormSexyMat(wordloop+1,TextasMat)));
-
-    }
+                //textView.setText(currentText);
+                imageView = (ImageView)findViewById(R.id.imageview_textpoints);
+                // TextasMat sexy ,,
+                imageView.setImageBitmap(getBitmapFromMat(FormSexyMat(wordloop+1,TextasMat)));
+                textView.setVisibility(View.INVISIBLE);
+                imageView.setVisibility(View.VISIBLE);
+            }
 
     private void checksharedpref(){
 

@@ -602,28 +602,29 @@ public class Utils {
         editor.commit();
     }
 
-    public static Mat FormSexyMat(int stage, Mat org){
-        Mat dest=org;
+    public static Mat FormSexyMat(int stage, Mat org) {
+        Mat dest = org.clone();
         /*
         v.i variable:
             stage1/2/3,mPaint.strokesize28
          */
-        int CounterToBeSkipped=28*stage*7;
         for (int x = 1; x < org.width(); x++) {
-            for (int y = 1; y < org.height(); y++) {
-                int pixelvalue = (int) org.get(y, x)[0];
-                if (pixelvalue != 0) {
-                    if (CounterToBeSkipped == 0) {
+                int CounterToBeSkipped = stage * 7;
+                for (int y = 1; y < org.height(); y++) {
+                    int pixelvalue = (int) org.get(y, x)[0];
+                    if (pixelvalue != 0) {
+                        if (CounterToBeSkipped == 0) {
 
-                    } else {
-                        dest.put(y, x, new double[]{0, 0, 0});
-                        CounterToBeSkipped--;
+                        } else{
+                            dest.put(y, x, new double[]{0, 0, 0, 0});
+                            CounterToBeSkipped--;
+                        }
                     }
                 }
             }
-        }
-        return dest;
+            return dest;
     }
+
     public static boolean IspointSexy(int x,int y,Mat mat){
         if(mat.get(y,x)!=null) return  (mat.get(y,x)[0] != 0);
         else return false;
