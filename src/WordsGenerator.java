@@ -106,7 +106,7 @@ public class WordsGenerator {
 	 * to transfer to player
 	 */
 
-	private Direction[] GenerateWordFV(String word) {
+	public Direction[] GenerateWordFV(String word) {
 		Direction[] word_directions = new Direction[0];
 
 		for (int i = 0; i < word.length(); i++) {
@@ -158,7 +158,7 @@ public class WordsGenerator {
 	private String FindHelpImage(String ImagesFolder, String word) {
 		word = word.replaceAll(" ", "+");
 		// file = audio folder
-		String file = ImagesFolder + Utils.SlashIndicator + word + ".png";
+		String file = ImagesFolder + word + ".png";
 		if (!Utils.checkfileExist(file)) {
 			// find image from webservice
 		}

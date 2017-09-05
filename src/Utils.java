@@ -54,11 +54,13 @@ public class Utils {
 	public static String TriggerPointsOutputPATH = "/SF/TPF/";
 	public static String SpeechOutputPATH = "/SF/AF/";
 	public static String words_db_txtfilepath = "";
+	public static String chars_db_txtfilepath ="";
 	public static String OUTPUTPATH = "";
 	public static String SlashIndicator = "/";
 	public static final String SHAREDPREF = "sharedpref";
 	public static final String CONFIG = "Config";
 	public static final String CHARFILEKEY = "chars:";
+	public static final String DBWORDSFILEKEY ="dbwords:";
 	public static final String WordsOutputFileName = "WORDS.txt";
 	public static final String PhrasesOutputFileName = "PHRASES.txt";
 
@@ -67,6 +69,8 @@ public class Utils {
 
 	public static final String CharLangWindowTitle = "Please, Choose the file contains language charcters";
 	public static final String DbWordsWindowTitle = "Please, Choose file contains language words";
+	public static final String CharCustWindowTitle = "Customize language characters";
+	public static final String FONTNAME = "KFGQPC Alphabet Dotted";
 	public static State state = State.CHARSNOTLOADED;
 	public static double width, height;
 
@@ -86,10 +90,10 @@ public class Utils {
 	public static String DoTTS(String AudioFoler, String word, String lang) {
 		word = word.replaceAll(" ", "+");
 		// filepath = audio folder
-		String file = AudioFoler + Utils.SlashIndicator + word + ".wav";
+		String file = AudioFoler + word ;
 		if (!Utils.checkfileExist(file)) {
 			String DownloadSpeechFile_cmd = "wget -q -U Mozilla -O " + AudioFoler + Utils.SlashIndicator + word
-					+ ".wav http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q="
+					+ " http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q="
 					+ word + "&tl=" + lang;
 			Utils.executeCommand(DownloadSpeechFile_cmd);
 			// exe cmd to create it as .wav
