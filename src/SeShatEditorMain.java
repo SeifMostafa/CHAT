@@ -13,7 +13,6 @@ public class SeShatEditorMain {
 	 */
 	static int phaseindex = 1;
 	static Map<Character, model.Character> characters = null;
-
 	public static void main(String[] args) {
 		new Utils().init();
 		switch (Utils.state) {
@@ -53,7 +52,7 @@ public class SeShatEditorMain {
 		if (characters == null)
 			characters = loader.loadIn();
 
-		loader.GenerateSyllabus(new WordsGenerator(phaseindex, p));
+		loader.GenerateSyllabus(new WordsGenerator(Utils.Lang,phaseindex, p));
 		try {
 			loader.loadout();
 		} catch (Exception e) {

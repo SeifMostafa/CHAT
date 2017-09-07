@@ -57,10 +57,12 @@ public class Utils {
 	public static String chars_db_txtfilepath = "";
 	public static String OUTPUTPATH = "";
 	public static String SlashIndicator = "/";
+	public static String Lang = "AR";
 	public static final String SHAREDPREF = "sharedpref";
 	public static final String CONFIG = "Config";
 	public static final String CHARFILEKEY = "chars:";
 	public static final String DBWORDSFILEKEY = "dbwords:";
+	public static final String LANGFILEKEY = "lang:";
 	public static final String WordsOutputFileName = "WORDS.txt";
 	public static final String PhrasesOutputFileName = "PHRASES.txt";
 
@@ -102,7 +104,15 @@ public class Utils {
 		}
 		return file;
 	}
-
+	public String FindHelpImage(String ImagesFolder, String word) {
+		word = word.replaceAll(" ", "+");
+		// file = audio folder
+		String file = ImagesFolder + word + ".png";
+		if (!Utils.checkfileExist(file)) {
+			// find image from webservice
+		}
+		return file;
+	}
 	/*
 	 * write String into file and \n at the end
 	 */

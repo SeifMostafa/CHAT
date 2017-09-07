@@ -18,11 +18,10 @@ public class WordsGenerator {
 	public int PhaseIndex;
 	private Person person;
 	private int NumberOfRequiredWords;
-
+	private String lang;
 	public Person getPerson() {
 		return person;
 	}
-
 	public void setPerson(Person person) {
 		this.person = person;
 	}
@@ -35,7 +34,7 @@ public class WordsGenerator {
 		SyllabusWords = syllabusWords;
 	}
 
-	public WordsGenerator(int phaseIndex, Person p) {
+	public WordsGenerator(String lang,int phaseIndex, Person p) {
 		super();
 		this.PhaseIndex = phaseIndex;
 		this.NumberOfRequiredWords = NUMBER_OF_WORDS_EACH_PHASE * PhaseIndex;
@@ -44,7 +43,6 @@ public class WordsGenerator {
 
 	public void generate(String AudiosFolderPath, String ImagesFolderPath, String txtfilepath) {
 		System.out.println("Hello from generate");
-
 		SyllabusWords = new Stack<>();
 
 		int NumberOfWordsToBeGeneratedAsAdvanced = NumberOfRequiredWords - SyllabusWords.size();
@@ -57,7 +55,7 @@ public class WordsGenerator {
 		for (Word word : SyllabusWords) {
 			// check if exist and create audio files
 			System.out.println(word.getText());
-			word.setSpeechFilePath(DoTTS(word.getText(), AudiosFolderPath));
+			word.setSpeechFilePath(Utils.DoTTS(word.getText(), AudiosFolderPath,this.lang));
 			// check if exist and create imagepath
 			// word.setImageFilePath(FindHelpImage(word.getText(),
 			// ImagesFolderPath));
@@ -70,7 +68,7 @@ public class WordsGenerator {
 		String[] word_Characters = word.split("");
 		return word_Characters;
 	}
-
+		
 	private Stack<String> GenerateWordsTree(String txtfilepath, int number_of_words) {
 		int levels = 0;
 		int added = 0;
@@ -138,31 +136,4 @@ public class WordsGenerator {
 			return null;
 		}
 	}
-
-	private String DoTTS(String AudioFoler, String word) {
-		word = word.replaceAll(" ", "+");
-		// filepath = audio folder
-		String file = AudioFoler + Utils.SlashIndicator + word + ".wav";
-		if (!Utils.checkfileExist(file)) {
-			String DownloadSpeechFile_cmd = "wget -q -U Mozilla -O " + AudioFoler + Utils.SlashIndicator + word
-					+ ".wav http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q="
-					+ word + "&tl=AR";
-			Utils.executeCommand(DownloadSpeechFile_cmd);
-			// exe cmd to create it as .wav
-			String Mp3ToSpecificWav_command = "ffmpeg -i " + file + " -ar 16000 -ac 1 " + file + " -y";
-			Utils.executeCommand(Mp3ToSpecificWav_command);
-		}
-		return file;
-	}
-
-	private String FindHelpImage(String ImagesFolder, String word) {
-		word = word.replaceAll(" ", "+");
-		// file = audio folder
-		String file = ImagesFolder + word + ".png";
-		if (!Utils.checkfileExist(file)) {
-			// find image from webservice
-		}
-		return file;
-	}
-
 }

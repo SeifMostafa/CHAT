@@ -22,22 +22,19 @@ public class Loader {
 		// read and assign
 		Stack<String> configs = new Stack<>();
 		configs = Utils.readfileintoStack(Utils.SHAREDPREF);
-		if (configs.size() > 1) {
+		if (configs.size() > 2) {
 			Utils.words_db_txtfilepath = configs.pop().replace(Utils.DBWORDSFILEKEY, "");
 			Utils.chars_db_txtfilepath = configs.pop().replace(Utils.CHARFILEKEY, "");
+			Utils.Lang = configs.pop().replace(Utils.LANGFILEKEY, "");
+
 		} else {
 			Utils.chars_db_txtfilepath = configs.pop().replace(Utils.CHARFILEKEY, "");
+			Utils.Lang = configs.pop().replace(Utils.LANGFILEKEY, "");
+
 		}
 		assignFolderPathsInsideSyllabusFolder(new File(Utils.chars_db_txtfilepath).getParent());
 	}
 
-	public Loader(String filepath) {
-		// write and assign
-		Stack<String> configs = new Stack<>();
-		configs.push(Utils.CHARFILEKEY + filepath);
-		Utils.writeStackTofile(configs, Utils.SHAREDPREF);
-		assignFolderPathsInsideSyllabusFolder(new File(filepath).getParent());
-	}
 
 	/*
 	 * Audio folder and ImagesFolder have data txtfile have words Syllabus is

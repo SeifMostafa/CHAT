@@ -5,8 +5,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Stack;
+
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -32,6 +35,7 @@ public class FileChooser extends JFrame {
 	public JTextField filepath;
 	private JButton choose, ok, AddLangBtn;
 	public JPanel Langs;
+	
 	public ButtonGroup LangRadioBtnGroup;
 	String filenameJTextFieldInfo;
 	private JPanel AddLangugesPanel;
@@ -80,11 +84,13 @@ public class FileChooser extends JFrame {
 						Utils.createfile(BackupFile);
 						Utils.copyFileUsingFileStreams(new File(filepath.getText()), new File(BackupFile));
 						if (reason == REASON.LANG_CHARS) {
+							Utils.Lang = getSelectedButtonText();
+							Utils.writeStringToFile(Utils.LANGFILEKEY+ Utils.Lang ,Utils.SHAREDPREF);
 							Utils.writeStringToFile(Utils.CHARFILEKEY + filepath.getText(), Utils.SHAREDPREF);
 							Utils.UpdateStateInConfigFile(State.CHARSLOADED);
 							Utils.chars_db_txtfilepath = filepath.getText();
 							SeShatEditorMain.LangCharsChoosingFile_Pressed();
-						} else {
+						}else {
 							Utils.writeStringToFile(Utils.DBWORDSFILEKEY + filepath.getText(), Utils.SHAREDPREF);
 							Utils.UpdateStateInConfigFile(State.DBWORDSLOADED);
 							Utils.words_db_txtfilepath = filepath.getText();
@@ -93,6 +99,11 @@ public class FileChooser extends JFrame {
 					} catch (IOException e1) {
 						System.out.println("E:" + e1.toString());
 					}
+					
+					
+					
+					
+					
 					close();
 				}
 			}
@@ -162,7 +173,16 @@ public class FileChooser extends JFrame {
 	private void close() {
 		this.dispose();
 	}
+    private String getSelectedButtonText() {
+        for (Enumeration<AbstractButton> buttons = this.LangRadioBtnGroup.getElements(); buttons.hasMoreElements();) {
+            AbstractButton button = buttons.nextElement();
 
+            if (button.isSelected()) {
+                return button.getText();
+            }
+        }
+        return null;
+    }
 	class ChooseL implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
