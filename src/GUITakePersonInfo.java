@@ -60,10 +60,8 @@ public class GUITakePersonInfo {
 	private JButton btnGenerate;
 	private ArrayList<String> favNames = new ArrayList<>();
 	private ArrayList<String> whyMsgs = new ArrayList<>();
-	private JList whyList;
+	private JList<String> whyList;
 	private JScrollPane scrollPane;
-
-
 
 	private static void writeToXml(Person p)
 			throws ParserConfigurationException, SAXException, IOException, TransformerException {
@@ -126,7 +124,7 @@ public class GUITakePersonInfo {
 	/**
 	 * Create the application.
 	 */
-	public GUITakePersonInfo	() {
+	public GUITakePersonInfo() {
 		initialize();
 	}
 
@@ -344,7 +342,7 @@ public class GUITakePersonInfo {
 		String why[] = { "سخريه و خداع", "العمل", "التقدم في شئ ما", "تكملة التعليم", "التكنولوجيا", "مساعدة  أولاده",
 				"التعامل مع البيئه المحيطه", "السفر", "علم الأديان السماويه" };
 
-		whyList = new JList(why);
+		whyList = new JList<String>(why);
 
 		scrollPane.setViewportView(whyList);
 
@@ -361,6 +359,7 @@ public class GUITakePersonInfo {
 
 		btnGenerate = new JButton("Generate");
 		btnGenerate.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				Person p = new Person();
 
@@ -403,9 +402,9 @@ public class GUITakePersonInfo {
 						e.printStackTrace();
 					}
 					clear();
-					SeShatEditorMain.LangCharsFinishingPaint_FV_TR__Pressed(p);
+					SeShatEditorMain.GenerateSyllabus_Pressed(p);
 				}
-					
+
 			}
 		});
 		GridBagConstraints gbc_btnGenerate = new GridBagConstraints();
@@ -416,10 +415,12 @@ public class GUITakePersonInfo {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
+		frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
 		frame.setVisible(true);
+
 	}
-	
-	public void clear(){
+
+	public void clear() {
 		nameText.setText("");
 		male.setSelected(false);
 		female.setSelected(false);

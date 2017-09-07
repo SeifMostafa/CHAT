@@ -31,22 +31,29 @@ public class FileChooser extends JFrame {
 
 	public JTextField filepath;
 	private JButton choose, ok, AddLangBtn;
-	private JPanel Langs;
-
+	public JPanel Langs;
+	public ButtonGroup LangRadioBtnGroup;
+	String filenameJTextFieldInfo;
 	private JPanel AddLangugesPanel;
 	private JPanel MainPanel_1;
 
+	private REASON reason;
+
 	public FileChooser(REASON R, String title) {
+		this.reason = R;
 		setBounds(100, 100, (int) Utils.width / 4, (int) Utils.height / 4);
 		setLayout(new BorderLayout());
 		setTitle(title);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		switch (R) {
 		case LANG_CHARS:
+			filenameJTextFieldInfo = "file contains language characters";
+
 			initialize_MainPanel();
 			initialize_langPanel();
 			break;
 		case DB_WORDS:
+			filenameJTextFieldInfo = "file contains language words";
 			initialize_MainPanel();
 			break;
 		}
@@ -55,7 +62,6 @@ public class FileChooser extends JFrame {
 	}
 
 	private void initialize_MainPanel() {
-		String filenameJTextFieldInfo = "file contains language charcters";
 		filepath = new JTextField();
 		choose = new JButton("Choose");
 		ok = new JButton("OK");
@@ -73,15 +79,22 @@ public class FileChooser extends JFrame {
 						String BackupFile = new File(filepath.getText()).getName();
 						Utils.createfile(BackupFile);
 						Utils.copyFileUsingFileStreams(new File(filepath.getText()), new File(BackupFile));
-						Utils.writeStringToFile(Utils.CHARFILEKEY+filepath.getText(), Utils.SHAREDPREF);
-						Utils.UpdateStateInConfigFile(State.CHARSLOADED);
-						SeShatEditorMain.LangCharsChoosingFile_Pressed(filepath.getText());
+						if (reason == REASON.LANG_CHARS) {
+							Utils.writeStringToFile(Utils.CHARFILEKEY + filepath.getText(), Utils.SHAREDPREF);
+							Utils.UpdateStateInConfigFile(State.CHARSLOADED);
+							Utils.chars_db_txtfilepath = filepath.getText();
+							SeShatEditorMain.LangCharsChoosingFile_Pressed();
+						} else {
+							Utils.writeStringToFile(Utils.DBWORDSFILEKEY + filepath.getText(), Utils.SHAREDPREF);
+							Utils.UpdateStateInConfigFile(State.DBWORDSLOADED);
+							Utils.words_db_txtfilepath = filepath.getText();
+							SeShatEditorMain.LangWordsChoosingFile_Pressed();
+						}
 					} catch (IOException e1) {
 						System.out.println("E:" + e1.toString());
 					}
-					
+					close();
 				}
-				close();
 			}
 		});
 
@@ -91,7 +104,7 @@ public class FileChooser extends JFrame {
 		Border border = MainPanel_1.getBorder();
 		Border margin = new EmptyBorder(20, 20, 20, 20);
 		Border borderline = new BevelBorder(BevelBorder.RAISED);
-		MainPanel_1.setBorder(new CompoundBorder( margin,borderline));
+		MainPanel_1.setBorder(new CompoundBorder(margin, borderline));
 
 		border = ok.getBorder();
 		margin = new EmptyBorder(10, 10, 10, 10);
@@ -130,11 +143,11 @@ public class FileChooser extends JFrame {
 			}
 		});
 		Langs = new JPanel();
-		ButtonGroup group = new ButtonGroup();
+		LangRadioBtnGroup = new ButtonGroup();
 		for (String added_lang : Added_langs) {
 			JRadioButtonMenuItem newMenuItem = new JRadioButtonMenuItem(new Locale(added_lang).getDisplayName());
 			newMenuItem.setSelected(true);
-			group.add(newMenuItem);
+			LangRadioBtnGroup.add(newMenuItem);
 			Langs.add(newMenuItem);
 		}
 		AddLangugesPanel.add(AddLangBtn);

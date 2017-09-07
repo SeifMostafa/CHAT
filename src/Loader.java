@@ -17,16 +17,21 @@ import model.Word;
  */
 public class Loader {
 	public WordsGenerator generator;
-	 
+
 	public Loader() {
 		// read and assign
 		Stack<String> configs = new Stack<>();
 		configs = Utils.readfileintoStack(Utils.SHAREDPREF);
-		Utils.words_db_txtfilepath = configs.pop().replace(Utils.CHARFILEKEY, "");
-		assignFolderPathsInsideSyllabusFolder(new File(Utils.words_db_txtfilepath).getParent()); 
+		if (configs.size() > 1) {
+			Utils.words_db_txtfilepath = configs.pop().replace(Utils.DBWORDSFILEKEY, "");
+			Utils.chars_db_txtfilepath = configs.pop().replace(Utils.CHARFILEKEY, "");
+		} else {
+			Utils.chars_db_txtfilepath = configs.pop().replace(Utils.CHARFILEKEY, "");
+		}
+		assignFolderPathsInsideSyllabusFolder(new File(Utils.chars_db_txtfilepath).getParent());
 	}
 
-	public Loader(String filepath){
+	public Loader(String filepath) {
 		// write and assign
 		Stack<String> configs = new Stack<>();
 		configs.push(Utils.CHARFILEKEY + filepath);
@@ -62,6 +67,8 @@ public class Loader {
 		Stack<Direction> fv_stack = new Stack<Direction>();
 		ArrayList<Point> tr_list;
 
+		System.out.println("Hello from loadout!" + mainfolder);
+
 		/*
 		 * create 4 folders and 2 file file contains words texts file contains
 		 * phrases 4 folders: triggerpoints,fvs,speeches and images
@@ -81,32 +88,39 @@ public class Loader {
 					mainfolder + Utils.SlashIndicator + w.getText() + Utils.AppenddedToOutputTriggerPointsfile);
 			Utils.writeStringToFile(w.getText(), ResultWordsFile);
 			Utils.writeStringToFile(w.getPhrase(), ResultPhrasesFile);
-
 		}
 	}
 
-	public Map<Character, model.Character> loadChars() {
+	public Map<Character, model.Character> loadIn() {
 		Map<Character, model.Character> characters = new HashMap<>();
-		Stack<String> charsfromfile = Utils.readfileintoStack(Utils.words_db_txtfilepath);
 
+		if (Utils.state != State.DBWORDSLOADED) {
+			Utils.UpdateStateInConfigFile(State.CHARSPAINTED);
+
+		} else {
+			String filebackuppath = new File(Utils.chars_db_txtfilepath).getName();
+			Utils.chars_db_txtfilepath = filebackuppath;
+			filebackuppath = new File(Utils.words_db_txtfilepath).getName();
+			Utils.words_db_txtfilepath = filebackuppath;
+		}
+
+		Stack<String> charsfromfile = Utils.readfileintoStack(Utils.chars_db_txtfilepath);
 		for (String ch : charsfromfile) {
 			model.Character character = new model.Character(ch.charAt(0));
 			Character key_char = new Character(ch.charAt(0));
 			character.setFV(stringsToDirections(
-					Utils.readfileintoStack(Utils.FVOutputPATH + Utils.SlashIndicator + ch + Utils.AppenddedToOutputFVfile)));
+					Utils.readfileintoStack(Utils.FVOutputPATH + ch + Utils.AppenddedToOutputFVfile)));
 			character.setSpeechesFilePath(getspeechfilesforchar(ch.charAt(0)));
 			character.setImagesFilePath(getImagesfilesforchar(ch.charAt(0)));
-			character.setTiggerPoints(gettriggerpointsforchar(ch.charAt(ch.charAt(0))));
+			character.setTiggerPoints(gettriggerpointsforchar(ch.charAt(0)));
 			characters.put(key_char, character);
 		}
-		Utils.UpdateStateInConfigFile(State.CHARSPAINTED);
-		
 		return characters;
 	}
 
 	private Point[] gettriggerpointsforchar(char charAt) {
 		Stack<String> points_string = Utils
-				.readfileintoStack(Utils.TriggerPointsOutputPATH + Utils.SlashIndicator + charAt+Utils.AppenddedToOutputTriggerPointsfile);
+				.readfileintoStack(Utils.TriggerPointsOutputPATH + charAt + Utils.AppenddedToOutputTriggerPointsfile);
 		Point[] points = new Point[points_string.size()];
 
 		for (int i = 0; i < points_string.size(); i++) {
@@ -117,20 +131,36 @@ public class Loader {
 	}
 
 	private String[] getspeechfilesforchar(char charAt) {
-		File folder = new File(Utils.SpeechOutputPATH + Utils.SlashIndicator + charAt);
-		File[] listOfFiles = folder.listFiles();
-		String[] filepaths = new String[listOfFiles.length];
-		for (int i = 0; i < listOfFiles.length; i++) {
-			filepaths[i] = listOfFiles[i].getAbsolutePath();
+		File folder = new File(Utils.SpeechOutputPATH + charAt);
+		String[] filepaths;
+		if (folder.isDirectory()) {
+			File[] listOfFiles = folder.listFiles();
+			filepaths = new String[listOfFiles.length];
+			for (int i = 0; i < listOfFiles.length; i++) {
+				filepaths[i] = listOfFiles[i].getAbsolutePath();
+			}
+		} else {
+			filepaths = new String[1];
+			filepaths[0] = folder.getAbsolutePath();
 		}
+
 		return filepaths;
 	}
 
 	private String[] getImagesfilesforchar(char charAt) {
 		File folder = new File(Utils.ImagesOutputPATH + Utils.SlashIndicator + charAt);
-		String[] filepaths = new String[2];
-		filepaths[0] = folder + Utils.SlashIndicator + charAt;
-		filepaths[1] = folder + Utils.SlashIndicator + charAt + 'ـ';
+		String[] filepaths;
+
+		if (folder.isDirectory()) {
+			File[] listOfFiles = folder.listFiles();
+			filepaths = new String[listOfFiles.length];
+			for (int i = 0; i < listOfFiles.length; i++) {
+				filepaths[i] = listOfFiles[i].getAbsolutePath();
+			}
+		} else {
+			filepaths = new String[1];
+			filepaths[0] = folder.getAbsolutePath();
+		}
 		return filepaths;
 	}
 
@@ -163,11 +193,13 @@ public class Loader {
 	}
 
 	private void assignFolderPathsInsideSyllabusFolder(String SyllabusFolderPath) {
-		Utils.SpeechOutputPATH = SyllabusFolderPath + Utils.SpeechOutputPATH;
-		Utils.ImagesOutputPATH = SyllabusFolderPath + Utils.ImagesOutputPATH;
-		Utils.FVOutputPATH = SyllabusFolderPath + Utils.FVOutputPATH;
-		Utils.TriggerPointsOutputPATH = SyllabusFolderPath + Utils.TriggerPointsOutputPATH;
-
+		if (Utils.OUTPUTPATH.equals("")) {
+			Utils.OUTPUTPATH = SyllabusFolderPath;
+			Utils.SpeechOutputPATH = SyllabusFolderPath + Utils.SpeechOutputPATH;
+			Utils.ImagesOutputPATH = SyllabusFolderPath + Utils.ImagesOutputPATH;
+			Utils.FVOutputPATH = SyllabusFolderPath + Utils.FVOutputPATH;
+			Utils.TriggerPointsOutputPATH = SyllabusFolderPath + Utils.TriggerPointsOutputPATH;
+		}
 	}
 
 }

@@ -15,7 +15,6 @@ public class Word {
 		this.triggerpoints = triggerpoints;
 	}
 
-
 	public Word(String text) {
 		super();
 		Text = text;

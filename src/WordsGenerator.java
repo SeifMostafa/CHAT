@@ -18,8 +18,7 @@ public class WordsGenerator {
 	public int PhaseIndex;
 	private Person person;
 	private int NumberOfRequiredWords;
-	
-	
+
 	public Person getPerson() {
 		return person;
 	}
@@ -38,13 +37,13 @@ public class WordsGenerator {
 
 	public WordsGenerator(int phaseIndex, Person p) {
 		super();
-		PhaseIndex = phaseIndex;
-		NumberOfRequiredWords = NUMBER_OF_WORDS_EACH_PHASE * PhaseIndex;
+		this.PhaseIndex = phaseIndex;
+		this.NumberOfRequiredWords = NUMBER_OF_WORDS_EACH_PHASE * PhaseIndex;
 		this.person = p;
-
 	}
 
 	public void generate(String AudiosFolderPath, String ImagesFolderPath, String txtfilepath) {
+		System.out.println("Hello from generate");
 
 		SyllabusWords = new Stack<>();
 
@@ -60,11 +59,11 @@ public class WordsGenerator {
 			System.out.println(word.getText());
 			word.setSpeechFilePath(DoTTS(word.getText(), AudiosFolderPath));
 			// check if exist and create imagepath
-//			word.setImageFilePath(FindHelpImage(word.getText(), ImagesFolderPath));
-//			// check if exist and create fv
-//			word.setFV(GenerateWordFV(word.getText()));
+			// word.setImageFilePath(FindHelpImage(word.getText(),
+			// ImagesFolderPath));
+			// // check if exist and create fv
+			// word.setFV(GenerateWordFV(word.getText()));
 		}
-
 	}
 
 	private String[] GenerateWord_Characters(String word) {
@@ -106,7 +105,7 @@ public class WordsGenerator {
 	 * to transfer to player
 	 */
 
-	private Direction[] GenerateWordFV(String word) {
+	public Direction[] GenerateWordFV(String word) {
 		Direction[] word_directions = new Direction[0];
 
 		for (int i = 0; i < word.length(); i++) {
@@ -124,7 +123,7 @@ public class WordsGenerator {
 	// pass char and get from db or model
 	private Direction[] getCharacterFV(char c, int index) {
 
-		model.Character character = (model.Character) SeShatEditorMain.characters.get(new Character(c));
+		model.Character character = SeShatEditorMain.characters.get(new Character(c));
 		if (character != null) {
 			switch (index) {
 			case 0:
@@ -132,7 +131,8 @@ public class WordsGenerator {
 			case 2:
 				return character.getFVwithoutINIT(); // remove first
 			default:
-				return character.getFVwithoutEND_withoutINIT(); // remove last // and first
+				return character.getFVwithoutEND_withoutINIT(); // remove last
+																// // and first
 			}
 		} else {
 			return null;
@@ -158,7 +158,7 @@ public class WordsGenerator {
 	private String FindHelpImage(String ImagesFolder, String word) {
 		word = word.replaceAll(" ", "+");
 		// file = audio folder
-		String file = ImagesFolder + Utils.SlashIndicator + word + ".png";
+		String file = ImagesFolder + word + ".png";
 		if (!Utils.checkfileExist(file)) {
 			// find image from webservice
 		}
