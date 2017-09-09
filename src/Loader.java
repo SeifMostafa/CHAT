@@ -1,5 +1,6 @@
 import java.awt.Point;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,7 +53,7 @@ public class Loader {
 	}
 
 	// write syllabus
-	public void loadout() throws Exception {
+	public void loadout() throws IOException  {
 		String mainfolder = Utils.OUTPUTPATH + Utils.SlashIndicator + generator.getPerson().getName();
 		String ResultWordsFile = mainfolder + Utils.SlashIndicator + Utils.WordsOutputFileName;
 		String ResultPhrasesFile = mainfolder + Utils.SlashIndicator + Utils.PhrasesOutputFileName;
