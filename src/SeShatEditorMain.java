@@ -14,7 +14,7 @@ public class SeShatEditorMain {
 	static int phaseindex = 1;
 	static Map<Character, model.Character> characters = null;
 	public static void main(String[] args) {
-		new Utils().init();
+		/*new Utils().init();
 		switch (Utils.state) {
 		case CHARSNOTLOADED:
 			new FileChooser(REASON.LANG_CHARS, Utils.CharLangWindowTitle).setSize(new Dimension(500, 300));
@@ -44,7 +44,15 @@ public class SeShatEditorMain {
 			break;
 		default:
 			break;
-		}
+		}*/
+		
+		WordsGenerator generator = new WordsGenerator(Utils.Lang, 1, new Person("سيف","الجيزة",22));
+		generator.generate("", "", "/home/azizax/Desktop/nouns.txt");
+			
+		//Utils.cleanwordsfile("/home/azizax/Desktop/nouns.txt");
+		//Map<java.lang.Character, Stack<String>>AvailableWordsOrganisedByCharacters = Utils.readfileintoMap("/home/azizax/Desktop/nouns.txt", 0);
+
+
 	}
 
 	public static void GenerateSyllabus_Pressed(Person p) {

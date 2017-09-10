@@ -28,7 +28,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Stream;
 
@@ -104,6 +106,7 @@ public class Utils {
 		}
 		return file;
 	}
+
 	public String FindHelpImage(String ImagesFolder, String word) {
 		word = word.replaceAll(" ", "+");
 		// file = audio folder
@@ -113,6 +116,7 @@ public class Utils {
 		}
 		return file;
 	}
+
 	/*
 	 * write String into file and \n at the end
 	 */
@@ -209,6 +213,60 @@ public class Utils {
 			e1.printStackTrace();
 		}
 		return words;
+	}
+
+	public static Map<Character, Stack<String>> readfileintoMap(String filepath, int afterlines) {
+		Map<Character, Stack<String>> result = new HashMap<>();
+		try {
+			try (Stream<String> lines = Files.lines(Paths.get(filepath))) {
+				Iterator<String> iterator = lines.skip(afterlines).iterator();
+				while (iterator.hasNext()) {
+					String current = iterator.next();
+					if (result.containsKey(new Character(current.charAt(0)))) {
+						Stack<String> currentstack = result.get(new Character(current.charAt(0)));
+						currentstack.push(current);
+						result.remove(new Character(current.charAt(0)));
+						result.put(new Character(current.charAt(0)), currentstack);
+					}else{
+						Stack<String> currentstack = new Stack<>();
+						currentstack.push(current);
+						result.put(new Character(current.charAt(0)), currentstack);
+					}
+				}
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		return result;
+	}
+
+	public static int CharToASCII(final char character) {
+		return (int) character;
+	}
+
+	public static void cleanwordsfile(String wordsfilepath) {
+		Stack<String> ret = new Stack<>();
+		try {
+			FileReader reader = new FileReader(wordsfilepath);
+			BufferedReader bufferedReader = new BufferedReader(reader);
+
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+
+				line = line.replaceAll("[!-~]", "");
+				String words[] = line.split(" ");
+				for (String word : words) {
+					if (!line.equals(""))
+						ret.push(word);
+				}
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		writeStackTofile(ret, wordsfilepath);
 	}
 
 	/*

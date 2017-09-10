@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Stack;
 
 import model.Character;
@@ -12,7 +14,7 @@ public class WordsGenerator {
 	 * custom) Advanced (level 3, combination between Personal and Basic to
 	 * generate custom level of words)
 	 */
-	private int NUMBER_OF_WORDS_EACH_PHASE = 300;
+	private int NUMBER_OF_WORDS_EACH_PHASE = 3000;
 
 	private Stack<Word> SyllabusWords;
 	public int PhaseIndex;
@@ -45,17 +47,24 @@ public class WordsGenerator {
 		System.out.println("Hello from generate");
 		SyllabusWords = new Stack<>();
 
+		
+		// add basic words
+		// add related to environment .. from person info
+		// add rest 
 		int NumberOfWordsToBeGeneratedAsAdvanced = NumberOfRequiredWords - SyllabusWords.size();
 		Stack<String> advanced_words = GenerateWordsTree(txtfilepath, NumberOfWordsToBeGeneratedAsAdvanced);
 
+		System.out.println("Hello AGAIN!"+advanced_words.size());
+		
 		for (String txt_to_word : advanced_words) {
-			SyllabusWords.push(new Word(txt_to_word));
+			System.out.println(txt_to_word);
+			//SyllabusWords.push(new Word(txt_to_word));
 		}
 
 		for (Word word : SyllabusWords) {
 			// check if exist and create audio files
-			System.out.println(word.getText());
-			word.setSpeechFilePath(Utils.DoTTS(word.getText(), AudiosFolderPath,this.lang));
+			//System.out.println(word.getText());
+			//word.setSpeechFilePath(Utils.DoTTS(word.getText(), AudiosFolderPath,this.lang));
 			// check if exist and create imagepath
 			// word.setImageFilePath(FindHelpImage(word.getText(),
 			// ImagesFolderPath));
@@ -69,33 +78,53 @@ public class WordsGenerator {
 		return word_Characters;
 	}
 		
+//	private Stack<String> GenerateWordsTree(String txtfilepath, int number_of_words) {
+//		int levels = 0;
+//		int added = 0;
+//		Stack<String> AvailableWords = new Stack<>();
+//		// read AvailableWords read from txtfile
+//		AvailableWords = Utils.readfileintoStack(txtfilepath);
+//		Stack<String> tree = new Stack<>();
+//		tree.add(this.person.getName());
+//		added++;
+//		while (number_of_words > tree.size()) {
+//			for (int i = 0; i < added; i++) {
+//				added = 0;
+//				String[] Word_characters = GenerateWord_Characters(tree.get((i) + levels));
+//				for (String CH : Word_characters) {
+//					for (String searchword : AvailableWords) {
+//						if (searchword.substring(0, 1).equals(CH)) {
+//							tree.add(searchword);
+//							added++;
+//							AvailableWords.remove(searchword);
+//							break;
+//						}
+//					}
+//				}
+//			}
+//			levels++;
+//		}
+//		return tree;
+//	}
 	private Stack<String> GenerateWordsTree(String txtfilepath, int number_of_words) {
-		int levels = 0;
-		int added = 0;
-		Stack<String> AvailableWords = new Stack<>();
-		// read AvailableWords read from txtfile
-		AvailableWords = Utils.readfileintoStack(txtfilepath);
-		Stack<String> tree = new Stack<>();
-		tree.add(this.person.getName());
-		added++;
-		while (number_of_words > tree.size()) {
-			for (int i = 0; i < added; i++) {
-				added = 0;
-				String[] Word_characters = GenerateWord_Characters(tree.get((i) + levels));
-				for (String CH : Word_characters) {
-					for (String searchword : AvailableWords) {
-						if (searchword.substring(0, 1).equals(CH)) {
-							tree.add(searchword);
-							added++;
-							AvailableWords.remove(searchword);
-							break;
-						}
-					}
+		Stack<String> AdvancedWords = new Stack<>();
+		Map<java.lang.Character, Stack<String>>AvailableWordsOrganisedByCharacters = Utils.readfileintoMap(txtfilepath, 0);
+		int ASCIINUM4_1stArChar = 1575;
+
+		while(AdvancedWords.size()<number_of_words){
+			for(int i=0;i<AvailableWordsOrganisedByCharacters.size()+5;i++){
+				try{
+					Stack<String>CurrentCharStack = AvailableWordsOrganisedByCharacters.get(new java.lang.Character((char)(ASCIINUM4_1stArChar+i)));
+					AdvancedWords.push(CurrentCharStack.pop());
+					AvailableWordsOrganisedByCharacters.remove(new java.lang.Character((char)(ASCIINUM4_1stArChar+i)));
+					AvailableWordsOrganisedByCharacters.put(new java.lang.Character((char)(ASCIINUM4_1stArChar+i)), CurrentCharStack);
+					if(AdvancedWords.size()>=number_of_words) break;
+				}catch(Exception e){
+					System.err.println("NULL: "+new java.lang.Character((char)(ASCIINUM4_1stArChar+i)));
 				}
 			}
-			levels++;
 		}
-		return tree;
+		return AdvancedWords;
 	}
 
 	/*
