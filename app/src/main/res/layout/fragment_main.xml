@@ -1,0 +1,76 @@
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".layout.MainFragment">
+
+
+    <TextView
+        android:id="@+id/textView_maintext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text"
+        android:textSize="@dimen/activity_word_textsize"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/relativelayout_arrowslayout">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imagebutton_prevword"
+            android:layout_alignParentLeft="true"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:src="@drawable/prevword"
+            android:elevation="10dp"
+            android:translationZ="10dp"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imagebutton_skipword"
+            android:layout_alignParentRight="true"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:src="@drawable/nextword"
+            android:elevation="10dp"
+            android:translationZ="10dp"/>
+    </RelativeLayout>
+
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imagebutton_soundhelp"
+        android:src="@drawable/sound"
+        android:background="@color/colorWhity"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="@dimen/activity_double_actionbar_margin"
+        android:layout_marginBottom="@dimen/activity_double_actionbar_margin"
+        android:elevation="10dp"
+        android:translationZ="10dp"
+
+        />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imagebutton_photohelp"
+        android:src="@drawable/photo"
+        android:background="@color/colorWhity"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="@dimen/activity_double_actionbar_margin"
+        android:layout_marginLeft="@dimen/activity_double_actionbar_margin"
+        android:elevation="10dp"
+        android:translationZ="10dp" />
+
+
+</android.support.constraint.ConstraintLayout>
