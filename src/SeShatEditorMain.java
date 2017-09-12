@@ -17,7 +17,7 @@ public class SeShatEditorMain {
 	
 	public static void main(String[] args) {
 		new Utils().init();
-		/*switch (Utils.state) {
+		switch (Utils.state) {
 		case CHARSNOTLOADED:
 			new FileChooser(REASON.LANG_CHARS, Utils.CharLangWindowTitle).setSize(new Dimension(500, 300));
 			break;
@@ -46,25 +46,7 @@ public class SeShatEditorMain {
 			break;
 		default:
 			break;
-		}*/
-		
-		Loader loader = new Loader();
-		if (characters == null)
-			characters = loader.loadIn();
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				loader.GenerateSyllabus(new WordsGenerator("AR",phaseindex,new Person("سيف","الجيزة",22)));
-			}
-		}).start();
-
-		/*Loader loader = new Loader();
-		characters = loader.loadIn();
-		WordsGenerator generator = new WordsGenerator("AR", 1, new Person("سيف","الجيزة",22));
-		Stack<Word>words = generator.generate("/home/seif/Desktop/SF/AF/", "/home/seif/Desktop/SF/IF/", "/home/seif/Desktop/nouns.txt");
-		System.out.println("YES!"+words.size());*/
-		//Utils.cleanwordsfile("basicwords.txt");
-		//System.out.println(""+Utils.CodeToChar(1615));*/
+		}
 	}
 
 	public static void GenerateSyllabus_Pressed(Person p) {
