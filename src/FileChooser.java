@@ -30,9 +30,9 @@ enum REASON {
 public class FileChooser extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private Stack<String> Added_langs;
+	private Stack<String> Added_langs= null;
 
-	public JTextField filepath;
+	public JTextField filepath=null;
 	private JButton choose, ok, AddLangBtn;
 	public JPanel Langs;
 	
@@ -51,13 +51,13 @@ public class FileChooser extends JFrame {
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		switch (R) {
 		case LANG_CHARS:
-			filenameJTextFieldInfo = "file contains language characters";
+			filenameJTextFieldInfo = Messages.getString("FileChooser.characters_file"); //$NON-NLS-1$
 
 			initialize_MainPanel();
 			initialize_langPanel();
 			break;
 		case DB_WORDS:
-			filenameJTextFieldInfo = "file contains language words";
+			filenameJTextFieldInfo = Messages.getString("FileChooser.words_file"); //$NON-NLS-1$
 			initialize_MainPanel();
 			break;
 		}
@@ -67,19 +67,19 @@ public class FileChooser extends JFrame {
 
 	private void initialize_MainPanel() {
 		filepath = new JTextField();
-		choose = new JButton("Choose");
-		ok = new JButton("OK");
+		choose = new JButton(Messages.getString("FileChooser.btn_choose")); //$NON-NLS-1$
+		ok = new JButton(Messages.getString("FileChooser.btn_ok")); //$NON-NLS-1$
 		filepath.setText(filenameJTextFieldInfo);
 		choose.addActionListener(new ChooseL());
 		ok.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (filepath.getText().equals(filenameJTextFieldInfo)) {
-					JOptionPane.showMessageDialog(new JFrame(), "Sorry! You didn't choose any file!", "Warning",
+					JOptionPane.showMessageDialog(new JFrame(), Messages.getString("FileChooser.nochoice"), Messages.getString("FileChooser.warning"), //$NON-NLS-1$ //$NON-NLS-2$
 							JOptionPane.WARNING_MESSAGE);
 				} else {
 					try {
-						JOptionPane.showMessageDialog(new JFrame(), "Thanks!", "Info", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(new JFrame(), Messages.getString("FileChooser.thanks"), Messages.getString("FileChooser.info"), JOptionPane.INFORMATION_MESSAGE); //$NON-NLS-1$ //$NON-NLS-2$
 						String BackupFile = new File(filepath.getText()).getName();
 						Utils.createfile(BackupFile);
 						Utils.copyFileUsingFileStreams(new File(filepath.getText()), new File(BackupFile));
@@ -97,7 +97,7 @@ public class FileChooser extends JFrame {
 							SeShatEditorMain.LangWordsChoosingFile_Pressed();
 						}
 					} catch (IOException e1) {
-						System.out.println("E:" + e1.toString());
+						System.out.println(Messages.getString( e1.toString())); //$NON-NLS-1$
 					}
 					
 					
@@ -127,7 +127,7 @@ public class FileChooser extends JFrame {
 		choose.setBorder(new CompoundBorder(border, margin));
 		choose.setPreferredSize(new Dimension(20, 20));
 
-		MainPanel_1.setName("file paths");
+		MainPanel_1.setName(Messages.getString("FileChooser.filepaths")); //$NON-NLS-1$
 
 		MainPanel_1.setLayout(new BorderLayout());
 		MainPanel_1.add(filepath, BorderLayout.NORTH);
@@ -139,13 +139,12 @@ public class FileChooser extends JFrame {
 
 	public void initialize_langPanel() {
 
-		this.Added_langs = Utils.readfileintoStack("Config", 1);
+		this.Added_langs = Utils.readfileintoStack(Utils.CONFIG, 1); //$NON-NLS-1$
 		AddLangugesPanel = new JPanel();
-		AddLangugesPanel.setName("Add Language");
 		AddLangugesPanel.setBorder(new BevelBorder(BevelBorder.RAISED));
 		AddLangugesPanel.setLayout(new GridLayout(1, 1));
 
-		AddLangBtn = new JButton("Add Language");
+		AddLangBtn = new JButton(Messages.getString("FileChooser.btn_addlang")); //$NON-NLS-1$
 		AddLangBtn.addActionListener(new ActionListener() {
 
 			@Override
@@ -174,11 +173,11 @@ public class FileChooser extends JFrame {
 		this.dispose();
 	}
     private String getSelectedButtonText() {
+    	int i=0;
         for (Enumeration<AbstractButton> buttons = this.LangRadioBtnGroup.getElements(); buttons.hasMoreElements();) {
             AbstractButton button = buttons.nextElement();
-
             if (button.isSelected()) {
-                return button.getText();
+                return Utils.readfileintoStack(Utils.CONFIG).elementAt(i++).toUpperCase(); // adding 1 for state line
             }
         }
         return null;

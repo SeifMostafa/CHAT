@@ -3,6 +3,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import model.Person;
+import model.Word;
 
 public class SeShatEditorMain {
 	/*
@@ -13,9 +14,10 @@ public class SeShatEditorMain {
 	 */
 	static int phaseindex = 1;
 	static Map<Character, model.Character> characters = null;
+	
 	public static void main(String[] args) {
-		/*new Utils().init();
-		switch (Utils.state) {
+		new Utils().init();
+		/*switch (Utils.state) {
 		case CHARSNOTLOADED:
 			new FileChooser(REASON.LANG_CHARS, Utils.CharLangWindowTitle).setSize(new Dimension(500, 300));
 			break;
@@ -46,26 +48,35 @@ public class SeShatEditorMain {
 			break;
 		}*/
 		
-		WordsGenerator generator = new WordsGenerator(Utils.Lang, 1, new Person("سيف","الجيزة",22));
-		generator.generate("", "", "/home/azizax/Desktop/nouns.txt");
-			
-		//Utils.cleanwordsfile("/home/azizax/Desktop/nouns.txt");
-		//Map<java.lang.Character, Stack<String>>AvailableWordsOrganisedByCharacters = Utils.readfileintoMap("/home/azizax/Desktop/nouns.txt", 0);
+		Loader loader = new Loader();
+		if (characters == null)
+			characters = loader.loadIn();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				loader.GenerateSyllabus(new WordsGenerator("AR",phaseindex,new Person("سيف","الجيزة",22)));
+			}
+		}).start();
 
-
+		/*Loader loader = new Loader();
+		characters = loader.loadIn();
+		WordsGenerator generator = new WordsGenerator("AR", 1, new Person("سيف","الجيزة",22));
+		Stack<Word>words = generator.generate("/home/seif/Desktop/SF/AF/", "/home/seif/Desktop/SF/IF/", "/home/seif/Desktop/nouns.txt");
+		System.out.println("YES!"+words.size());*/
+		//Utils.cleanwordsfile("basicwords.txt");
+		//System.out.println(""+Utils.CodeToChar(1615));*/
 	}
 
 	public static void GenerateSyllabus_Pressed(Person p) {
 		Loader loader = new Loader();
-		if (characters == null)
+		if (characters.equals(null))
 			characters = loader.loadIn();
-
-		loader.GenerateSyllabus(new WordsGenerator(Utils.Lang,phaseindex, p));
-		try {
-			loader.loadout();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				loader.GenerateSyllabus(new WordsGenerator("AR",phaseindex, p));
+			}
+		}).start();
 	}
 
 	public static void LangCharsFinishingPaint_FV_TR__Pressed() {
@@ -86,7 +97,7 @@ public class SeShatEditorMain {
 			new TextToImage(words, Utils.ImagesOutputPATH).run();
 			new TextToSpeech(words, Utils.SpeechOutputPATH, "AR").run();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e.toString()+"    from: LangCharsChoosingFile_Pressed" );
 		}
 	}
 

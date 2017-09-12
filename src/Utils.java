@@ -62,6 +62,8 @@ public class Utils {
 	public static String Lang = "AR";
 	public static final String SHAREDPREF = "sharedpref";
 	public static final String CONFIG = "Config";
+	public static final String BasicWordsFileName = "basicwords.txt";
+	public static final String PhrasesInputFile = "phrases";
 	public static final String CHARFILEKEY = "chars:";
 	public static final String DBWORDSFILEKEY = "dbwords:";
 	public static final String LANGFILEKEY = "lang:";
@@ -86,12 +88,12 @@ public class Utils {
 		final Calendar c = Calendar.getInstance();
 		int todaysDate = (c.get(Calendar.YEAR) * 10000) + ((c.get(Calendar.MONTH) + 1) * 100)
 				+ (c.get(Calendar.DAY_OF_MONTH));
-		System.out.println("DATE:" + String.valueOf(todaysDate));
+		//System.out.println(String.valueOf(todaysDate));
 		return (String.valueOf(todaysDate));
-
 	}
 
 	public static String DoTTS(String AudioFoler, String word, String lang) {
+		if(checkfileExist(AudioFoler)&&word.length()>0&&lang.length()==2){
 		word = word.replaceAll(" ", "+");
 		// filepath = audio folder
 		String file = AudioFoler + word;
@@ -105,8 +107,15 @@ public class Utils {
 			Utils.executeCommand(Mp3ToSpecificWav_command);
 		}
 		return file;
+		}else{
+			System.err.println("Invalid parameters!");
+			return null;
+		}
 	}
 
+	/*
+	 * need web service to download from
+	 */
 	public String FindHelpImage(String ImagesFolder, String word) {
 		word = word.replaceAll(" ", "+");
 		// file = audio folder
@@ -128,7 +137,7 @@ public class Utils {
 			bufferedWriter.write(data + "\n");
 			bufferedWriter.close();
 
-		} catch (IOException e) {
+		}catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -241,11 +250,32 @@ public class Utils {
 		}
 		return result;
 	}
+	public static Map<String,String> readfileintoMap(String filepath){
+		Map<String, String> result = new HashMap<>();
+		try{
+			FileReader reader = new FileReader(filepath);
+			BufferedReader bufferedReader = new BufferedReader(reader);
 
+			String line = bufferedReader.readLine();
+			String[] k_v= line.split(",");
+			result.put(k_v[0], k_v[1]);
+			reader.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return result;
+	}
 	public static int CharToASCII(final char character) {
 		return (int) character;
 	}
+	public static char CodeToChar(final int code){
+		return (char) code;
+	}
 
+	/*
+	 * remove non ar, symbols words and print them- ar words- into file 
+	 * line by line
+	 */
 	public static void cleanwordsfile(String wordsfilepath) {
 		Stack<String> ret = new Stack<>();
 		try {
@@ -256,6 +286,9 @@ public class Utils {
 			while ((line = bufferedReader.readLine()) != null) {
 
 				line = line.replaceAll("[!-~]", "");
+				for(int i=1610;i<1620;i++){
+					line = line.replaceAll(""+CodeToChar(i), "");
+				}
 				String words[] = line.split(" ");
 				for (String word : words) {
 					if (!line.equals(""))
@@ -294,6 +327,7 @@ public class Utils {
 			is.close();
 		}
 		/*
+		 * if not java 8, can use the following code but notice some delay.
 		 * LineNumberReader lnr = new LineNumberReader(new FileReader(new
 		 * File(filename))); lnr.skip(Long.MAX_VALUE); int result=
 		 * lnr.getLineNumber() + 1;//Add 1 because line index starts at 0
@@ -527,6 +561,9 @@ public class Utils {
 		return direction;
 	}
 
+	/*
+	 * return text in image form, doing Text To Image and throw it into ImagesFolder(para1)
+	 */
 	public static BufferedImage DoTTI(String ImagesFolder, String text) {
 
 		BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY);
@@ -578,10 +615,10 @@ public class Utils {
 
 	public static void UpdateStateInConfigFile(State s) {
 		Utils.state = s;
-		Stack<String> config_content = Utils.readfileintoStack("Config");
+		Stack<String> config_content = Utils.readfileintoStack(CONFIG);
 		config_content.remove(0);
 		config_content.add(0, "" + InterpretState(s));
-		Utils.writeStackTofile(config_content, "Config");
+		Utils.writeStackTofile(config_content, CONFIG);
 	}
 
 }

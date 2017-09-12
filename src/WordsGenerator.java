@@ -1,8 +1,7 @@
-import java.util.LinkedList;
+import java.awt.Point;
 import java.util.Map;
 import java.util.Stack;
 
-import model.Character;
 import model.Direction;
 import model.Person;
 import model.Word;
@@ -14,16 +13,18 @@ public class WordsGenerator {
 	 * custom) Advanced (level 3, combination between Personal and Basic to
 	 * generate custom level of words)
 	 */
-	private int NUMBER_OF_WORDS_EACH_PHASE = 3000;
+	private int NUMBER_OF_WORDS_EACH_PHASE = 300;
 
 	private Stack<Word> SyllabusWords;
 	public int PhaseIndex;
 	private Person person;
 	private int NumberOfRequiredWords;
 	private String lang;
+
 	public Person getPerson() {
 		return person;
 	}
+
 	public void setPerson(Person person) {
 		this.person = person;
 	}
@@ -36,91 +37,101 @@ public class WordsGenerator {
 		SyllabusWords = syllabusWords;
 	}
 
-	public WordsGenerator(String lang,int phaseIndex, Person p) {
+	public WordsGenerator(String lang, int phaseIndex, Person p) {
 		super();
 		this.PhaseIndex = phaseIndex;
 		this.NumberOfRequiredWords = NUMBER_OF_WORDS_EACH_PHASE * PhaseIndex;
 		this.person = p;
+		this.lang = lang;
 	}
 
-	public void generate(String AudiosFolderPath, String ImagesFolderPath, String txtfilepath) {
+	public Stack<Word> generate(String AudiosFolderPath, String ImagesFolderPath, String txtfilepath) {
 		System.out.println("Hello from generate");
 		SyllabusWords = new Stack<>();
 
-		
-		// add basic words
-		// add related to environment .. from person info
-		// add rest 
-		int NumberOfWordsToBeGeneratedAsAdvanced = NumberOfRequiredWords - SyllabusWords.size();
-		Stack<String> advanced_words = GenerateWordsTree(txtfilepath, NumberOfWordsToBeGeneratedAsAdvanced);
+		Stack<String> SyllabusWords_txt = new Stack<>();
+		SyllabusWords_txt.push(this.person.getName().trim());
+		SyllabusWords_txt.addAll(Utils.readfileintoStack(Utils.BasicWordsFileName));
 
-		System.out.println("Hello AGAIN!"+advanced_words.size());
+		int NumberOfWordsToBeGeneratedAsAdvanced = NumberOfRequiredWords - SyllabusWords_txt.size();
 		
-		for (String txt_to_word : advanced_words) {
-			System.out.println(txt_to_word);
-			//SyllabusWords.push(new Word(txt_to_word));
-		}
-
-		for (Word word : SyllabusWords) {
+		SyllabusWords_txt.addAll(GenerateWordsTree(txtfilepath, NumberOfWordsToBeGeneratedAsAdvanced));
+		for (String word_txt : SyllabusWords_txt) {	
 			// check if exist and create audio files
-			//System.out.println(word.getText());
-			//word.setSpeechFilePath(Utils.DoTTS(word.getText(), AudiosFolderPath,this.lang));
+			Word word = new Word(word_txt);
+			//System.out.println(word_txt+"@@"+AudiosFolderPath+this.lang);
+			word.setSpeechFilePath(Utils.DoTTS(AudiosFolderPath,word_txt, this.lang));
 			// check if exist and create imagepath
 			// word.setImageFilePath(FindHelpImage(word.getText(),
 			// ImagesFolderPath));
-			// // check if exist and create fv
-			// word.setFV(GenerateWordFV(word.getText()));
+			// check if exist and create fv
+			word.setFV(GenerateWordFV(word_txt));
+			try{
+				word.setTriggerpoints(GenerateWordTR(word_txt));
+			}catch(Exception e){
+				System.out.println(e.toString() + "         from:WordsGenerator::generate");
+			}
+			word.setPhrase(getWordPhrase(word_txt));
+			this.SyllabusWords.push(word);
 		}
+		return this.SyllabusWords;
 	}
 
-	private String[] GenerateWord_Characters(String word) {
-		String[] word_Characters = word.split("");
-		return word_Characters;
-	}
-		
-//	private Stack<String> GenerateWordsTree(String txtfilepath, int number_of_words) {
-//		int levels = 0;
-//		int added = 0;
-//		Stack<String> AvailableWords = new Stack<>();
-//		// read AvailableWords read from txtfile
-//		AvailableWords = Utils.readfileintoStack(txtfilepath);
-//		Stack<String> tree = new Stack<>();
-//		tree.add(this.person.getName());
-//		added++;
-//		while (number_of_words > tree.size()) {
-//			for (int i = 0; i < added; i++) {
-//				added = 0;
-//				String[] Word_characters = GenerateWord_Characters(tree.get((i) + levels));
-//				for (String CH : Word_characters) {
-//					for (String searchword : AvailableWords) {
-//						if (searchword.substring(0, 1).equals(CH)) {
-//							tree.add(searchword);
-//							added++;
-//							AvailableWords.remove(searchword);
-//							break;
-//						}
-//					}
-//				}
-//			}
-//			levels++;
-//		}
-//		return tree;
+//	private String[] GenerateWord_Characters(String word) {
+//		String[] word_Characters = word.split("");
+//		return word_Characters;
 //	}
+	 
+	// private Stack<String> GenerateWordsTree(String txtfilepath, int
+	// number_of_words) {
+	// int levels = 0;
+	// int added = 0;
+	// Stack<String> AvailableWords = new Stack<>();
+	// // read AvailableWords read from txtfile
+	// AvailableWords = Utils.readfileintoStack(txtfilepath);
+	// Stack<String> tree = new Stack<>();
+	// tree.add(this.person.getName());
+	// added++;
+	// while (number_of_words > tree.size()) {
+	// for (int i = 0; i < added; i++) {
+	// added = 0;
+	// String[] Word_characters = GenerateWord_Characters(tree.get((i) +
+	// levels));
+	// for (String CH : Word_characters) {
+	// for (String searchword : AvailableWords) {
+	// if (searchword.substring(0, 1).equals(CH)) {
+	// tree.add(searchword);
+	// added++;
+	// AvailableWords.remove(searchword);
+	// break;
+	// }
+	// }
+	// }
+	// }
+	// levels++;
+	// }
+	// return tree;
+	// }
 	private Stack<String> GenerateWordsTree(String txtfilepath, int number_of_words) {
 		Stack<String> AdvancedWords = new Stack<>();
-		Map<java.lang.Character, Stack<String>>AvailableWordsOrganisedByCharacters = Utils.readfileintoMap(txtfilepath, 0);
+		Map<java.lang.Character, Stack<String>> AvailableWordsOrganisedByCharacters = Utils.readfileintoMap(txtfilepath,0);
 		int ASCIINUM4_1stArChar = 1575;
 
-		while(AdvancedWords.size()<number_of_words){
-			for(int i=0;i<AvailableWordsOrganisedByCharacters.size()+5;i++){
-				try{
-					Stack<String>CurrentCharStack = AvailableWordsOrganisedByCharacters.get(new java.lang.Character((char)(ASCIINUM4_1stArChar+i)));
+		while (AdvancedWords.size() < number_of_words) {
+			for (int i = 0; i < AvailableWordsOrganisedByCharacters.size() + 5; i++) {
+				try {
+					Stack<String> CurrentCharStack = AvailableWordsOrganisedByCharacters
+							.get(new java.lang.Character((char) (ASCIINUM4_1stArChar + i)));
 					AdvancedWords.push(CurrentCharStack.pop());
-					AvailableWordsOrganisedByCharacters.remove(new java.lang.Character((char)(ASCIINUM4_1stArChar+i)));
-					AvailableWordsOrganisedByCharacters.put(new java.lang.Character((char)(ASCIINUM4_1stArChar+i)), CurrentCharStack);
-					if(AdvancedWords.size()>=number_of_words) break;
-				}catch(Exception e){
-					System.err.println("NULL: "+new java.lang.Character((char)(ASCIINUM4_1stArChar+i)));
+					AvailableWordsOrganisedByCharacters
+							.remove(new java.lang.Character((char) (ASCIINUM4_1stArChar + i)));
+					AvailableWordsOrganisedByCharacters.put(new java.lang.Character((char) (ASCIINUM4_1stArChar + i)),
+							CurrentCharStack);
+					if (AdvancedWords.size() >= number_of_words)
+						break;
+				} catch (Exception e) {
+					// System.err.println("NULL: "+new
+					// java.lang.Character((char)(ASCIINUM4_1stArChar+i)));
 				}
 			}
 		}
@@ -138,7 +149,7 @@ public class WordsGenerator {
 		for (int i = 0; i < word.length(); i++) {
 			if (i == 0) {
 				word_directions = Utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 0));
-			} else if (i == word.length() - 1) {
+			} else if (i == (word.length() - 1)) {
 				word_directions = Utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 2));
 			} else {
 				word_directions = Utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 1));
@@ -149,8 +160,7 @@ public class WordsGenerator {
 
 	// pass char and get from db or model
 	private Direction[] getCharacterFV(char c, int index) {
-
-		model.Character character = SeShatEditorMain.characters.get(new Character(c));
+		model.Character character = SeShatEditorMain.characters.get(new java.lang.Character(c));
 		if (character != null) {
 			switch (index) {
 			case 0:
@@ -162,7 +172,32 @@ public class WordsGenerator {
 																// // and first
 			}
 		} else {
+			System.out.println("getCharacterFV:"+c+":NULL");
+			
 			return null;
 		}
 	}
+
+	public Point[] GenerateWordTR(String word) {
+		Point[] word_directions = new Point[0];
+
+		for (int i = 0; i < word.length(); i++) {
+			word_directions = Utils.concatenate(word_directions, getCharacterTR(word.charAt(i)));
+		}
+		return word_directions;
+	}
+
+	// pass char and get from db or model
+	private Point[] getCharacterTR(char c) {
+		model.Character character = SeShatEditorMain.characters.get(new java.lang.Character(c));
+		if(character.getTiggerPoints().equals(null))return new Point[0];
+		return character.getTiggerPoints();
+	}
+
+
+	private String getWordPhrase(String word){
+		return word;
+	}
+
+
 }

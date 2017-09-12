@@ -3,9 +3,9 @@ package model;
 import java.util.ArrayList;
 
 public class Person {
-	private String name, address, job, gender, birthAddress, envLocation, orgHome;
-	ArrayList<String> whyLearn;
-	ArrayList<String> favNames;
+	private String name=null, address=null, job=null, gender=null, birthAddress=null, envLocation=null, orgHome=null;
+	ArrayList<String> whyLearn=null;
+	ArrayList<String> favNames=null;
 	private int age;
 
 	public Person(String name, String address, int age) {
@@ -14,6 +14,23 @@ public class Person {
 		this.address = address;
 		this.age = age;
 	}
+	
+
+	public Person(String name, String address, String job, String gender, String birthAddress, String envLocation,
+			String orgHome, ArrayList<String> whyLearn, ArrayList<String> favNames, int age) {
+		super();
+		this.name = name;
+		this.address = address;
+		this.job = job;
+		this.gender = gender;
+		this.birthAddress = birthAddress;
+		this.envLocation = envLocation;
+		this.orgHome = orgHome;
+		this.whyLearn = whyLearn;
+		this.favNames = favNames;
+		this.age = age;
+	}
+
 
 	public String getAddress() {
 		return address;

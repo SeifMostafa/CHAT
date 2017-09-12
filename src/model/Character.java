@@ -10,9 +10,9 @@ public class Character {
 	 * Syllabus folder will contain CharactersFolder for data for this class
 	 */
 	// 3 files for character positions
-	private String ImagesFilePath[], SpeechesFilePath[];
-	private Direction[] FV;
-	private Point[] TiggerPoints;
+	private String ImagesFilePath[]= null, SpeechesFilePath[]= null;
+	private Direction[] FV= null;
+	private Point[] TiggerPoints = null;
 
 	public char getCh() {
 		return ch;
@@ -52,34 +52,75 @@ public class Character {
 	}
 
 	public Direction[] getFVwithoutINIT() {
+		try {
+			ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV));
+			Direction[] a;
+			if (arrayList.size() > 0) {
+				arrayList.remove(0);
+				a = new Direction[arrayList.size()];
+			} else {
+				a = new Direction[arrayList.size()];
+			}
+			return arrayList.toArray(a);
 
-		ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV));
-		arrayList.remove(0);
-		Direction[] a = new Direction[arrayList.size()];
-		return arrayList.toArray(a);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public Direction[] getFVwithoutEND() {
-		ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV));
-		arrayList.remove(arrayList.size() - 1);
-		Direction[] a = new Direction[arrayList.size()];
-		return arrayList.toArray(a);
+		try {
+			ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV));
+			Direction[] a;
+			if (arrayList.size() > 0) {
+				arrayList.remove(arrayList.size() - 1);
+				a = new Direction[arrayList.size()];
+				return arrayList.toArray(a);
+			} else {
+				a = new Direction[arrayList.size()];
+			}
+			return arrayList.toArray(a);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public Direction[] getFVwithoutEND_withoutINIT() {
-		ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV));
-		arrayList.remove(arrayList.size() - 1);
-		arrayList.remove(0);
-		Direction[] a = new Direction[arrayList.size()];
-		return arrayList.toArray(a);
+		try {
+			ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV));
+
+			Direction[] a;
+
+			if (arrayList.size() > 0) {
+				arrayList.remove(arrayList.size() - 1);
+				arrayList.remove(0);
+				a = new Direction[arrayList.size()];
+				return arrayList.toArray(a);
+			} else {
+				a = new Direction[arrayList.size()];
+			}
+			return arrayList.toArray(a);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public Point[] getTiggerPoints() {
+		
 		return TiggerPoints;
 	}
 
 	public void setTiggerPoints(Point[] tiggerPoints) {
 		TiggerPoints = tiggerPoints;
+	}
+
+	@Override
+	public String toString() {
+		return this.ch + this.FV.toString() + this.TiggerPoints.toString() + this.SpeechesFilePath
+				+ this.SpeechesFilePath;
 	}
 
 }

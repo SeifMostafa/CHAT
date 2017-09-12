@@ -1,10 +1,10 @@
 import java.awt.Point;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 
@@ -45,47 +45,38 @@ public class Loader {
 	 */
 	public void GenerateSyllabus(WordsGenerator g) {
 		this.generator = g;
-		generator.generate(Utils.SpeechOutputPATH, Utils.ImagesOutputPATH, Utils.words_db_txtfilepath);
-	}
-
-	public Loader getInctanse() {
-		return this;
-	}
-
-	// write syllabus
-	public void loadout() throws IOException  {
+		Stack<Word>words = generator.generate(Utils.SpeechOutputPATH, Utils.ImagesOutputPATH, Utils.words_db_txtfilepath);
+		System.out.println("GenerateSyllabus"+words.size());
 		String mainfolder = Utils.OUTPUTPATH + Utils.SlashIndicator + generator.getPerson().getName();
 		String ResultWordsFile = mainfolder + Utils.SlashIndicator + Utils.WordsOutputFileName;
 		String ResultPhrasesFile = mainfolder + Utils.SlashIndicator + Utils.PhrasesOutputFileName;
 		Utils.createdir(mainfolder);
 		Utils.createfile(ResultWordsFile);
+		
 		Utils.createfile(ResultPhrasesFile);
 
 		List<Direction> fv_list;
 		Stack<Direction> fv_stack = new Stack<Direction>();
 		ArrayList<Point> tr_list;
 
-		System.out.println("Hello from loadout!" + mainfolder);
-
-		/*
-		 * create 4 folders and 2 file file contains words texts file contains
-		 * phrases 4 folders: triggerpoints,fvs,speeches and images
-		 */
-
-		for (Word w : generator.getSyllabusWords()) {
-			Utils.copyFileUsingFileStreams(new File(w.getImageFilePath()),
-					new File(mainfolder + Utils.SlashIndicator + new File(w.getImageFilePath()).getName()));
-			Utils.copyFileUsingFileStreams(new File(w.getSpeechFilePath()),
-					new File(mainfolder + Utils.SlashIndicator + new File(w.getSpeechFilePath()).getName()));
-			fv_list = Arrays.asList(w.getFV());
-			fv_stack.addAll(fv_list);
-			Utils.writeDirectionStackTofile(fv_stack,
-					mainfolder + Utils.SlashIndicator + w.getText() + Utils.AppenddedToOutputFVfile);
-			tr_list = new ArrayList<>(Arrays.asList(w.getTriggerpoints()));
-			Utils.writePointsStackTofile(tr_list,
-					mainfolder + Utils.SlashIndicator + w.getText() + Utils.AppenddedToOutputTriggerPointsfile);
-			Utils.writeStringToFile(w.getText(), ResultWordsFile);
-			Utils.writeStringToFile(w.getPhrase(), ResultPhrasesFile);
+		for (Word w : words) {
+			try{
+			/*	Utils.copyFileUsingFileStreams(new File(w.getImageFilePath()),
+						new File(mainfolder + Utils.SlashIndicator + new File(w.getImageFilePath()).getName()));*/
+				Utils.copyFileUsingFileStreams(new File(w.getSpeechFilePath()),
+						new File(mainfolder + Utils.SlashIndicator + new File(w.getSpeechFilePath()).getName()));
+				fv_list = Arrays.asList(w.getFV());
+				fv_stack.addAll(fv_list);
+				Utils.writeDirectionStackTofile(fv_stack,
+						mainfolder + Utils.SlashIndicator + w.getText() + Utils.AppenddedToOutputFVfile);
+				tr_list = new ArrayList<>(Arrays.asList(w.getTriggerpoints()));
+				Utils.writePointsStackTofile(tr_list,
+						mainfolder + Utils.SlashIndicator + w.getText() + Utils.AppenddedToOutputTriggerPointsfile);
+				Utils.writeStringToFile(w.getText(), ResultWordsFile);
+				Utils.writeStringToFile(w.getPhrase(), ResultPhrasesFile);
+			}catch(Exception e){
+				System.out.println(e.toString()+"        from:GenerateSyllabus");
+			}
 		}
 	}
 

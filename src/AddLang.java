@@ -15,14 +15,14 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
 public class AddLang extends JFrame {
-	Stack<String> Added_langs;
-	FileChooser chooser;
+	Stack<String> Added_langs=null;
+	FileChooser chooser=null;
 	private static final long serialVersionUID = 1L;
 
 	public AddLang(FileChooser fileChooser) {
 		chooser = fileChooser;
 		this.Added_langs = chooser.getAdded_langs();
-		JPanel panel = new JPanel();
+		JPanel MainPanel = new JPanel();
 		String locales[] = Locale.getISOLanguages();
 		JComboBox<String> dropdownlist = new JComboBox<String>();
 		for (int i = 0; i < locales.length; i++) {
@@ -37,13 +37,13 @@ public class AddLang extends JFrame {
 		JButton OK_btn = new JButton("OK");
 		JButton Cancel_btn = new JButton("Cancel");
 
-		border = panel.getBorder();
+		border = MainPanel.getBorder();
 		margin = new EmptyBorder(100, 100, 100, 100);
-		panel.setBorder(new CompoundBorder(border, margin));
+		MainPanel.setBorder(new CompoundBorder(border, margin));
 
-		panel.setLayout(new GridLayout(1, 2));
-		panel.add(OK_btn);
-		panel.add(Cancel_btn);
+		MainPanel.setLayout(new GridLayout(1, 2));
+		MainPanel.add(OK_btn);
+		MainPanel.add(Cancel_btn);
 		OK_btn.addActionListener(new ActionListener() {
 
 			@Override
@@ -82,18 +82,18 @@ public class AddLang extends JFrame {
 			}
 		});
 		setBounds((int) Utils.width / 2, (int) Utils.height / 2, 500, 500);
-		add(panel, BorderLayout.SOUTH);
+		add(MainPanel, BorderLayout.SOUTH);
 		pack();
 		setTitle("Pick language");
 		setVisible(true);
 		setAlwaysOnTop(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	}
-
 	private boolean checkifalreadyadded(String string) {
 		if (Added_langs.contains(string))
 			return true;
 		else
 			return false;
 	}
+
 }
