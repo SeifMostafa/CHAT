@@ -23,5 +23,8 @@ public class PhrasePickFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_phrase_pick, container, false);
     }
+    // textswitcher and pick from txtview
+    // request word
+    // return true , false
 
 }
