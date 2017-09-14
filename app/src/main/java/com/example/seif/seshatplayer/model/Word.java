@@ -10,6 +10,7 @@ public class Word  implements Parcelable {
 	private String Text, ImageFilePath=null, SpeechFilePath=null, Phrase=null;
 	Point[] triggerpoints=null;
 	private Direction[] FV=null;
+	private boolean Achieved = false;
 
 	protected Word(Parcel in) {
 		Text = in.readString();
@@ -117,5 +118,12 @@ public class Word  implements Parcelable {
 		parcel.writeString(SpeechFilePath);
 		parcel.writeString(Phrase);
 		parcel.writeTypedArray(triggerpoints, i);
+	}
+
+	public boolean isAchieved() {
+		return Achieved;
+	}
+	public void SetAchieved(){
+		this.Achieved = true;
 	}
 }

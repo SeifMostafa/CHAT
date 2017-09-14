@@ -28,16 +28,12 @@ import com.example.seif.seshatplayer.model.Word;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.nio.file.*;
 import java.io.FileNotFoundException;
-
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Stack;
-import java.util.stream.Stream;
 
 
 public class MainActivity extends Activity {
@@ -78,13 +74,7 @@ public class MainActivity extends Activity {
         }
 
 
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        MainFragment mainFragment = new MainFragment();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(WordKey, form_word(word_index));
-         mainFragment.setArguments(bundle);
-        fragmentTransaction.replace(R.id.fragment_replacement,mainFragment);
+        OpenMainFragment(word_index);
 
       /*  HelpFragment helpFragment = new HelpFragment();
         fragmentTransaction.replace(R.id.fragment_replacement,helpFragment);*/
@@ -92,6 +82,7 @@ public class MainActivity extends Activity {
         fragmentTransaction.replace(R.id.fragment_replacement,phrasePickFragment);
         fragmentTransaction.commit();*/
     }
+
     public String getNextWord(){
         return words.get(++word_index);
     }
@@ -104,6 +95,19 @@ public class MainActivity extends Activity {
     private Word form_word(int index){
         return new Word(words.get(index),words.get(index)+AppendedToImageFile,words.get(index)+AppendedToSpeechFile,phrases.get(index)
                 ,getPoints(words.get(index)+AppenddedToOutputTriggerPointsfile),getDirections(words.get(index)+AppenddedToOutputFVfile));
+    }
+    /*
+    ToFlag: if 0 = current, if -1 = prev;
+     */
+    public void updatelesson(int ToFlag){
+        switch(ToFlag){
+            case 0:
+                OpenMainFragment(word_index);
+                break;
+            case -1:
+                OpenMainFragment(--word_index);
+                break;
+        }
     }
     public void voiceoffer(View view, String DataPath2Bplayed) {
         Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
@@ -277,6 +281,16 @@ public class MainActivity extends Activity {
         }
         Point[] result = new Point[points.size()];
         return points.toArray(result);
+    }
+
+    private void OpenMainFragment(int i){
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        MainFragment mainFragment = new MainFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(WordKey, form_word(i));
+        mainFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragment_replacement,mainFragment);
     }
     /*
   * read file into string and the end = \n and return this string

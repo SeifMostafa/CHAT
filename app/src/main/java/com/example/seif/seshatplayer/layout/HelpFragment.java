@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
 
 
@@ -33,14 +34,14 @@ public class HelpFragment extends Fragment {
         PrevlessoniBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                ((MainActivity) getActivity()).updatelesson(-1);
             }
         });
         CurrentlessoniBtn = (ImageButton)view.findViewById(R.id.imagebutton_currentlesson);
         CurrentlessoniBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                ((MainActivity) getActivity()).updatelesson(0);
             }
         });
         AchievedlessoniBtn = (ImageButton)view.findViewById(R.id.imagebutton_achievedlessons);
@@ -50,6 +51,7 @@ public class HelpFragment extends Fragment {
 
             }
         });
+
         PrevlessoniBtn_help = (ImageButton)view.findViewById(R.id.imagebutton_prevlesson_help);
         PrevlessoniBtn_help.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +84,12 @@ public class HelpFragment extends Fragment {
 
     return view;
     }
+
+    private void ShowAchievementsListview(){
+
+    }
+    // listview and clickable to back to specified word
+    // from begin to current lesson
 
 
 }
