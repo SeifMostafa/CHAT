@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,27 +23,35 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.example.seif.seshatplayer.layout.MainFragment;
+import com.example.seif.seshatplayer.model.Direction;
+import com.example.seif.seshatplayer.model.Word;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.nio.file.*;
+import java.io.FileNotFoundException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Scanner;
 import java.util.Stack;
+import java.util.stream.Stream;
 
 
 public class MainActivity extends Activity {
 
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
-    final String WORDS_PREFS_NAME = "WordsPrefsFile";
-    final String WordLoopKey  = "WL";
-    final String WordIndexKey  = "WI";
+    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey  = "WL" , WordIndexKey  = "WI",WordKey ="w";
+    private final String WordsFilePath="WORDS.txt",PhrasesFilePath = "PHRASES.txt",AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt"
+            ,AppendedToImageFile =".png",AppendedToSpeechFile = ".wav";
+
     private static final int RESULT_SPEECH = 1;
-
-
-    private Stack<String> words;
-    private int word_loop=0;
-    private int word_index=0;
+    private Stack<String> words,phrases;
+    private int word_loop=0,word_index=0;
     SharedPreferences sharedPreferences_words;
     SharedPreferences.Editor sharedPreferences_words_editor  ;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +64,9 @@ public class MainActivity extends Activity {
         sharedPreferences_words_editor = sharedPreferences_words.edit();
 
         // read file into words
-        words =   Utils.readfileintoStack("");
+        words =   readFileintoStrack(WordsFilePath);
+        phrases = readFileintoStrack(PhrasesFilePath);
+
         if(sharedPreferences_words.getAll().isEmpty()){
             word_loop  =0;
             word_index = 0;
@@ -65,9 +76,14 @@ public class MainActivity extends Activity {
             word_loop  = Integer.parseInt(sharedPreferences_words.getString(WordLoopKey,"0"));
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey,"0"));
         }
+
+
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         MainFragment mainFragment = new MainFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(WordKey, form_word(word_index));
+         mainFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement,mainFragment);
 
       /*  HelpFragment helpFragment = new HelpFragment();
@@ -75,6 +91,19 @@ public class MainActivity extends Activity {
         /*PhrasePickFragment phrasePickFragment = new PhrasePickFragment();
         fragmentTransaction.replace(R.id.fragment_replacement,phrasePickFragment);
         fragmentTransaction.commit();*/
+    }
+    public String getNextWord(){
+        return words.get(++word_index);
+    }
+    public String getPrevWord(){
+        return words.get(--word_index);
+    }
+    public String getCurrentWord(){
+        return words.get(word_index);
+    }
+    private Word form_word(int index){
+        return new Word(words.get(index),words.get(index)+AppendedToImageFile,words.get(index)+AppendedToSpeechFile,phrases.get(index)
+                ,getPoints(words.get(index)+AppenddedToOutputTriggerPointsfile),getDirections(words.get(index)+AppenddedToOutputFVfile));
     }
     public void voiceoffer(View view, String DataPath2Bplayed) {
         Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
@@ -95,7 +124,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void  SaveOnSharedPref( String key, String value) {
+    public void  SaveOnSharedPref(String key, String value) {
         sharedPreferences_words_editor.putString(key, value).apply();
         sharedPreferences_words_editor.commit();
     }
@@ -194,4 +223,81 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+
+    private Direction[] getDirections(String filepath){
+        Stack<Direction> directions = new Stack<>() ;
+        File file = new File(filepath);
+        try {
+            Scanner scan = new Scanner(file);
+            while(scan.hasNextLine())
+            {
+                String line =null;
+                line = scan.nextLine();
+                switch(line.charAt(0)){
+                    case 'I':
+                        directions.push(Direction.INIT);
+                        break;
+                    case 'E':
+                        directions.push(Direction.END);
+                        break;
+                    case 'L':
+                        directions.push(Direction.LEFT);
+                        break;
+                    case 'R':
+                        directions.push(Direction.RIGHT);
+                        break;
+                    case 'U':
+                        directions.push(Direction.UP);
+                        break;
+                    case 'D':
+                        directions.push(Direction.DOWN);
+                        break;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println(e.toString());
+        }
+        Direction[] result = new Direction[directions.size()];
+        return directions.toArray(result);
+    }
+    private Point[] getPoints(String filepath){
+        Stack<Point> points = new Stack<>() ;
+        File file = new File(filepath);
+        try {
+            Scanner scan = new Scanner(file);
+            while(scan.hasNextLine())
+            {
+                String line =null;
+                line = scan.nextLine();
+                String[]x_y = line.split(",");
+                points.push(new Point(Integer.parseInt(x_y[0]),Integer.parseInt(x_y[1])));
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println(e.toString());
+        }
+        Point[] result = new Point[points.size()];
+        return points.toArray(result);
+    }
+    /*
+  * read file into string and the end = \n and return this string
+  */
+    public static Stack<String> readFileintoStrack(String filepath) {
+
+        Stack<String> result = new Stack<>();
+        try {
+            FileReader reader = new FileReader(filepath);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                result.push(line);
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

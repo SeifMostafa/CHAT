@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
+import com.example.seif.seshatplayer.model.Word;
 
 import java.io.File;
 
@@ -35,12 +36,12 @@ import java.io.File;
 public class MainFragment extends Fragment {
 
     ImageButton helpiBtn,PreviBtn,NextiBtn,PlaySoundiBtn,DisplayImageiBtn;
-    private String word;
+    private Word word;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-
+            word = getArguments().getParcelable(MainActivity.WordKey);
         }
     }
 
@@ -49,16 +50,7 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_main, container, false);
-       /* TextView tv = (TextView) view.findViewById(R.id.textView_maintext);
-        tv.setText("");
-        String text = "ورد";
-        for(int i=0;i<text.length();i++){
-            Animation a = AnimationUtils.loadAnimation(getActivity(), R.anim.scale);
-            a.reset();
-            tv.setText(tv.getText().toString()+text.charAt(i));
-            tv.clearAnimation();
-            tv.startAnimation(a);
-        }*/
+
 
         helpiBtn = (ImageButton) view.findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(new View.OnClickListener() {
@@ -88,8 +80,6 @@ public class MainFragment extends Fragment {
         PlaySoundiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //mediaplayer
-                Activity activity = getActivity();
                 ((MainActivity) getActivity()).voiceoffer(PlaySoundiBtn,"");
             }
         });
@@ -128,7 +118,7 @@ public class MainFragment extends Fragment {
 
         return view;
     }
-    private void helpbypic(View view) {
+    private void helpbypic(View view,String img2Bdisplayed) {
         Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.shake);
         view.startAnimation(shake);
 
@@ -143,7 +133,7 @@ public class MainFragment extends Fragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
         ImageView imageView = (ImageView) dialogLayout.findViewById(R.id.picsample);
-        File imgFile = new  File("/storage/emulated/0/CCHAT/helpPhoto/ورد.jpg");
+        File imgFile = new  File(img2Bdisplayed);
         if(imgFile.exists()){
 
             Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
@@ -158,7 +148,7 @@ public class MainFragment extends Fragment {
     /**
      * Created by azizax on 31/01/17.
      */
-    public class CustTextView extends TextView {
+    public class CustTextView extends android.support.v7.widget.AppCompatTextView {
         Context context;
         public CustTextView(Context context, AttributeSet attrs, int defStyle) {
             super(context, attrs, defStyle);
@@ -246,8 +236,6 @@ public class MainFragment extends Fragment {
             CustTextView.this.setAnimation(animation);
             return super.animate();
         }
-
-
     }
 
 }

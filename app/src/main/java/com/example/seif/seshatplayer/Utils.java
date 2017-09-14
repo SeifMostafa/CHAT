@@ -1,27 +1,15 @@
 package com.example.seif.seshatplayer;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.media.MediaPlayer;
 import android.util.Log;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import com.example.seif.seshatplayer.model.Direction;
 import java.util.Calendar;
-import java.util.Scanner;
-import java.util.Stack;
 
 /**
  * Created by seif on 9/13/17.
  */
 
 public class Utils {
-    public static final String SyllabusFolderPath="/SF/";
-    // media player
+
     public static String getCurrentTime() {
 
         final Calendar c = Calendar.getInstance();
@@ -32,24 +20,21 @@ public class Utils {
         return (String.valueOf(currentTime));
 
     }
-    public static Stack<String>  readfileintoStack(String filepath){
+    public static Direction[] ComparePointsToCheckFV(double x1, double y1, double x2, double y2) {
+        Direction direction[] = new Direction[2];
+        if (x1 > x2)
+            direction[0] = Direction.RIGHT;
+        else if (x1 < x2)
+            direction[0] = Direction.LEFT;
+        else
+            direction[0] = null;
 
-        File file = new File(filepath);
-        Stack<String> words = new Stack<>();
-        try {
-            Scanner scan = new Scanner(file);
-            while(scan.hasNextLine())
-            {
-                String line =null;
-                line = scan.nextLine();
-                words.push(line);
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println(e.toString());
-        }
-        return words;
+        if (y1 > y2)
+            direction[1] = Direction.DOWN;
+        else if (y1 < y2)
+            direction[1] = Direction.UP;
+        else
+            direction[1] = null;
+        return direction;
     }
-
-
-
 }

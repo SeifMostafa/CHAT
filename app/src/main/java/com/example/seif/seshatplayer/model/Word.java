@@ -1,0 +1,121 @@
+package com.example.seif.seshatplayer.model;
+
+import android.graphics.Point;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.lang.*;
+
+public class Word  implements Parcelable {
+	private String Text, ImageFilePath=null, SpeechFilePath=null, Phrase=null;
+	Point[] triggerpoints=null;
+	private Direction[] FV=null;
+
+	protected Word(Parcel in) {
+		Text = in.readString();
+		ImageFilePath = in.readString();
+		SpeechFilePath = in.readString();
+		Phrase = in.readString();
+		triggerpoints = in.createTypedArray(Point.CREATOR);
+	}
+
+	public static final Creator<Word> CREATOR = new Creator<Word>() {
+		@Override
+		public Word createFromParcel(Parcel in) {
+			return new Word(in);
+		}
+
+		@Override
+		public Word[] newArray(int size) {
+			return new Word[size];
+		}
+	};
+
+	public Point[] getTriggerpoints() {
+		return triggerpoints;
+	}
+
+	public void setTriggerpoints(Point[] triggerpoints) {
+		this.triggerpoints = triggerpoints;
+	}
+
+	public Word(String text) {
+		super();
+		Text = text;
+	}
+
+	public Word(String text, String imageFilePath, String speechFilePath, String phrase, Point[] triggerpoints,
+			Direction[] fV) {
+		super();
+		Text = text;
+		ImageFilePath = imageFilePath;
+		SpeechFilePath = speechFilePath;
+		Phrase = phrase;
+		this.triggerpoints = triggerpoints;
+		FV = fV;
+	}
+
+	public String getText() {
+		return Text;
+	}
+
+	public void setText(String text) {
+		Text = text;
+	}
+
+	public String getImageFilePath() {
+		return ImageFilePath;
+	}
+
+	public void setImageFilePath(String imageFilePath) {
+		ImageFilePath = imageFilePath;
+	}
+
+	public String getSpeechFilePath() {
+		return SpeechFilePath;
+	}
+
+	public void setSpeechFilePath(String speechFilePath) {
+		SpeechFilePath = speechFilePath;
+	}
+
+	public java.lang.Character[] getWordChars() {
+		java.lang.Character[] chars = new java.lang.Character[this.Text.length()];
+		for (int i = 0; i < this.Text.length(); i++) {
+			java.lang.Character character;
+			character = new java.lang.Character(this.Text.charAt(i));
+			chars[i] = character;
+		}
+		return chars;
+	}
+
+	public Direction[] getFV() {
+		return FV;
+	}
+
+	public void setFV(Direction[] fV) {
+		FV = fV;
+	}
+
+	public String getPhrase() {
+		return Phrase;
+	}
+
+	public void setPhrase(String phrase) {
+		Phrase = phrase;
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel parcel, int i) {
+		parcel.writeString(Text);
+		parcel.writeString(ImageFilePath);
+		parcel.writeString(SpeechFilePath);
+		parcel.writeString(Phrase);
+		parcel.writeTypedArray(triggerpoints, i);
+	}
+}
