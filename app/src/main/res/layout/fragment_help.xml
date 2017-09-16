@@ -1,0 +1,79 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.seif.seshatplayer.layout.HelpFragment">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/imagebutton_prevlesson"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhity"
+                android:src="@drawable/prevlesson" />
+
+            <ImageButton
+                android:id="@+id/imagebutton_prevlesson_help"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:src="@drawable/sound" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:paddingLeft="@dimen/activity_double_actionbar_margin">
+
+            <ImageButton
+                android:id="@+id/imagebutton_currentlesson"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:src="@drawable/reset" />
+
+            <ImageButton
+                android:id="@+id/imagebutton_currentlesson_help"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:src="@drawable/sound" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center"
+            android:orientation="vertical"
+            android:paddingLeft="@dimen/activity_double_actionbar_margin">
+
+            <ImageButton
+                android:id="@+id/imagebutton_achievedlessons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhity"
+                android:src="@drawable/achieved" />
+
+            <ImageButton
+                android:id="@+id/imagebutton_achievedlessons_help"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:src="@drawable/sound" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
