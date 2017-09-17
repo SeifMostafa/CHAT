@@ -12,35 +12,42 @@ import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.example.seif.seshatplayer.layout.HelpFragment;
 import com.example.seif.seshatplayer.layout.MainFragment;
+import com.example.seif.seshatplayer.layout.PhrasePickFragment;
 import com.example.seif.seshatplayer.model.Direction;
 import com.example.seif.seshatplayer.model.Word;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
-    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey  = "WL" , WordIndexKey  = "WI",WordKey ="w";
-    private final String WordsFilePath="WORDS.txt",PhrasesFilePath = "PHRASES.txt",AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt"
+    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey  = "WL" , WordIndexKey  = "WI",WordKey ="w",PhraseKey ="p";
+    private  String WordsFilePath="/SF/WORDS.txt",PhrasesFilePath = "/SF/PHRASES.txt",AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt"
             ,AppendedToImageFile =".png",AppendedToSpeechFile = ".wav";
 
     private static final int RESULT_SPEECH = 1;
@@ -48,7 +55,7 @@ public class MainActivity extends Activity {
     private int word_loop=0,word_index=0;
     SharedPreferences sharedPreferences_words;
     SharedPreferences.Editor sharedPreferences_words_editor  ;
-
+    private String filename = "Archive.txt";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,8 +67,23 @@ public class MainActivity extends Activity {
         sharedPreferences_words_editor = sharedPreferences_words.edit();
 
         // read file into words
+
+        //WordsFilePath = Environment.getDataDirectory() + WordsFilePath;
+        //PhrasesFilePath = Environment.getDataDirectory() + PhrasesFilePath;
+
         words =   readFileintoStrack(WordsFilePath);
         phrases = readFileintoStrack(PhrasesFilePath);
+
+
+
+      /*  Log.i("XX",""+words.size());
+        String[] childs =  this.getDir(WordsFilePath,MODE_PRIVATE).list();
+
+        for(int i=0;i<childs.length;i++){
+            Log.i("XX",childs[i]);
+        }
+        Log.i("XX",""+WordsFilePath);
+*/
 
         if(sharedPreferences_words.getAll().isEmpty()){
             word_loop  =0;
@@ -73,14 +95,21 @@ public class MainActivity extends Activity {
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey,"0"));
         }
 
-
-        OpenMainFragment(word_index);
-
-      /*  HelpFragment helpFragment = new HelpFragment();
-        fragmentTransaction.replace(R.id.fragment_replacement,helpFragment);*/
-        /*PhrasePickFragment phrasePickFragment = new PhrasePickFragment();
-        fragmentTransaction.replace(R.id.fragment_replacement,phrasePickFragment);
-        fragmentTransaction.commit();*/
+        new File(getFilesDir(), filename);
+       // OpenMainFragment(word_index);
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        HelpFragment helpFragment = new HelpFragment();
+        fragmentTransaction.replace(R.id.fragment_replacement,helpFragment);
+        /*FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        PhrasePickFragment phrasePickFragment = new PhrasePickFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(PhraseKey, "ود الورد");
+        bundle.putString(WordKey,"الورد");
+        phrasePickFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragment_replacement,phrasePickFragment);*/
+        fragmentTransaction.commit();
     }
 
     public String getNextWord(){
@@ -118,6 +147,7 @@ public class MainActivity extends Activity {
             mp.stop();
         }
         try {
+
             mp.setDataSource(DataPath2Bplayed);
             mp.prepare();
             mp.start();
@@ -127,7 +157,19 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
-
+    public void voiceoffer(View view, int res_id) {
+        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+        view.startAnimation(shake);
+        final MediaPlayer mediaPlayer=MediaPlayer.create(this,res_id);
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+        try {
+            mediaPlayer.start();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     public void  SaveOnSharedPref(String key, String value) {
         sharedPreferences_words_editor.putString(key, value).apply();
         sharedPreferences_words_editor.commit();
@@ -197,6 +239,7 @@ public class MainActivity extends Activity {
                     if (RecordAudioPermission && InternetPermission && write_storagePermission && read_storagePermission) {
                         // write your logic here
                     } else {
+                        Log.i("onRequestPermResult",""+RecordAudioPermission+","+InternetPermission+","+write_storagePermission+","+read_storagePermission);
                         Snackbar.make(this.findViewById(android.R.id.content),
                                 "Please Grant Permissions to be able to work",
                                 Snackbar.LENGTH_INDEFINITE).setAction("ENABLE",
@@ -258,6 +301,7 @@ public class MainActivity extends Activity {
                         break;
                 }
             }
+            scan.close();
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());
         }
@@ -313,5 +357,35 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public void AssignWordAsFinished(String Word){
+        try {
+            FileWriter writer = new FileWriter(filename, true);
+            BufferedWriter bufferedWriter = new BufferedWriter(writer);
+            bufferedWriter.write(Word + "\n");
+            bufferedWriter.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<String> ReadArchiveWords(){
+        ArrayList<String> words = new ArrayList<>();
+        try {
+            FileReader reader = new FileReader(filename);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                words.add(line);
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return words;
     }
 }

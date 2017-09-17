@@ -37,11 +37,12 @@ public class MainFragment extends Fragment {
 
     ImageButton helpiBtn,PreviBtn,NextiBtn,PlaySoundiBtn,DisplayImageiBtn;
     private Word word;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            word = getArguments().getParcelable(MainActivity.WordKey);
+           this.word = getArguments().getParcelable(MainActivity.WordKey);
         }
     }
 
