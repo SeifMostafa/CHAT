@@ -55,17 +55,40 @@ import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey  = "WL" , WordIndexKey  = "WI",WordKey ="w",PhraseKey ="p";
-    private  String WordsFilePath="/SF/WORDS.txt",PhrasesFilePath = "/SF/PHRASES.txt",AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt"
-            ,AppendedToImageFile =".png",AppendedToSpeechFile = ".wav",SF= "/SF/";
-
+    private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     private static final int RESULT_SPEECH = 1;
-    private ArrayList<String> words,phrases;
-    private int word_loop=0,word_index=0;
     SharedPreferences sharedPreferences_words;
     SharedPreferences.Editor sharedPreferences_words_editor  ;
+    private  String WordsFilePath="/SF/WORDS.txt",PhrasesFilePath = "/SF/PHRASES.txt",AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt"
+            ,AppendedToImageFile =".png",AppendedToSpeechFile = ".wav",SF= "/SF/";
+    private ArrayList<String> words,phrases;
+    private int word_loop=0,word_index=0;
     private String filename = "Archive.txt";
+
+    /*
+  * read file into string and the end = \n and return this string
+  */
+    public static Stack<String> readFileintoStrack(String filepath) {
+
+        Stack<String> result = new Stack<>();
+        try {
+            FileReader reader = new FileReader(filepath);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                result.push(line);
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,31 +123,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //OpenMainFragment(word_index);
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        HelpFragment helpFragment = new HelpFragment();
-        fragmentTransaction.replace(R.id.fragment_replacement,helpFragment);
-        fragmentTransaction.commit();
-        /*FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        PhrasePickFragment phrasePickFragment = new PhrasePickFragment();
-        Bundle bundle = new Bundle();
-        bundle.putString(PhraseKey, "ود الورد");
-        bundle.putString(WordKey,"الورد");
-        phrasePickFragment.setArguments(bundle);
-        fragmentTransaction.replace(R.id.fragment_replacement,phrasePickFragment);*//*
-        fragmentTransaction.commit();*/
+        OpenPhraseFragment("سيف مصطفى","سيف");
     }
 
     public String getNextWord(){
         return words.get(++word_index);
     }
+
     public String getPrevWord(){
         return words.get(--word_index);
     }
+
     public String getCurrentWord(){
         return words.get(word_index);
     }
+
     private Word form_word(int index){
         try {
             return new Word(words.get(index), SF + words.get(index) + AppendedToImageFile, SF + words.get(index) + AppendedToSpeechFile, phrases.get(index)
@@ -135,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
         }
+
     /*
     ToFlag: if 0 = current, if -1 = prev;
      */
@@ -152,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
     public void updatelesson(String word){
         if(word!=null){
             OpenMainFragment(words.indexOf(word));
@@ -160,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e("updatelessonE:","word == null");
         }
     }
+
     public void voiceoffer(View view, String DataPath2Bplayed) {
         Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
         view.startAnimation(shake);
@@ -179,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     public void voiceoffer(View view, int res_id) {
         Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
         view.startAnimation(shake);
@@ -192,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     public void helpbypic(View view,String img2Bdisplayed) {
         Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
         view.startAnimation(shake);
@@ -273,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
             // write your logic code if permission already granted
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -306,6 +325,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RESULT_SPEECH && requestCode == RESULT_OK) ;
@@ -318,7 +338,6 @@ public class MainActivity extends AppCompatActivity {
 
         super.onActivityResult(requestCode, resultCode, data);
     }
-
 
     private Direction[] getDirections(String filepath){
         Stack<Direction> directions = new Stack<>() ;
@@ -357,6 +376,7 @@ public class MainActivity extends AppCompatActivity {
         Direction[] result = new Direction[directions.size()];
         return directions.toArray(result);
     }
+
     private Point[] getPoints(String filepath){
         Stack<Point> points = new Stack<>() ;
         File file = new File(filepath);
@@ -386,27 +406,17 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.fragment_replacement,mainFragment);
         fragmentTransaction.commit();
     }
-    /*
-  * read file into string and the end = \n and return this string
-  */
-    public static Stack<String> readFileintoStrack(String filepath) {
 
-        Stack<String> result = new Stack<>();
-        try {
-            FileReader reader = new FileReader(filepath);
-            BufferedReader bufferedReader = new BufferedReader(reader);
-
-            String line;
-
-            while ((line = bufferedReader.readLine()) != null) {
-                result.push(line);
-            }
-            reader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
+    private void OpenPhraseFragment(String phrase,String word){
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        PhrasePickFragment phrasePickFragment = new PhrasePickFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(PhraseKey, phrase);
+        bundle.putString(WordKey,word);
+        phrasePickFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragment_replacement,phrasePickFragment);
+        fragmentTransaction.commit();
     }
 
     public void AssignWordAsFinished(String Word){
