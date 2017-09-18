@@ -7,13 +7,16 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +38,7 @@ import java.io.File;
 
 public class MainFragment extends Fragment {
 
+    public static final int RESULT_SPEECH = 177;
     ImageButton helpiBtn,PreviBtn,NextiBtn,PlaySoundiBtn,DisplayImageiBtn;
     private Word word;
 
@@ -51,9 +55,9 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_main, container, false);
-
-
-        helpiBtn = (ImageButton) view.findViewById(R.id.imagebutton_moreInfo);
+        TextView custTextView =(TextView) view.findViewById(R.id.textView_maintext);
+        custTextView.setText(word.getText());
+/*        helpiBtn = (ImageButton) view.findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -62,7 +66,7 @@ public class MainFragment extends Fragment {
                 HelpFragment helpFragment = new HelpFragment();
                 fragmentTransaction.replace(R.id.fragment_replacement,helpFragment);
             }
-        });
+        });*/
         PreviBtn = (ImageButton)view.findViewById(R.id.imagebutton_skipword);
         PreviBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,75 +85,48 @@ public class MainFragment extends Fragment {
         PlaySoundiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) getActivity()).voiceoffer(PlaySoundiBtn,"");
+                try{
+                    ((MainActivity) getActivity()).voiceoffer(PlaySoundiBtn,word.getText());
+                }catch(Exception e){
+                    e.printStackTrace();
+                    Log.e("PlaySoundiBtn",e.toString());
+                }
             }
         });
         DisplayImageiBtn = (ImageButton)view.findViewById(R.id.imagebutton_photohelp);
         DisplayImageiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // alertDialog
+                try{
+                    ((MainActivity) getActivity()).helpbypic(DisplayImageiBtn,word.getText());
+                }catch(Exception e){
+                    e.printStackTrace();
+                    Log.e("DisplayImageiBtn",e.toString());
+                }
             }
         });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         return view;
     }
-    private void helpbypic(View view,String img2Bdisplayed) {
+
+    private void voicerec(View view) {
         Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.shake);
         view.startAnimation(shake);
+       Intent voicerecogize = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        voicerecogize.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+        voicerecogize.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        voicerecogize.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
+        voicerecogize.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE,false);
+        startActivityForResult(voicerecogize, RESULT_SPEECH);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        final AlertDialog dialog = builder.create();
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
-        ImageView imageView = (ImageView) dialogLayout.findViewById(R.id.picsample);
-        File imgFile = new  File(img2Bdisplayed);
-        if(imgFile.exists()){
-
-            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            imageView.setImageBitmap(myBitmap);
-        }
-        dialog.setView(dialogLayout);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
-        dialog.show();
     }
+
+
 
     /**
      * Created by azizax on 31/01/17.
      */
-    public class CustTextView extends android.support.v7.widget.AppCompatTextView {
+    public class CustTextView extends TextView {
         Context context;
         public CustTextView(Context context, AttributeSet attrs, int defStyle) {
             super(context, attrs, defStyle);

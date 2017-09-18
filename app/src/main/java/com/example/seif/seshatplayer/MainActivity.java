@@ -2,12 +2,16 @@ package com.example.seif.seshatplayer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -20,10 +24,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.seif.seshatplayer.layout.HelpFragment;
 import com.example.seif.seshatplayer.layout.MainFragment;
@@ -39,6 +47,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -48,10 +58,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey  = "WL" , WordIndexKey  = "WI",WordKey ="w",PhraseKey ="p";
     private  String WordsFilePath="/SF/WORDS.txt",PhrasesFilePath = "/SF/PHRASES.txt",AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt"
-            ,AppendedToImageFile =".png",AppendedToSpeechFile = ".wav";
+            ,AppendedToImageFile =".png",AppendedToSpeechFile = ".wav",SF= "/SF/";
 
     private static final int RESULT_SPEECH = 1;
-    private Stack<String> words,phrases;
+    private ArrayList<String> words,phrases;
     private int word_loop=0,word_index=0;
     SharedPreferences sharedPreferences_words;
     SharedPreferences.Editor sharedPreferences_words_editor  ;
@@ -67,23 +77,17 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences_words_editor = sharedPreferences_words.edit();
 
         // read file into words
-
-        //WordsFilePath = Environment.getDataDirectory() + WordsFilePath;
-        //PhrasesFilePath = Environment.getDataDirectory() + PhrasesFilePath;
-
-        words =   readFileintoStrack(WordsFilePath);
-        phrases = readFileintoStrack(PhrasesFilePath);
-
-
-
-      /*  Log.i("XX",""+words.size());
-        String[] childs =  this.getDir(WordsFilePath,MODE_PRIVATE).list();
-
-        for(int i=0;i<childs.length;i++){
-            Log.i("XX",childs[i]);
+        try {
+            WordsFilePath = Environment.getExternalStorageDirectory() + WordsFilePath;
+            PhrasesFilePath = Environment.getExternalStorageDirectory() + PhrasesFilePath;
+            new File(Environment.getExternalStorageDirectory(), filename);
+            SF = Environment.getExternalStorageDirectory() + SF;
+        }catch (Exception e){
+            Log.e("StorageE:",e.toString());
+            e.printStackTrace();
         }
-        Log.i("XX",""+WordsFilePath);
-*/
+        words =   new ArrayList<>(readFileintoStrack(WordsFilePath));
+        phrases = new ArrayList<>(readFileintoStrack(PhrasesFilePath));
 
         if(sharedPreferences_words.getAll().isEmpty()){
             word_loop  =0;
@@ -95,12 +99,12 @@ public class MainActivity extends AppCompatActivity {
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey,"0"));
         }
 
-        new File(getFilesDir(), filename);
-       // OpenMainFragment(word_index);
+        //OpenMainFragment(word_index);
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         HelpFragment helpFragment = new HelpFragment();
         fragmentTransaction.replace(R.id.fragment_replacement,helpFragment);
+        fragmentTransaction.commit();
         /*FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         PhrasePickFragment phrasePickFragment = new PhrasePickFragment();
@@ -108,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
         bundle.putString(PhraseKey, "ود الورد");
         bundle.putString(WordKey,"الورد");
         phrasePickFragment.setArguments(bundle);
-        fragmentTransaction.replace(R.id.fragment_replacement,phrasePickFragment);*/
-        fragmentTransaction.commit();
+        fragmentTransaction.replace(R.id.fragment_replacement,phrasePickFragment);*//*
+        fragmentTransaction.commit();*/
     }
 
     public String getNextWord(){
@@ -122,9 +126,15 @@ public class MainActivity extends AppCompatActivity {
         return words.get(word_index);
     }
     private Word form_word(int index){
-        return new Word(words.get(index),words.get(index)+AppendedToImageFile,words.get(index)+AppendedToSpeechFile,phrases.get(index)
-                ,getPoints(words.get(index)+AppenddedToOutputTriggerPointsfile),getDirections(words.get(index)+AppenddedToOutputFVfile));
-    }
+        try {
+            return new Word(words.get(index), SF + words.get(index) + AppendedToImageFile, SF + words.get(index) + AppendedToSpeechFile, phrases.get(index)
+                    , getPoints(SF + words.get(index) + AppenddedToOutputTriggerPointsfile), getDirections(SF + words.get(index) + AppenddedToOutputFVfile));
+        }catch (Exception e){
+            Log.e("form_wordE:",e.toString());
+            e.printStackTrace();
+            return null;
+        }
+        }
     /*
     ToFlag: if 0 = current, if -1 = prev;
      */
@@ -134,8 +144,20 @@ public class MainActivity extends AppCompatActivity {
                 OpenMainFragment(word_index);
                 break;
             case -1:
-                OpenMainFragment(--word_index);
+                if(word_index == 0){
+                    OpenMainFragment(word_index);
+                }else{
+                    OpenMainFragment(--word_index);
+                }
                 break;
+        }
+    }
+    public void updatelesson(String word){
+        if(word!=null){
+            OpenMainFragment(words.indexOf(word));
+        }else{
+            finish();
+            Log.e("updatelessonE:","word == null");
         }
     }
     public void voiceoffer(View view, String DataPath2Bplayed) {
@@ -148,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         }
         try {
 
-            mp.setDataSource(DataPath2Bplayed);
+            mp.setDataSource(SF+DataPath2Bplayed);
             mp.prepare();
             mp.start();
         } catch (IllegalStateException e) {
@@ -170,6 +192,33 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+    public void helpbypic(View view,String img2Bdisplayed) {
+        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+        view.startAnimation(shake);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        final AlertDialog dialog = builder.create();
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
+        ImageView imageView = (ImageView) dialogLayout.findViewById(R.id.picsample);
+        File imgFile = new  File(SF+img2Bdisplayed);
+        if(imgFile.exists()){
+
+            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            imageView.setImageBitmap(myBitmap);
+        }
+        dialog.setView(dialogLayout);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
     public void  SaveOnSharedPref(String key, String value) {
         sharedPreferences_words_editor.putString(key, value).apply();
         sharedPreferences_words_editor.commit();
@@ -335,6 +384,7 @@ public class MainActivity extends AppCompatActivity {
         bundle.putParcelable(WordKey, form_word(i));
         mainFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement,mainFragment);
+        fragmentTransaction.commit();
     }
     /*
   * read file into string and the end = \n and return this string
@@ -387,5 +437,8 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return words;
+    }
+    public ArrayList<String>getWords(){
+        return new ArrayList<>(this.words);
     }
 }
