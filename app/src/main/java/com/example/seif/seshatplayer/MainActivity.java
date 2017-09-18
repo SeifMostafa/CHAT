@@ -58,8 +58,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey  = "WL" , WordIndexKey  = "WI",WordKey ="w",PhraseKey ="p";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     private static final int RESULT_SPEECH = 1;
-    SharedPreferences sharedPreferences_words;
-    SharedPreferences.Editor sharedPreferences_words_editor  ;
+    SharedPreferences sharedPreferences_words =  null;
+    SharedPreferences.Editor sharedPreferences_words_editor =null ;
     private  String WordsFilePath="/SF/WORDS.txt",PhrasesFilePath = "/SF/PHRASES.txt",AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt"
             ,AppendedToImageFile =".png",AppendedToSpeechFile = ".wav",SF= "/SF/";
     private ArrayList<String> words,phrases;
@@ -93,12 +93,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        checkPermission_AndroidVersion();
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         sharedPreferences_words = this.getSharedPreferences(WORDS_PREFS_NAME, Context.MODE_PRIVATE);
         sharedPreferences_words_editor = sharedPreferences_words.edit();
+        checkPermission_AndroidVersion();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        //OpenPhraseFragment("سيف مصطفى","سيف");
+    }
+    private void startApp(){
         // read file into words
         try {
             WordsFilePath = Environment.getExternalStorageDirectory() + WordsFilePath;
@@ -109,8 +111,14 @@ public class MainActivity extends AppCompatActivity {
             Log.e("StorageE:",e.toString());
             e.printStackTrace();
         }
-        words =   new ArrayList<>(readFileintoStrack(WordsFilePath));
-        phrases = new ArrayList<>(readFileintoStrack(PhrasesFilePath));
+        try{
+            words =   new ArrayList<>(readFileintoStrack(WordsFilePath));
+            phrases = new ArrayList<>(readFileintoStrack(PhrasesFilePath));
+            Log.i("words:",""+words.size());
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.e("words","error");
+        }
 
         if(sharedPreferences_words.getAll().isEmpty()){
             word_loop  =0;
@@ -122,8 +130,7 @@ public class MainActivity extends AppCompatActivity {
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey,"0"));
         }
 
-        //OpenMainFragment(word_index);
-        OpenPhraseFragment("سيف مصطفى","سيف");
+        OpenMainFragment(word_index);
     }
 
     public String getNextWord(){
@@ -189,9 +196,7 @@ public class MainActivity extends AppCompatActivity {
             mp.setDataSource(SF+DataPath2Bplayed);
             mp.prepare();
             mp.start();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (IllegalStateException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -289,6 +294,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             // write your logic code if permission already granted
+            startApp();
         }
     }
 
@@ -306,6 +312,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (RecordAudioPermission && InternetPermission && write_storagePermission && read_storagePermission) {
                         // write your logic here
+                        startApp();
                     } else {
                         Log.i("onRequestPermResult",""+RecordAudioPermission+","+InternetPermission+","+write_storagePermission+","+read_storagePermission);
                         Snackbar.make(this.findViewById(android.R.id.content),

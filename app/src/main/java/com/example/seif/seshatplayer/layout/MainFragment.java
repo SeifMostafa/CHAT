@@ -29,6 +29,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.seif.seshatplayer.DrawView;
 import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
 import com.example.seif.seshatplayer.model.Word;
@@ -41,6 +42,7 @@ public class MainFragment extends Fragment {
     public static final int RESULT_SPEECH = 177;
     ImageButton helpiBtn,PreviBtn,NextiBtn,PlaySoundiBtn,DisplayImageiBtn;
     private Word word;
+    private DrawView drawView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,8 @@ public class MainFragment extends Fragment {
         if (getArguments() != null) {
            this.word = getArguments().getParcelable(MainActivity.WordKey);
         }
+
+        Log.i("WORD_INFO:",""+this.word.getTriggerpoints().length);
     }
 
     @Override
@@ -105,6 +109,8 @@ public class MainFragment extends Fragment {
                 }
             }
         });
+        drawView = (DrawView)view.findViewById(R.id.textView_maintext);
+        drawView.SetTriggerPoints(this.word.getTriggerpoints());
         return view;
     }
 
