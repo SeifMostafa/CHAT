@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public class HelpFragment extends Fragment {
 
-    ImageButton PrevlessoniBtn,CurrentlessoniBtn,AchievedlessoniBtn,PrevlessoniBtn_help,CurrentlessoniBtn_help,AchievedlessoniBtn_help;
+    ImageButton helpiBtn,PrevlessoniBtn,CurrentlessoniBtn,AchievedlessoniBtn,PrevlessoniBtn_help,CurrentlessoniBtn_help,AchievedlessoniBtn_help;
     AlertDialog AchievedDialog ;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,8 +35,16 @@ public class HelpFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_help, container, false);
+
+        helpiBtn = (ImageButton) ((MainActivity)getActivity()).findViewById(R.id.imagebutton_moreInfo);
+        helpiBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MainActivity)getActivity()).voiceoffer(helpiBtn,R.raw.helpfragmenthelpbtninstr);
+            }
+        });
+
         PrevlessoniBtn = (ImageButton)view.findViewById(R.id.imagebutton_prevlesson);
         PrevlessoniBtn.setOnClickListener(new View.OnClickListener() {
             @Override

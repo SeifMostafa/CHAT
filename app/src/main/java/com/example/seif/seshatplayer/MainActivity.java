@@ -1,13 +1,11 @@
 package com.example.seif.seshatplayer;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -17,7 +15,6 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -31,9 +28,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.example.seif.seshatplayer.layout.HelpFragment;
 import com.example.seif.seshatplayer.layout.MainFragment;
 import com.example.seif.seshatplayer.layout.PhrasePickFragment;
 import com.example.seif.seshatplayer.model.Direction;
@@ -47,29 +42,26 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey  = "WL" , WordIndexKey  = "WI",WordKey ="w",PhraseKey ="p";
+    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
-    private static final int RESULT_SPEECH = 1;
-    SharedPreferences sharedPreferences_words =  null;
-    SharedPreferences.Editor sharedPreferences_words_editor =null ;
-    private  String WordsFilePath="/SF/WORDS.txt",PhrasesFilePath = "/SF/PHRASES.txt",AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt"
-            ,AppendedToImageFile =".png",AppendedToSpeechFile = ".wav",SF= "/SF/";
-    private ArrayList<String> words,phrases;
-    private int word_loop=0,word_index=0;
+    SharedPreferences sharedPreferences_words = null;
+    SharedPreferences.Editor sharedPreferences_words_editor = null;
+    private String WordsFilePath = "/SF/WORDS.txt", PhrasesFilePath = "/SF/PHRASES.txt", AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt", AppendedToImageFile = ".png", AppendedToSpeechFile = ".wav", SF = "/SF/";
+    private ArrayList<String> words, phrases;
+    private int word_loop = 0, word_index = 0;
     private String filename = "Archive.txt";
+    MediaPlayer mediaPlayer;
 
     /*
   * read file into string and the end = \n and return this string
   */
-    public static Stack<String> readFileintoStrack(String filepath) {
+    public static Stack<String> readFileintoStack(String filepath) {
 
         Stack<String> result = new Stack<>();
         try {
@@ -100,125 +92,129 @@ public class MainActivity extends AppCompatActivity {
 
         //OpenPhraseFragment("سيف مصطفى","سيف");
     }
-    private void startApp(){
+
+    private void startApp() {
         // read file into words
         try {
             WordsFilePath = Environment.getExternalStorageDirectory() + WordsFilePath;
             PhrasesFilePath = Environment.getExternalStorageDirectory() + PhrasesFilePath;
             new File(Environment.getExternalStorageDirectory(), filename);
             SF = Environment.getExternalStorageDirectory() + SF;
-        }catch (Exception e){
-            Log.e("StorageE:",e.toString());
+        } catch (Exception e) {
+            Log.e("StorageE:", e.toString());
             e.printStackTrace();
         }
-        try{
-            words =   new ArrayList<>(readFileintoStrack(WordsFilePath));
-            phrases = new ArrayList<>(readFileintoStrack(PhrasesFilePath));
-            Log.i("words:",""+words.size());
-        }catch (Exception e){
+        try {
+            words = new ArrayList<>(readFileintoStack(WordsFilePath));
+            phrases = new ArrayList<>(readFileintoStack(PhrasesFilePath));
+            Log.i("words:", "" + words.size());
+        } catch (Exception e) {
             e.printStackTrace();
-            Log.e("words","error");
+            Log.e("words", "error");
         }
 
-        if(sharedPreferences_words.getAll().isEmpty()){
-            word_loop  =0;
+        if (sharedPreferences_words.getAll().isEmpty()) {
+            word_loop = 0;
             word_index = 0;
-            SaveOnSharedPref(WordLoopKey,String.valueOf(word_loop));
-            SaveOnSharedPref(WordIndexKey,String.valueOf(word_index));
-        }else{
-            word_loop  = Integer.parseInt(sharedPreferences_words.getString(WordLoopKey,"0"));
-            word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey,"0"));
+            SaveOnSharedPref(WordLoopKey, String.valueOf(word_loop));
+            SaveOnSharedPref(WordIndexKey, String.valueOf(word_index));
+        } else {
+            word_loop = Integer.parseInt(sharedPreferences_words.getString(WordLoopKey, "0"));
+            word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
         }
 
         OpenMainFragment(word_index);
     }
 
-    public String getNextWord(){
+    public String getNextWord() {
         return words.get(++word_index);
     }
 
-    public String getPrevWord(){
+    public String getPrevWord() {
         return words.get(--word_index);
     }
 
-    public String getCurrentWord(){
+    public String getCurrentWord() {
         return words.get(word_index);
     }
 
-    private Word form_word(int index){
+    private Word form_word(int index) {
         try {
             return new Word(words.get(index), SF + words.get(index) + AppendedToImageFile, SF + words.get(index) + AppendedToSpeechFile, phrases.get(index)
                     , getPoints(SF + words.get(index) + AppenddedToOutputTriggerPointsfile), getDirections(SF + words.get(index) + AppenddedToOutputFVfile));
-        }catch (Exception e){
-            Log.e("form_wordE:",e.toString());
+        } catch (Exception e) {
+            Log.e("form_wordE:", e.toString());
             e.printStackTrace();
             return null;
         }
-        }
+    }
 
     /*
     ToFlag: if 0 = current, if -1 = prev;
      */
-    public void updatelesson(int ToFlag){
-        switch(ToFlag){
+    public void updatelesson(int ToFlag) {
+        switch (ToFlag) {
             case 0:
                 OpenMainFragment(word_index);
                 break;
             case -1:
-                if(word_index == 0){
+                if (word_index == 0) {
                     OpenMainFragment(word_index);
-                }else{
+                } else {
                     OpenMainFragment(--word_index);
                 }
                 break;
         }
     }
 
-    public void updatelesson(String word){
-        if(word!=null){
+    public void updatelesson(String word) {
+        if (word != null) {
             OpenMainFragment(words.indexOf(word));
-        }else{
+        } else {
             finish();
-            Log.e("updatelessonE:","word == null");
+            Log.e("updatelessonE:", "word == null");
         }
     }
 
     public void voiceoffer(View view, String DataPath2Bplayed) {
-        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-        view.startAnimation(shake);
-
-        final MediaPlayer mp = new MediaPlayer();
-        if (mp.isPlaying()) {
-            mp.stop();
+        if (view != null) {
+            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+            view.startAnimation(shake);
+        }
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
         }
         try {
-
-            mp.setDataSource(SF+DataPath2Bplayed);
-            mp.prepare();
-            mp.start();
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(SF + DataPath2Bplayed);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
         } catch (IllegalStateException | IOException e) {
             e.printStackTrace();
         }
     }
 
     public void voiceoffer(View view, int res_id) {
-        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-        view.startAnimation(shake);
-        final MediaPlayer mediaPlayer=MediaPlayer.create(this,res_id);
-        if (mediaPlayer.isPlaying()) {
+        if (view != null) {
+            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+            view.startAnimation(shake);
+        }
+        if (mediaPlayer != null) {
             mediaPlayer.stop();
         }
         try {
+            mediaPlayer = MediaPlayer.create(this, res_id);
             mediaPlayer.start();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void helpbypic(View view,String img2Bdisplayed) {
-        Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-        view.startAnimation(shake);
-
+    public void helpbypic(View view, String img2Bdisplayed) {
+        if(view!=null){
+            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+            view.startAnimation(shake);
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
             @Override
@@ -230,8 +226,8 @@ public class MainActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
         ImageView imageView = (ImageView) dialogLayout.findViewById(R.id.picsample);
-        File imgFile = new  File(SF+img2Bdisplayed);
-        if(imgFile.exists()){
+        File imgFile = new File(SF + img2Bdisplayed);
+        if (imgFile.exists()) {
 
             Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
             imageView.setImageBitmap(myBitmap);
@@ -242,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public void  SaveOnSharedPref(String key, String value) {
+    public void SaveOnSharedPref(String key, String value) {
         sharedPreferences_words_editor.putString(key, value).apply();
         sharedPreferences_words_editor.commit();
     }
@@ -314,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
                         // write your logic here
                         startApp();
                     } else {
-                        Log.i("onRequestPermResult",""+RecordAudioPermission+","+InternetPermission+","+write_storagePermission+","+read_storagePermission);
+                        Log.i("onRequestPermResult", "" + RecordAudioPermission + "," + InternetPermission + "," + write_storagePermission + "," + read_storagePermission);
                         Snackbar.make(this.findViewById(android.R.id.content),
                                 "Please Grant Permissions to be able to work",
                                 Snackbar.LENGTH_INDEFINITE).setAction("ENABLE",
@@ -333,29 +329,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == RESULT_SPEECH && requestCode == RESULT_OK) ;
-        {
-            ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            if(results.size()>0){
 
-            }
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private Direction[] getDirections(String filepath){
-        Stack<Direction> directions = new Stack<>() ;
+    private Direction[] getDirections(String filepath) {
+        Stack<Direction> directions = new Stack<>();
         File file = new File(filepath);
         try {
             Scanner scan = new Scanner(file);
-            while(scan.hasNextLine())
-            {
-                String line =null;
+            while (scan.hasNextLine()) {
+                String line = null;
                 line = scan.nextLine();
-                switch(line.charAt(0)){
+                switch (line.charAt(0)) {
                     case 'I':
                         directions.push(Direction.INIT);
                         break;
@@ -384,17 +367,16 @@ public class MainActivity extends AppCompatActivity {
         return directions.toArray(result);
     }
 
-    private Point[] getPoints(String filepath){
-        Stack<Point> points = new Stack<>() ;
+    private Point[] getPoints(String filepath) {
+        Stack<Point> points = new Stack<>();
         File file = new File(filepath);
         try {
             Scanner scan = new Scanner(file);
-            while(scan.hasNextLine())
-            {
-                String line =null;
+            while (scan.hasNextLine()) {
+                String line = null;
                 line = scan.nextLine();
-                String[]x_y = line.split(",");
-                points.push(new Point(Integer.parseInt(x_y[0]),Integer.parseInt(x_y[1])));
+                String[] x_y = line.split(",");
+                points.push(new Point(Integer.parseInt(x_y[0]), Integer.parseInt(x_y[1])));
             }
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());
@@ -403,30 +385,31 @@ public class MainActivity extends AppCompatActivity {
         return points.toArray(result);
     }
 
-    private void OpenMainFragment(int i){
+    private void OpenMainFragment(int i) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         MainFragment mainFragment = new MainFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(WordKey, form_word(i));
+
         mainFragment.setArguments(bundle);
-        fragmentTransaction.replace(R.id.fragment_replacement,mainFragment);
+        fragmentTransaction.replace(R.id.fragment_replacement, mainFragment);
         fragmentTransaction.commit();
     }
 
-    private void OpenPhraseFragment(String phrase,String word){
+    private void OpenPhraseFragment(String phrase, String word) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         PhrasePickFragment phrasePickFragment = new PhrasePickFragment();
         Bundle bundle = new Bundle();
         bundle.putString(PhraseKey, phrase);
-        bundle.putString(WordKey,word);
+        bundle.putString(WordKey, word);
         phrasePickFragment.setArguments(bundle);
-        fragmentTransaction.replace(R.id.fragment_replacement,phrasePickFragment);
+        fragmentTransaction.replace(R.id.fragment_replacement, phrasePickFragment);
         fragmentTransaction.commit();
     }
 
-    public void AssignWordAsFinished(String Word){
+    public void AssignWordAsFinished(String Word) {
         try {
             FileWriter writer = new FileWriter(filename, true);
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
@@ -438,7 +421,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public ArrayList<String> ReadArchiveWords(){
+    public ArrayList<String> ReadArchiveWords() {
         ArrayList<String> words = new ArrayList<>();
         try {
             FileReader reader = new FileReader(filename);
@@ -455,7 +438,8 @@ public class MainActivity extends AppCompatActivity {
         }
         return words;
     }
-    public ArrayList<String>getWords(){
+
+    public ArrayList<String> getWords() {
         return new ArrayList<>(this.words);
     }
 }

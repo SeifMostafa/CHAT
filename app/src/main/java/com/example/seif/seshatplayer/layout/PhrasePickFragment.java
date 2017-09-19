@@ -1,6 +1,8 @@
 package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.TextPaint;
@@ -11,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +26,7 @@ import java.util.Locale;
 public class PhrasePickFragment extends Fragment {
     private String word = null,phrase = null;
     TextView textView_phrase,textView_picked;
+    ImageButton helpiBtn;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +61,17 @@ public class PhrasePickFragment extends Fragment {
         }
         textView_picked.setVisibility(View.VISIBLE);
         textView_phrase.setVisibility(View.VISIBLE);
+
+
+
+        helpiBtn = (ImageButton) ((MainActivity)getActivity()).findViewById(R.id.imagebutton_moreInfo);
+        helpiBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MainActivity)getActivity()).voiceoffer(helpiBtn,R.raw.pickwordinstr);
+            }
+        });
+
         return view;
     }
 

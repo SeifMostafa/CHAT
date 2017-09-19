@@ -1,120 +1,171 @@
 package com.example.seif.seshatplayer;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.seif.seshatplayer.layout.MainFragment;
-import com.example.seif.seshatplayer.model.Word;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class DrawView extends TextView {
-    Context context;
     private int color = Color.parseColor("#0000FF");
     private float width = 4f;
-    Point[]TriggerPoints;
+    public int height;
+    private static final float TOUCH_TOLERANCE = 4;
+    Context context;
+    private Bitmap mBitmap;
+    private Canvas mCanvas;
+    private Path mPath;
+    private Paint mPaint;
+    private Paint mBitmapPaint;
+    private Paint circlePaint;
+    private Path circlePath;
+    private float mX, mY;
+    Point[] TriggerPoints;
     int TOLERANCE_MIN = 10;
     int TOLERANCE_MAX = 100;
-    private List<Holder> holderList = new ArrayList<Holder>();
-
-    private class Holder {
-        Path path;
-        Paint paint;
-
-        Holder(int color, float width) {
-            path = new Path();
-            paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setStrokeWidth(width);
-            paint.setColor(color);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setStrokeCap(Paint.Cap.ROUND);
-        }
-    }
+    boolean INITisOK =false;
 
     public DrawView(Context context) throws IOException {
         super(context);
+        this.context = context;
         init();
     }
 
     public DrawView(Context context, AttributeSet attrs) throws IOException {
         super(context, attrs);
+        this.context = context;
         init();
     }
 
     public DrawView(Context context, AttributeSet attrs, int defStyle) throws IOException {
         super(context, attrs, defStyle);
+        this.context = context;
         init();
     }
 
-    private void init() {
 
-        holderList.add(new Holder(color, width));
+
+    public void init() {
+        Typeface tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
+        setTypeface(tf, 1);
+
+        Log.i("init","AM HERE!");
+        mPath = new Path();
+        mBitmapPaint = new Paint(Paint.DITHER_FLAG);
+        circlePaint = new Paint();
+        circlePath = new Path();
+        circlePaint.setAntiAlias(true);
+        circlePaint.setColor(Color.BLUE);
+        circlePaint.setStyle(Paint.Style.STROKE);
+        circlePaint.setStrokeJoin(Paint.Join.MITER);
+        circlePaint.setStrokeWidth(16f);
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setDither(true);
+        mPaint.setColor(Color.RED);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        mPaint.setStrokeWidth(14);
+    }
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(mBitmap);
     }
 
+    public void reset() {
+        mBitmap.recycle();
+        mBitmap = Bitmap.createBitmap(this.mBitmap.getWidth(), this.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(mBitmap);
+    }
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //canvas.drawPoint(TriggerPoints[0].x,TriggerPoints[0].y,new Holder(color,width).paint);
-        for (Holder holder : holderList) {
-            canvas.drawPath(holder.path, holder.paint);
+
+        canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+        canvas.drawPath(mPath, mPaint);
+        canvas.drawPath(circlePath, circlePaint);
+    }
+
+    private void touch_start(float x, float y) {
+        mPath.reset();
+        mPath.moveTo(x, y);
+        mX = x;
+        mY = y;
+    }
+
+    private void touch_move(float x, float y) {
+        float dx = Math.abs(x - mX);
+        float dy = Math.abs(y - mY);
+        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+            mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+            mX = x;
+            mY = y;
+
+            circlePath.reset();
+            circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    private void touch_up() {
+        mPath.lineTo(mX, mY);
+        circlePath.reset();
+        // commit the path to our offscreen
+        mCanvas.drawPath(mPath, mPaint);
+        // kill this so we don't double draw
+        mPath.reset();
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
-        float eventX = event.getX();
-        float eventY = event.getY();
-
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                holderList.add(new Holder(color, width));
-                holderList.get(holderList.size() - 1).path.moveTo(eventX, eventY);
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                //holderList.get(holderList.size() - 1).path.lineTo(eventX, eventY);
-                Point initWord=TriggerPoints[0];
-                if(Math.abs(eventX-initWord.x)<=TOLERANCE_MAX && Math.abs(eventY-initWord.y)<=TOLERANCE_MAX){
-                holderList.get(holderList.size() - 1).path.lineTo(eventX, eventY);
+        float x = event.getX();
+        float y = event.getY();
+                if(Math.abs(x-this.TriggerPoints[0].x)<=TOLERANCE_MAX  && Math.abs(y-this.TriggerPoints[0].y)<=TOLERANCE_MAX ){
+                    this.INITisOK = true;
+                }else{
+                    Log.i("onTouchEvent","Touch closer"+TriggerPoints[0].x+","+TriggerPoints[0].y+"   ,   "+x+","+y);
                 }
-            case MotionEvent.ACTION_UP:
-                break;
-            default:
-                return false;
-        }
 
-        invalidate();
+                if(INITisOK){
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            touch_start(x, y);
+                            invalidate();
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            touch_move(x, y);
+                            invalidate();
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            touch_up();
+                            invalidate();
+                            break;
+                    }
+                }
         return true;
     }
+
     @Override
     public ViewPropertyAnimator animate() {
 
-        final int screenWidth, currentMsg;
+        int screenWidth, currentMsg;
         Animation.AnimationListener myAnimationListener = null;
 
         // Get the screen width
@@ -133,7 +184,7 @@ public class DrawView extends TextView {
         animation.setRepeatCount(Animation.INFINITE);
 
         // Create the animation listener
-        final Animation.AnimationListener finalMyAnimationListener = myAnimationListener;
+        Animation.AnimationListener finalMyAnimationListener = myAnimationListener;
         myAnimationListener = new Animation.AnimationListener() {
 
             @Override
@@ -166,7 +217,7 @@ public class DrawView extends TextView {
         };
         animation.setAnimationListener(myAnimationListener);
 
-        this.setAnimation(animation);
+        DrawView.this.setAnimation(animation);
         return super.animate();
     }
     public void SetTriggerPoints(Point[]trpoints){

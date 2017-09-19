@@ -30,7 +30,8 @@
             android:padding="@dimen/activity_horizontal_margin"
             android:src="@drawable/prevword"
             android:elevation="10dp"
-            android:translationZ="10dp"/>
+            android:translationZ="10dp"
+            tools:ignore="RtlHardcoded" />
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -40,7 +41,8 @@
             android:padding="@dimen/activity_horizontal_margin"
             android:src="@drawable/nextword"
             android:elevation="10dp"
-            android:translationZ="10dp"/>
+            android:translationZ="10dp"
+            tools:ignore="RtlHardcoded" />
     </RelativeLayout>
 
 
@@ -70,7 +72,8 @@
         android:layout_marginBottom="@dimen/activity_double_actionbar_margin"
         android:layout_marginLeft="@dimen/activity_double_actionbar_margin"
         android:elevation="10dp"
-        android:translationZ="10dp" />
+        android:translationZ="10dp"
+        tools:ignore="ContentDescription,RtlHardcoded" />
 
 
 </android.support.constraint.ConstraintLayout>
