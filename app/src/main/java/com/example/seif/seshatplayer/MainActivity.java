@@ -29,6 +29,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import com.example.seif.seshatplayer.layout.HelpFragment;
 import com.example.seif.seshatplayer.layout.MainFragment;
 import com.example.seif.seshatplayer.layout.PhrasePickFragment;
 import com.example.seif.seshatplayer.model.Direction;
@@ -48,7 +49,7 @@ import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p";
+    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     SharedPreferences sharedPreferences_words = null;
     SharedPreferences.Editor sharedPreferences_words_editor = null;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> words, phrases;
     private int word_loop = 0, word_index = 0;
     private String filename = "Archive.txt";
-    MediaPlayer mediaPlayer;
+    MediaPlayer mediaPlayer = null;
 
     /*
   * read file into string and the end = \n and return this string
@@ -164,6 +165,9 @@ public class MainActivity extends AppCompatActivity {
                     OpenMainFragment(--word_index);
                 }
                 break;
+            case 1:
+                OpenMainFragment(++word_index);
+                break;
         }
     }
 
@@ -182,7 +186,10 @@ public class MainActivity extends AppCompatActivity {
             view.startAnimation(shake);
         }
         if (mediaPlayer != null) {
-            mediaPlayer.stop();
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
         }
         try {
             mediaPlayer = new MediaPlayer();
@@ -192,6 +199,14 @@ public class MainActivity extends AppCompatActivity {
         } catch (IllegalStateException | IOException e) {
             e.printStackTrace();
         }
+/*        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mp.release();
+
+            }
+        });*/
     }
 
     public void voiceoffer(View view, int res_id) {
@@ -200,7 +215,11 @@ public class MainActivity extends AppCompatActivity {
             view.startAnimation(shake);
         }
         if (mediaPlayer != null) {
-            mediaPlayer.stop();
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+
         }
         try {
             mediaPlayer = MediaPlayer.create(this, res_id);
@@ -208,10 +227,24 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+/*        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mp.release();
+
+            }
+        });*/
+    }
+
+    public void StopMediaPlayer() {
+        Log.i("MainActivity", "StopMediaPlayer");
+        mediaPlayer.stop();
+        mediaPlayer.release();
     }
 
     public void helpbypic(View view, String img2Bdisplayed) {
-        if(view!=null){
+        if (view != null) {
             Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
             view.startAnimation(shake);
         }
@@ -384,20 +417,31 @@ public class MainActivity extends AppCompatActivity {
         Point[] result = new Point[points.size()];
         return points.toArray(result);
     }
-
+    /*
+    dummy fn till getting data separated in lessons
+     */
+    private Word[] fillWordsArray() {
+        Word[] wordsArray=new Word[5];
+        for (int i = 0; i < 5; i++) {
+            wordsArray[i] = form_word(i);
+        }
+        return wordsArray;
+    }
     private void OpenMainFragment(int i) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         MainFragment mainFragment = new MainFragment();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(WordKey, form_word(i));
 
+        Bundle bundle = new Bundle();
+        Word[] wordsArray=fillWordsArray();
+
+        bundle.putParcelableArray(WordsArrayKey, wordsArray);
         mainFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, mainFragment);
         fragmentTransaction.commit();
     }
 
-    private void OpenPhraseFragment(String phrase, String word) {
+    public void OpenPhraseFragment(String phrase, String word) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         PhrasePickFragment phrasePickFragment = new PhrasePickFragment();
@@ -406,6 +450,14 @@ public class MainActivity extends AppCompatActivity {
         bundle.putString(WordKey, word);
         phrasePickFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, phrasePickFragment);
+        fragmentTransaction.commit();
+    }
+
+    public void OpenHelpFragment() {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        HelpFragment helpFragment = new HelpFragment();
+        fragmentTransaction.replace(R.id.fragment_replacement, helpFragment);
         fragmentTransaction.commit();
     }
 

@@ -1,21 +1,12 @@
 package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -28,7 +19,6 @@ import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
 import com.example.seif.seshatplayer.model.Word;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
@@ -36,22 +26,27 @@ import static android.app.Activity.RESULT_OK;
 
 public class MainFragment extends Fragment {
 
-    public static final int RESULT_SPEECH = 177,WAIT2SayInstructions = 1500;
+    public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1500;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
-    private Word word;
+    private Word[] words;
+    private  Word word= null;
+    private int CurrentWordsArrayIndex = 0;
     private Paint mPaint;
     DrawView drawView_MainText = null;
     private boolean Pronounced = false;
     private int PronouncedCounter = 0;
+    Thread Thread_WordTrip = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.word = getArguments().getParcelable(MainActivity.WordKey);
+            this.words = (Word[]) getArguments().getParcelableArray(MainActivity.WordsArrayKey);
+            //Log.i("onCreate",this.words[4].getText());
+           if(this.words.length > 0){
+               this.word = words[0];
+           }
         }
-        // drawView_MainText = new DrawView(getActivity());
-        Log.i("WORD_INFO:", "" + this.word.getTriggerpoints().length);
     }
 
     @Override
@@ -62,31 +57,60 @@ public class MainFragment extends Fragment {
         TextView custTextView = (TextView) view.findViewById(R.id.textView_maintext);
         custTextView.setText(word.getText());
 
-        helpiBtn = (ImageButton) ((MainActivity)getActivity()).findViewById(R.id.imagebutton_moreInfo);
+        helpiBtn = (ImageButton) ((MainActivity) getActivity()).findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                HelpFragment helpFragment = new HelpFragment();
-                fragmentTransaction.replace(R.id.fragment_replacement,helpFragment);
+                Log.i("helpiBtn", "is clicked!");
+                try {
+                    if (Thread_WordTrip != null) {
+                        if (Thread_WordTrip.isAlive()) {
+                            Thread_WordTrip.interrupt();
+                            Log.i("helpiBtn", "is clicked!" + "Thread_WordTrip.is alive");
+                        }
+                    }
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+                ((MainActivity) getActivity()).OpenHelpFragment();
             }
         });
 
-        PreviBtn = (ImageButton) view.findViewById(R.id.imagebutton_skipword);
+
+        PreviBtn = (ImageButton) view.findViewById(R.id.imagebutton_prevword);
         PreviBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // request prev word
+                ((MainActivity)getActivity()).updatelesson(-1);
+                CurrentWordsArrayIndex--;
+                word = words[CurrentWordsArrayIndex];
             }
         });
+        if(CurrentWordsArrayIndex == 0){
+            PreviBtn.setVisibility(View.INVISIBLE);
+        }else{
+            PreviBtn.setVisibility(View.VISIBLE);
+        }
+
         NextiBtn = (ImageButton) view.findViewById(R.id.imagebutton_skipword);
         NextiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // request nxt word
+                ((MainActivity)getActivity()).updatelesson(1);
+                Log.i("NextiBtn",((MainActivity)getActivity()).getNextWord());
+                CurrentWordsArrayIndex++;
+                word = words[CurrentWordsArrayIndex];
             }
         });
+
+        if(CurrentWordsArrayIndex== words.length-1){
+            NextiBtn.setVisibility(View.INVISIBLE);
+        }else{
+            NextiBtn.setVisibility(View.VISIBLE);
+        }
+
         PlaySoundiBtn = (ImageButton) view.findViewById(R.id.imagebutton_soundhelp);
         PlaySoundiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,17 +141,18 @@ public class MainFragment extends Fragment {
 
         return view;
     }
+
     @Override
     public void onResume() {
         super.onResume();
         if (!Pronounced) {
             final String s = this.word.getText();
 
-            Thread thread = new Thread() {
+            Thread_WordTrip = new Thread() {
                 @Override
                 public void run() {
                     try {
-                        Log.i("XX","XX");
+                        Log.i("XX", "XX");
                         Thread.sleep(WAIT2SayInstructions);
                     } catch (InterruptedException e) {
                     }
@@ -147,12 +172,14 @@ public class MainFragment extends Fragment {
                     });
                 }
             };
-            thread.start(); //start the thread
+            Thread_WordTrip.start(); //start the thread
+
         }
     }
+
     private void voicerec(View view) {
         if (view != null) {
-            Animation shake = AnimationUtils.loadAnimation(((MainActivity)getActivity()), R.anim.shake);
+            Animation shake = AnimationUtils.loadAnimation(((MainActivity) getActivity()), R.anim.shake);
             view.startAnimation(shake);
         }
         Intent voicerecogize = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -186,4 +213,29 @@ public class MainFragment extends Fragment {
 
         }
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.i("MainFragment", "onStop");
+        /*((MainActivity)getActivity()).StopMediaPlayer();
+        if(Thread_WordTrip!=null){
+            Thread_WordTrip.interrupt();
+
+        }*/
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.i("MainFragment", "onDetach");
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+    }
+
 }
