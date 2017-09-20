@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private int word_loop = 0, word_index = 0;
     private String filename = "Archive.txt";
     MediaPlayer mediaPlayer = null;
+    private int DEFAULT_LESSON_LENGTH=5;
 
     /*
   * read file into string and the end = \n and return this string
@@ -420,20 +421,23 @@ public class MainActivity extends AppCompatActivity {
     /*
     dummy fn till getting data separated in lessons
      */
-    private Word[] fillWordsArray() {
-        Word[] wordsArray=new Word[5];
-        for (int i = 0; i < 5; i++) {
-            wordsArray[i] = form_word(i);
+    private Word[] fillWordsArray(int arraySize, int index) {
+
+        Word[] wordsArray = new Word[arraySize];
+        for (int i = 0; i < arraySize; i++) {
+            wordsArray[i] = form_word(index);
+            index++;
         }
         return wordsArray;
     }
+
     private void OpenMainFragment(int i) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         MainFragment mainFragment = new MainFragment();
 
         Bundle bundle = new Bundle();
-        Word[] wordsArray=fillWordsArray();
+        Word[] wordsArray = fillWordsArray(DEFAULT_LESSON_LENGTH, i);
 
         bundle.putParcelableArray(WordsArrayKey, wordsArray);
         mainFragment.setArguments(bundle);
@@ -454,6 +458,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void OpenHelpFragment() {
+
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         HelpFragment helpFragment = new HelpFragment();

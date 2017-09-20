@@ -61,7 +61,7 @@ public class DrawView extends TextView {
 
     public void init() {
         Typeface tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
-        setTypeface(tf, 1);
+        this.setTypeface(tf);
 
         Log.i("init","AM HERE!");
         mPath = new Path();
@@ -82,6 +82,7 @@ public class DrawView extends TextView {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(14);
     }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -98,7 +99,7 @@ public class DrawView extends TextView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
+        canvas.drawPoint(canvas.getWidth()-TriggerPoints[0].x,TriggerPoints[0].y,mPaint);
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
         canvas.drawPath(mPath, mPaint);
         canvas.drawPath(circlePath, circlePaint);
@@ -140,7 +141,7 @@ public class DrawView extends TextView {
                 if(Math.abs(x-this.TriggerPoints[0].x)<=TOLERANCE_MAX  && Math.abs(y-this.TriggerPoints[0].y)<=TOLERANCE_MAX ){
                     this.INITisOK = true;
                 }else{
-                    Log.i("onTouchEvent","Touch closer"+TriggerPoints[0].x+","+TriggerPoints[0].y+"   ,   "+x+","+y);
+                    Log.i("onTouchEvent","Touch closer"+this.TriggerPoints[0].x+","+this.TriggerPoints[0].y+"   ,   "+x+","+y);
                 }
 
                 if(INITisOK){

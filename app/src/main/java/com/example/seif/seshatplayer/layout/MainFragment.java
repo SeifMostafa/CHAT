@@ -42,11 +42,11 @@ public class MainFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             this.words = (Word[]) getArguments().getParcelableArray(MainActivity.WordsArrayKey);
-            //Log.i("onCreate",this.words[4].getText());
            if(this.words.length > 0){
                this.word = words[0];
            }
         }
+        Log.i("onCreate","from MainFragment");
     }
 
     @Override
@@ -54,6 +54,12 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main, container, false);
+
+        drawView_MainText = (DrawView) view.findViewById(R.id.textView_maintext);
+        drawView_MainText.setVisibility(View.VISIBLE);
+        Log.i("getTriggerpoints()",""+this.word.getTriggerpoints()[0].x+this.word.getTriggerpoints()[0].y);
+        drawView_MainText.SetTriggerPoints(this.word.getTriggerpoints());
+
         TextView custTextView = (TextView) view.findViewById(R.id.textView_maintext);
         custTextView.setText(word.getText());
 
@@ -82,45 +88,55 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 // request prev word
-                ((MainActivity)getActivity()).updatelesson(-1);
+                if(Thread_WordTrip!=null) Thread_WordTrip.interrupt();
                 CurrentWordsArrayIndex--;
                 word = words[CurrentWordsArrayIndex];
+                custTextView.setText(word.getText());
+                drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
+                Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
+                setPreviBtnVisibilty();
+                //CreateWordTripThread().start();
+
             }
         });
-        if(CurrentWordsArrayIndex == 0){
-            PreviBtn.setVisibility(View.INVISIBLE);
-        }else{
-            PreviBtn.setVisibility(View.VISIBLE);
-        }
+
 
         NextiBtn = (ImageButton) view.findViewById(R.id.imagebutton_skipword);
         NextiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // request nxt word
-                ((MainActivity)getActivity()).updatelesson(1);
-                Log.i("NextiBtn",((MainActivity)getActivity()).getNextWord());
+                if(Thread_WordTrip!=null) Thread_WordTrip.interrupt();
                 CurrentWordsArrayIndex++;
                 word = words[CurrentWordsArrayIndex];
+                custTextView.setText(word.getText());
+                Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
+                setNextiBtnVisibility();
+                //CreateWordTripThread().start();
             }
         });
 
-        if(CurrentWordsArrayIndex== words.length-1){
-            NextiBtn.setVisibility(View.INVISIBLE);
-        }else{
-            NextiBtn.setVisibility(View.VISIBLE);
-        }
+
 
         PlaySoundiBtn = (ImageButton) view.findViewById(R.id.imagebutton_soundhelp);
         PlaySoundiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
+              /*  try {
                     ((MainActivity) getActivity()).voiceoffer(PlaySoundiBtn, word.getText());
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("PlaySoundiBtn", e.toString());
-                }
+                }*/
+                if(Thread_WordTrip!=null) Thread_WordTrip.interrupt();
+                CurrentWordsArrayIndex++;
+                word = words[CurrentWordsArrayIndex];
+                custTextView.setText(word.getText());
+                drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
+                Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
+                setNextiBtnVisibility();
+                //Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
+              //  CreateWordTripThread().start();
             }
         });
         DisplayImageiBtn = (ImageButton) view.findViewById(R.id.imagebutton_photohelp);
@@ -135,10 +151,6 @@ public class MainFragment extends Fragment {
                 }
             }
         });
-        drawView_MainText = (DrawView) view.findViewById(R.id.textView_maintext);
-        drawView_MainText.setVisibility(View.VISIBLE);
-        drawView_MainText.SetTriggerPoints(this.word.getTriggerpoints());
-
         return view;
     }
 
@@ -147,36 +159,57 @@ public class MainFragment extends Fragment {
         super.onResume();
         if (!Pronounced) {
             final String s = this.word.getText();
-
-            Thread_WordTrip = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Log.i("XX", "XX");
-                        Thread.sleep(WAIT2SayInstructions);
-                    } catch (InterruptedException e) {
-                    }
-                    ((MainActivity) getActivity()).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                ((MainActivity) getActivity()).voiceoffer(null, s);
-                                Thread.sleep(3000);
-                                ((MainActivity) getActivity()).voiceoffer(drawView_MainText, R.raw.speakinstruction);
-                                Thread.sleep(3000);
-                                voicerec(null);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                }
-            };
-            Thread_WordTrip.start(); //start the thread
-
+       //     CreateWordTripThread().start(); //start the thread
+        }
+    }
+    private void setNextiBtnVisibility(){
+        if(CurrentWordsArrayIndex== words.length-1){
+            NextiBtn.setVisibility(View.INVISIBLE);
+        }else{
+            NextiBtn.setVisibility(View.VISIBLE);
+        }
+    }
+    private void setPreviBtnVisibilty(){
+        if(CurrentWordsArrayIndex == 0){
+            PreviBtn.setVisibility(View.INVISIBLE);
+        }else{
+            PreviBtn.setVisibility(View.VISIBLE);
         }
     }
 
+    private Thread CreateWordTripThread(){
+        Thread_WordTrip = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Log.i("XX", "XX");
+                    Thread.sleep(WAIT2SayInstructions);
+                } catch (InterruptedException e) {
+                }
+                ((MainActivity) getActivity()).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ((MainActivity) getActivity()).voiceoffer(null, word.getText());
+                            Thread.sleep(3000);
+                            ((MainActivity) getActivity()).voiceoffer(drawView_MainText, R.raw.speakinstruction);
+                            Thread.sleep(3000);
+                            voicerec(null);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void interrupt() {
+                super.interrupt();
+
+            }
+        };
+        return Thread_WordTrip;
+    }
     private void voicerec(View view) {
         if (view != null) {
             Animation shake = AnimationUtils.loadAnimation(((MainActivity) getActivity()), R.anim.shake);
