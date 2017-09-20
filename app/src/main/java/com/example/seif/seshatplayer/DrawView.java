@@ -21,9 +21,6 @@ import java.io.IOException;
 
 
 public class DrawView extends TextView {
-    private int color = Color.parseColor("#0000FF");
-    private float width = 4f;
-    public int height;
     private static final float TOUCH_TOLERANCE = 4;
     Context context;
     private Bitmap mBitmap;
@@ -62,7 +59,6 @@ public class DrawView extends TextView {
     public void init() {
         Typeface tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
         this.setTypeface(tf);
-
         Log.i("init","AM HERE!");
         mPath = new Path();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
@@ -88,7 +84,7 @@ public class DrawView extends TextView {
         super.onSizeChanged(w, h, oldw, oldh);
 
         mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        mCanvas = new Canvas(mBitmap);
+       mCanvas = new Canvas(mBitmap);
     }
 
     public void reset() {
@@ -99,7 +95,6 @@ public class DrawView extends TextView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawPoint(canvas.getWidth()-TriggerPoints[0].x,TriggerPoints[0].y,mPaint);
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
         canvas.drawPath(mPath, mPaint);
         canvas.drawPath(circlePath, circlePaint);

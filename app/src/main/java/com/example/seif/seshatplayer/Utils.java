@@ -1,5 +1,7 @@
 package com.example.seif.seshatplayer;
 
+import android.content.Context;
+import android.content.res.Configuration;
 import android.util.Log;
 import com.example.seif.seshatplayer.model.Direction;
 import java.util.Calendar;

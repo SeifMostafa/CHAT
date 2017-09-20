@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -59,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
     private String filename = "Archive.txt";
     MediaPlayer mediaPlayer = null;
     private int DEFAULT_LESSON_LENGTH=5;
-
     /*
   * read file into string and the end = \n and return this string
   */
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
             view.startAnimation(shake);
         }
         if (mediaPlayer != null) {
-            if (mediaPlayer.isPlaying()) {
+            if (mediaPlayer.isLooping()||mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
                 mediaPlayer.release();
             }
@@ -200,14 +200,14 @@ public class MainActivity extends AppCompatActivity {
         } catch (IllegalStateException | IOException e) {
             e.printStackTrace();
         }
-/*        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
             @Override
             public void onCompletion(MediaPlayer mp) {
-                mp.release();
+                mediaPlayer.stop();
 
             }
-        });*/
+        });
     }
 
     public void voiceoffer(View view, int res_id) {
@@ -220,28 +220,29 @@ public class MainActivity extends AppCompatActivity {
                 mediaPlayer.stop();
                 mediaPlayer.release();
             }
-
         }
+            
         try {
             mediaPlayer = MediaPlayer.create(this, res_id);
             mediaPlayer.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
-/*        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
             @Override
             public void onCompletion(MediaPlayer mp) {
-                mp.release();
+                mediaPlayer.stop();
 
             }
-        });*/
+        });
     }
 
     public void StopMediaPlayer() {
         Log.i("MainActivity", "StopMediaPlayer");
-        mediaPlayer.stop();
-        mediaPlayer.release();
+        if(mediaPlayer.isPlaying()||mediaPlayer.isLooping()){
+            mediaPlayer.stop();
+        }
     }
 
     public void helpbypic(View view, String img2Bdisplayed) {
@@ -412,9 +413,11 @@ public class MainActivity extends AppCompatActivity {
                 String[] x_y = line.split(",");
                 points.push(new Point(Integer.parseInt(x_y[0]), Integer.parseInt(x_y[1])));
             }
+            scan.close();
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());
         }
+
         Point[] result = new Point[points.size()];
         return points.toArray(result);
     }
@@ -499,4 +502,6 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<String> getWords() {
         return new ArrayList<>(this.words);
     }
+
+
 }

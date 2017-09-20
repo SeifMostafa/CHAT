@@ -2,7 +2,6 @@ package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
@@ -31,7 +30,6 @@ public class MainFragment extends Fragment {
     private Word[] words;
     private  Word word= null;
     private int CurrentWordsArrayIndex = 0;
-    private Paint mPaint;
     DrawView drawView_MainText = null;
     private boolean Pronounced = false;
     private int PronouncedCounter = 0;
@@ -57,7 +55,6 @@ public class MainFragment extends Fragment {
 
         drawView_MainText = (DrawView) view.findViewById(R.id.textView_maintext);
         drawView_MainText.setVisibility(View.VISIBLE);
-        Log.i("getTriggerpoints()",""+this.word.getTriggerpoints()[0].x+this.word.getTriggerpoints()[0].y);
         drawView_MainText.SetTriggerPoints(this.word.getTriggerpoints());
 
         TextView custTextView = (TextView) view.findViewById(R.id.textView_maintext);
@@ -95,7 +92,7 @@ public class MainFragment extends Fragment {
                 drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
                 Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
                 setPreviBtnVisibilty();
-                //CreateWordTripThread().start();
+                CreateWordTripThread().start();
 
             }
         });
@@ -112,7 +109,7 @@ public class MainFragment extends Fragment {
                 custTextView.setText(word.getText());
                 Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
                 setNextiBtnVisibility();
-                //CreateWordTripThread().start();
+                CreateWordTripThread().start();
             }
         });
 
@@ -159,7 +156,7 @@ public class MainFragment extends Fragment {
         super.onResume();
         if (!Pronounced) {
             final String s = this.word.getText();
-       //     CreateWordTripThread().start(); //start the thread
+            CreateWordTripThread().start(); //start the thread
         }
     }
     private void setNextiBtnVisibility(){
@@ -205,7 +202,8 @@ public class MainFragment extends Fragment {
             @Override
             public void interrupt() {
                 super.interrupt();
-
+                ((MainActivity) getActivity()).StopMediaPlayer();
+                onDetach();
             }
         };
         return Thread_WordTrip;
@@ -251,24 +249,22 @@ public class MainFragment extends Fragment {
     public void onStop() {
         super.onStop();
         Log.i("MainFragment", "onStop");
-        /*((MainActivity)getActivity()).StopMediaPlayer();
-        if(Thread_WordTrip!=null){
+        if(!Thread_WordTrip.equals(null)){
             Thread_WordTrip.interrupt();
 
-        }*/
+        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         Log.i("MainFragment", "onDetach");
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
     }
+
 
 }

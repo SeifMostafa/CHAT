@@ -173,7 +173,6 @@ public class HelpFragment extends Fragment {
                 ImageButton imageButton_sound_help = (ImageButton)v.findViewById(R.id.imageButton_word_item_soundhelp);
                 ImageButton imageButton_photo_help = (ImageButton)v.findViewById(R.id.imageButton_word_item_photohelp);
                 ImageButton imageButton_redo = (ImageButton)v.findViewById(R.id.imageButton_word_item_back_to);
-
                 textView_word.setText(p);
                 imageButton_photo_help.setOnClickListener(new View.OnClickListener() {
                     @Override
