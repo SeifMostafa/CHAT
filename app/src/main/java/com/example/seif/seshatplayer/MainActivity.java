@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.media.MediaPlayer;
+import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -47,8 +48,12 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 
+import javax.microedition.khronos.opengles.GL;
+import javax.microedition.khronos.opengles.GL10;
+
 
 public class MainActivity extends AppCompatActivity {
+
 
     public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
@@ -60,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private String filename = "Archive.txt";
     MediaPlayer mediaPlayer = null;
     private int DEFAULT_LESSON_LENGTH=5;
+
+    public static String TAG = "MainActivity";
     /*
   * read file into string and the end = \n and return this string
   */
@@ -86,13 +93,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         sharedPreferences_words = this.getSharedPreferences(WORDS_PREFS_NAME, Context.MODE_PRIVATE);
         sharedPreferences_words_editor = sharedPreferences_words.edit();
         checkPermission_AndroidVersion();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        Log.i("AEP: ",""+getPackageManager().hasSystemFeature
+                (PackageManager.FEATURE_OPENGLES_EXTENSION_PACK));
         //OpenPhraseFragment("سيف مصطفى","سيف");
+
+
     }
 
     private void startApp() {

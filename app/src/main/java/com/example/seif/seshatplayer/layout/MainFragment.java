@@ -159,6 +159,7 @@ public class MainFragment extends Fragment {
             CreateWordTripThread().start(); //start the thread
         }
     }
+
     private void setNextiBtnVisibility(){
         if(CurrentWordsArrayIndex== words.length-1){
             NextiBtn.setVisibility(View.INVISIBLE);
@@ -166,6 +167,7 @@ public class MainFragment extends Fragment {
             NextiBtn.setVisibility(View.VISIBLE);
         }
     }
+
     private void setPreviBtnVisibilty(){
         if(CurrentWordsArrayIndex == 0){
             PreviBtn.setVisibility(View.INVISIBLE);
@@ -208,6 +210,8 @@ public class MainFragment extends Fragment {
         };
         return Thread_WordTrip;
     }
+
+
     private void voicerec(View view) {
         if (view != null) {
             Animation shake = AnimationUtils.loadAnimation(((MainActivity) getActivity()), R.anim.shake);
@@ -246,7 +250,7 @@ public class MainFragment extends Fragment {
     }
 
     @Override
-    public void onStop() {
+    public void onStop() {https://mail.google.com/mail/#inbox
         super.onStop();
         Log.i("MainFragment", "onStop");
         if(!Thread_WordTrip.equals(null)){

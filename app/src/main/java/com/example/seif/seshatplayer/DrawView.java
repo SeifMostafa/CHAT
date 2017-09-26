@@ -9,15 +9,19 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import java.io.IOException;
+
+import javax.microedition.khronos.opengles.GL;
 
 
 public class DrawView extends TextView {
@@ -35,24 +39,21 @@ public class DrawView extends TextView {
     int TOLERANCE_MIN = 10;
     int TOLERANCE_MAX = 100;
     boolean INITisOK =false;
+    View view;
 
     public DrawView(Context context) throws IOException {
         super(context);
         this.context = context;
+
         init();
+        /*view = new MyView(this);
+        view.setGLWrapper(new GLSurfaceView.GLWrapper() {
+            public GL wrap(GL gl) {
+                return new MatrixTrackingGL(gl);
+            }
+        });*/
     }
 
-    public DrawView(Context context, AttributeSet attrs) throws IOException {
-        super(context, attrs);
-        this.context = context;
-        init();
-    }
-
-    public DrawView(Context context, AttributeSet attrs, int defStyle) throws IOException {
-        super(context, attrs, defStyle);
-        this.context = context;
-        init();
-    }
 
 
 
