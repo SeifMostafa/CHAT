@@ -136,7 +136,7 @@ public class DrawView extends TextView {
                 if(Math.abs(x-this.TriggerPoints[0].x)<=TOLERANCE_MAX  && Math.abs(y-this.TriggerPoints[0].y)<=TOLERANCE_MAX ){
                     this.INITisOK = true;
                 }else{
-                    Log.i("onTouchEvent","Touch closer"+this.TriggerPoints[0].x+","+this.TriggerPoints[0].y+"   ,   "+x+","+y);
+                    Log.i("onTouchEvent","Touch closer "+this.TriggerPoints[0].x+","+this.TriggerPoints[0].y+"   ,   "+x+","+y);
                 }
 
                 if(INITisOK){

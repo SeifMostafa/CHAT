@@ -30,6 +30,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import com.example.seif.seshatplayer.layout.AnimationFragment;
 import com.example.seif.seshatplayer.layout.HelpFragment;
 import com.example.seif.seshatplayer.layout.MainFragment;
 import com.example.seif.seshatplayer.layout.PhrasePickFragment;
@@ -50,7 +51,7 @@ import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
+    public static final String AnimationKey= "AK",WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     SharedPreferences sharedPreferences_words = null;
     SharedPreferences.Editor sharedPreferences_words_editor = null;
@@ -125,7 +126,8 @@ public class MainActivity extends AppCompatActivity {
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
         }
 
-        OpenMainFragment(word_index);
+        //OpenMainFragment(word_index);
+        OpenAnimationFragment(word_index);
     }
 
     public String getNextWord() {
@@ -438,10 +440,8 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         MainFragment mainFragment = new MainFragment();
-
         Bundle bundle = new Bundle();
         Word[] wordsArray = fillWordsArray(DEFAULT_LESSON_LENGTH, i);
-
         bundle.putParcelableArray(WordsArrayKey, wordsArray);
         mainFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, mainFragment);
@@ -457,6 +457,16 @@ public class MainActivity extends AppCompatActivity {
         bundle.putString(WordKey, word);
         phrasePickFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, phrasePickFragment);
+        fragmentTransaction.commit();
+    }
+    public void OpenAnimationFragment(int index) {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        AnimationFragment animationFragment = new AnimationFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(AnimationKey,form_word(index).getText());
+        animationFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragment_replacement, animationFragment);
         fragmentTransaction.commit();
     }
 
