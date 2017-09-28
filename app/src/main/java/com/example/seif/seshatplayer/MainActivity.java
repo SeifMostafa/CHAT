@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -55,11 +54,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     SharedPreferences sharedPreferences_words = null;
     SharedPreferences.Editor sharedPreferences_words_editor = null;
+    MediaPlayer mediaPlayer = null;
     private String WordsFilePath = "/SF/WORDS.txt", PhrasesFilePath = "/SF/PHRASES.txt", AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt", AppendedToImageFile = ".png", AppendedToSpeechFile = ".wav", SF = "/SF/";
     private ArrayList<String> words, phrases;
     private int word_loop = 0, word_index = 0;
     private String filename = "Archive.txt";
-    MediaPlayer mediaPlayer = null;
     private int DEFAULT_LESSON_LENGTH=5;
     /*
   * read file into string and the end = \n and return this string
@@ -126,8 +125,8 @@ public class MainActivity extends AppCompatActivity {
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
         }
 
-        //OpenMainFragment(word_index);
-        OpenAnimationFragment(word_index);
+        OpenMainFragment(word_index);
+        //OpenAnimationFragment(word_index);
     }
 
     public String getNextWord() {
