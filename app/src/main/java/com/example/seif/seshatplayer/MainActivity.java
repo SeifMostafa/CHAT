@@ -125,8 +125,8 @@ public class MainActivity extends AppCompatActivity {
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
         }
 
-        OpenMainFragment(word_index);
-        //OpenAnimationFragment(word_index);
+        //OpenMainFragment(word_index);
+        OpenAnimationFragment(word_index);
     }
 
     public String getNextWord() {

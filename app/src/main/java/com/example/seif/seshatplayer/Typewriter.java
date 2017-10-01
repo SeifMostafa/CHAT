@@ -14,27 +14,31 @@ public class Typewriter extends TextView {
     private int mIndex;
     private int idx;
 
-    private long mDelay = 500; //Default 500ms delay
+    private long mDelay = 400; //Default 500ms delay
     private Handler mHandler = new Handler();
     private Runnable characterAdder = new Runnable() {
         @Override
         public void run() {
-            CharSequence txt = mText.subSequence(0, mIndex++);
-            setText(txt);
             try {
-                Thread.sleep(2000);
+                Thread.sleep(600);
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
+            CharSequence txt = mText.subSequence(0, mIndex++);
+            setText(txt);
             if (mIndex <= mText.length()) {
                 mHandler.postDelayed(characterAdder, mDelay);
                 ((MainActivity) context).voiceoffer(null, String.valueOf(mText.charAt(idx)));
                 Log.i("xx" + idx, mText.charAt(idx) + "");
                 idx++;
+            } else {
+
+                ((MainActivity) context).voiceoffer(null, mText.toString());
             }
         }
     };
+
 
     public Typewriter(Context context) throws IOException {
         super(context);

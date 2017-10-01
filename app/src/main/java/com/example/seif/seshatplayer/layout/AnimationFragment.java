@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
 import com.example.seif.seshatplayer.Typewriter;
@@ -32,10 +33,11 @@ public class AnimationFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_animation, container, false);
         custTextView = (Typewriter) view.findViewById(R.id.textView_maintext);
-        custTextView.setVisibility(View.VISIBLE);
-        custTextView.setCharacterDelay(500);
-        custTextView.animateText(word.getText());
         custTextView.setTypeface(tf);
+        custTextView.setVisibility(View.VISIBLE);
+        custTextView.setCharacterDelay(400);
+        custTextView.animateText(word.getText());
+
 
         return view;
     }
