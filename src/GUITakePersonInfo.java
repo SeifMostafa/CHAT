@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -39,8 +40,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import model.Person;
-
-import javax.swing.JPanel;
 
 public class GUITakePersonInfo {
 
@@ -74,7 +73,7 @@ public class GUITakePersonInfo {
 	private static void writeToXml(Person p)
 			throws ParserConfigurationException, SAXException, IOException, TransformerException {
 
-		String filepath = Messages.getString("DataFile"); 
+		String filepath = Messages.getString("LastPersonFile"); 
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 		org.w3c.dom.Document doc = docBuilder.parse(filepath);
@@ -133,7 +132,7 @@ public class GUITakePersonInfo {
 			throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-		Document document = documentBuilder.parse(Messages.getString("ServerFile")); 
+		Document document = documentBuilder.parse(Messages.getString("PersonsFile")); 
 		Element root = document.getDocumentElement();
 
 		Collection<Person> persons = new ArrayList<Person>();
@@ -190,7 +189,7 @@ public class GUITakePersonInfo {
 
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		Transformer transformer = transformerFactory.newTransformer();
-		StreamResult result = new StreamResult(Messages.getString("ServerFile")); 
+		StreamResult result = new StreamResult(Messages.getString("PersonsFile")); 
 		transformer.transform(source, result);
 	}
 

@@ -80,30 +80,26 @@ public class FileChooser extends JFrame {
 				} else {
 					try {
 						JOptionPane.showMessageDialog(new JFrame(), Messages.getString("FileChooser.thanks"), Messages.getString("FileChooser.info"), JOptionPane.INFORMATION_MESSAGE); //$NON-NLS-1$ //$NON-NLS-2$
-						String BackupFile = new File(filepath.getText()).getName();
+						String BackupFile = new File(new File("").getAbsolutePath()+Utils.SlashIndicator+new File(filepath.getText()).getName()).getPath();
 						Utils.createfile(BackupFile);
 						Utils.copyFileUsingFileStreams(new File(filepath.getText()), new File(BackupFile));
+						Utils.cleanwordsfile(BackupFile);
 						if (reason == REASON.LANG_CHARS) {
 							Utils.Lang = getSelectedButtonText();
 							Utils.writeStringToFile(Utils.LANGFILEKEY+ Utils.Lang ,Utils.SHAREDPREF);
-							Utils.writeStringToFile(Utils.CHARFILEKEY + filepath.getText(), Utils.SHAREDPREF);
+							Utils.writeStringToFile(Utils.CHARFILEKEY + BackupFile, Utils.SHAREDPREF);
 							Utils.UpdateStateInConfigFile(State.CHARSLOADED);
-							Utils.chars_db_txtfilepath = filepath.getText();
+							Utils.chars_db_txtfilepath =BackupFile;
 							SeShatEditorMain.LangCharsChoosingFile_Pressed();
 						}else {
-							Utils.writeStringToFile(Utils.DBWORDSFILEKEY + filepath.getText(), Utils.SHAREDPREF);
+							Utils.writeStringToFile(Utils.DBWORDSFILEKEY + BackupFile, Utils.SHAREDPREF);
 							Utils.UpdateStateInConfigFile(State.DBWORDSLOADED);
-							Utils.words_db_txtfilepath = filepath.getText();
+							Utils.words_db_txtfilepath = BackupFile;
 							SeShatEditorMain.LangWordsChoosingFile_Pressed();
 						}
 					} catch (IOException e1) {
 						System.out.println(Messages.getString( e1.toString())); //$NON-NLS-1$
 					}
-					
-					
-					
-					
-					
 					close();
 				}
 			}
@@ -172,6 +168,7 @@ public class FileChooser extends JFrame {
 	private void close() {
 		this.dispose();
 	}
+	
     private String getSelectedButtonText() {
     	int i=0;
         for (Enumeration<AbstractButton> buttons = this.LangRadioBtnGroup.getElements(); buttons.hasMoreElements();) {
@@ -182,6 +179,7 @@ public class FileChooser extends JFrame {
         }
         return null;
     }
+    
 	class ChooseL implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {

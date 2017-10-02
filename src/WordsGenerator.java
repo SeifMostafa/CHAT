@@ -1,7 +1,7 @@
-import java.awt.Point;
 import java.util.Map;
 import java.util.Stack;
 
+import model.Character.CharPosition;
 import model.Direction;
 import model.Person;
 import model.Word;
@@ -51,10 +51,14 @@ public class WordsGenerator {
 
 		Stack<String> SyllabusWords_txt = new Stack<>();
 		SyllabusWords_txt.push(this.person.getName().trim());
-		SyllabusWords_txt.addAll(Utils.readfileintoStack(Utils.BasicWordsFileName));
-
-		int NumberOfWordsToBeGeneratedAsAdvanced = NumberOfRequiredWords - SyllabusWords_txt.size();
+		Stack<String> SyllabusWords_BasicWords  =  Utils.readfileintoStack(Utils.BasicWordsFileName);
+		if(SyllabusWords_BasicWords.size()>NumberOfRequiredWords){
+			SyllabusWords_txt.addAll(SyllabusWords_BasicWords.subList(0, NumberOfRequiredWords));
+		}else{
+			SyllabusWords_txt.addAll(SyllabusWords_BasicWords);
+		}
 		
+		int NumberOfWordsToBeGeneratedAsAdvanced = NumberOfRequiredWords - SyllabusWords_txt.size();
 		SyllabusWords_txt.addAll(GenerateWordsTree(txtfilepath, NumberOfWordsToBeGeneratedAsAdvanced));
 		for (String word_txt : SyllabusWords_txt) {	
 			// check if exist and create audio files
@@ -62,56 +66,19 @@ public class WordsGenerator {
 			//System.out.println(word_txt+"@@"+AudiosFolderPath+this.lang);
 			word.setSpeechFilePath(Utils.DoTTS(AudiosFolderPath,word_txt, this.lang));
 			// check if exist and create imagepath
-			// word.setImageFilePath(FindHelpImage(word.getText(),
-			// ImagesFolderPath));
+			// word.setImageFilePath(Utils.FindHelpImage(ImagesFolderPath, word.getText()));
 			// check if exist and create fv
 			word.setFV(GenerateWordFV(word_txt));
-			try{
+/*			try{
 				word.setTriggerpoints(GenerateWordTR(word_txt));
 			}catch(Exception e){
 				System.out.println(e.toString() + "         from:WordsGenerator::generate");
-			}
+			}*/
 			word.setPhrase(getWordPhrase(word_txt));
 			this.SyllabusWords.push(word);
 		}
 		return this.SyllabusWords;
 	}
-
-//	private String[] GenerateWord_Characters(String word) {
-//		String[] word_Characters = word.split("");
-//		return word_Characters;
-//	}
-	 
-	// private Stack<String> GenerateWordsTree(String txtfilepath, int
-	// number_of_words) {
-	// int levels = 0;
-	// int added = 0;
-	// Stack<String> AvailableWords = new Stack<>();
-	// // read AvailableWords read from txtfile
-	// AvailableWords = Utils.readfileintoStack(txtfilepath);
-	// Stack<String> tree = new Stack<>();
-	// tree.add(this.person.getName());
-	// added++;
-	// while (number_of_words > tree.size()) {
-	// for (int i = 0; i < added; i++) {
-	// added = 0;
-	// String[] Word_characters = GenerateWord_Characters(tree.get((i) +
-	// levels));
-	// for (String CH : Word_characters) {
-	// for (String searchword : AvailableWords) {
-	// if (searchword.substring(0, 1).equals(CH)) {
-	// tree.add(searchword);
-	// added++;
-	// AvailableWords.remove(searchword);
-	// break;
-	// }
-	// }
-	// }
-	// }
-	// levels++;
-	// }
-	// return tree;
-	// }
 	private Stack<String> GenerateWordsTree(String txtfilepath, int number_of_words) {
 		Stack<String> AdvancedWords = new Stack<>();
 		Map<java.lang.Character, Stack<String>> AvailableWordsOrganisedByCharacters = Utils.readfileintoMap(txtfilepath,0);
@@ -155,6 +122,7 @@ public class WordsGenerator {
 				word_directions = Utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 1));
 			}
 		}
+		System.out.println("word_directions"+word_directions.length);
 		return word_directions;
 	}
 
@@ -163,36 +131,36 @@ public class WordsGenerator {
 		model.Character character = SeShatEditorMain.characters.get(new java.lang.Character(c));
 		if (character != null) {
 			switch (index) {
+			
 			case 0:
-				return character.getFVwithoutEND(); // remove last
+				return character.getFVwithoutEND(CharPosition.FIRST); // remove last
 			case 2:
-				return character.getFVwithoutINIT(); // remove first
+				return character.getFVwithoutINIT(CharPosition.LAST); // remove first
 			default:
-				return character.getFVwithoutEND_withoutINIT(); // remove last
+				return character.getFVwithoutEND_withoutINIT(CharPosition.MIDDLE); // remove last
 																// // and first
 			}
 		} else {
 			System.out.println("getCharacterFV:"+c+":NULL");
-			
 			return null;
 		}
 	}
 
-	public Point[] GenerateWordTR(String word) {
+/*	public Point[] GenerateWordTR(String word) {
 		Point[] word_directions = new Point[0];
 
 		for (int i = 0; i < word.length(); i++) {
 			word_directions = Utils.concatenate(word_directions, getCharacterTR(word.charAt(i)));
 		}
 		return word_directions;
-	}
+	}*/
 
-	// pass char and get from db or model
+/*	// pass char and get from db or model
 	private Point[] getCharacterTR(char c) {
 		model.Character character = SeShatEditorMain.characters.get(new java.lang.Character(c));
 		if(character.getTiggerPoints().equals(null))return new Point[0];
 		return character.getTiggerPoints();
-	}
+	}*/
 
 
 	private String getWordPhrase(String word){

@@ -84,6 +84,7 @@ public class Painter {
 		Point touchedpoint = null;
 		Point prev_touchedpoint = null;
 		String word;
+		int character_pos = 0;
 
 		public CharactersCustomization() {
 			word = words.pop();
@@ -98,6 +99,7 @@ public class Painter {
 
 				@Override
 				public void mouseDragged(MouseEvent e) {
+				
 				}
 
 				@Override
@@ -121,15 +123,14 @@ public class Painter {
 				public void actionPerformed(ActionEvent e) {
 					if (words.isEmpty()) {
 						CleanSaveDirectionsAndTriggerPoints(TriggerPoints, directions, word);
-
+						
 						frame.dispose();
 						JOptionPane.showMessageDialog(new JFrame(), "finished language characters!", "Thanks!",
 								JOptionPane.INFORMATION_MESSAGE);
 						Utils.UpdateStateInConfigFile(State.CHARSPAINTED);
 						SeShatEditorMain.LangCharsFinishingPaint_FV_TR__Pressed();
 					} else {
-						CleanSaveDirectionsAndTriggerPoints(TriggerPoints, directions, word);
-
+							CleanSaveDirectionsAndTriggerPoints(TriggerPoints, directions, word);
 						word = words.pop();
 						validate();
 						repaint();
@@ -137,7 +138,6 @@ public class Painter {
 						prev_touchedpoint = null;
 						TriggerPoints.clear();
 					}
-
 				}
 			});
 			add(btn_nxt, BorderLayout.EAST);
@@ -179,6 +179,26 @@ public class Painter {
 			validate();
 			repaint();
 		}
+		private void CleanSaveDirectionsAndTriggerPoints(ArrayList<Point> triggerpoints, Direction[] dirs, String word) {
+			Direction [] last_dir = new Direction[1];
+			last_dir[0] = Direction.END;
+			dirs = Utils.concatenate(dirs,last_dir);
+			List<Direction> list = Arrays.asList(dirs);
+			Stack<Direction> fvStack = new Stack<Direction>();
+			fvStack.addAll(list);
+			Utils.createfile(Utils.FVOutputPATH + word + Utils.AppenddedToOutputFVfile);
+			Utils.createfile(Utils.TriggerPointsOutputPATH + word + Utils.AppenddedToOutputTriggerPointsfile);
+			
+			Utils.writeDirectionStackTofile(fvStack, Utils.FVOutputPATH + word + character_pos +Utils.AppenddedToOutputFVfile);
+			Utils.writePointsStackTofile(triggerpoints,
+					Utils.TriggerPointsOutputPATH + word + character_pos + Utils.AppenddedToOutputTriggerPointsfile);
+			
+			if(character_pos == 3){
+				character_pos = 0;	
+			}else{
+				character_pos++;
+			}
+		}
 	}
 
 	private Direction[] fillDirections(Point p, Point prev) {
@@ -191,16 +211,7 @@ public class Painter {
 		}
 	}
 
-	private void CleanSaveDirectionsAndTriggerPoints(ArrayList<Point> triggerpoints, Direction[] dirs, String word) {
-		List<Direction> list = Arrays.asList(dirs);
-		Stack<Direction> fvStack = new Stack<Direction>();
-		fvStack.addAll(list);
-		Utils.createfile(Utils.FVOutputPATH + word + Utils.AppenddedToOutputFVfile);
-		Utils.createfile(Utils.TriggerPointsOutputPATH + word + Utils.AppenddedToOutputTriggerPointsfile);
-		Utils.writeDirectionStackTofile(fvStack, Utils.FVOutputPATH + word + Utils.AppenddedToOutputFVfile);
-		Utils.writePointsStackTofile(triggerpoints,
-				Utils.TriggerPointsOutputPATH + word + Utils.AppenddedToOutputTriggerPointsfile);
-	}
+
 
 	public String getLang() {
 		return lang;

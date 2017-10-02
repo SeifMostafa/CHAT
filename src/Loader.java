@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 
@@ -18,8 +17,9 @@ import model.Word;
  */
 public class Loader {
 	public WordsGenerator generator;
+	private static Loader loader = new Loader();
 
-	public Loader() {
+	private Loader() {
 		// read and assign
 		Stack<String> configs = new Stack<>();
 		configs = Utils.readfileintoStack(Utils.SHAREDPREF);
@@ -36,6 +36,9 @@ public class Loader {
 		assignFolderPathsInsideSyllabusFolder(new File(Utils.chars_db_txtfilepath).getParent());
 	}
 
+	public static Loader getInstance() {
+		return loader;
+	}
 
 	/*
 	 * Audio folder and ImagesFolder have data txtfile have words Syllabus is
@@ -45,26 +48,33 @@ public class Loader {
 	 */
 	public void GenerateSyllabus(WordsGenerator g) {
 		this.generator = g;
-		Stack<Word>words = generator.generate(Utils.SpeechOutputPATH, Utils.ImagesOutputPATH, Utils.words_db_txtfilepath);
-		System.out.println("GenerateSyllabus"+words.size());
+		Stack<Word> words = generator.generate(Utils.SpeechOutputPATH, Utils.ImagesOutputPATH,
+				Utils.words_db_txtfilepath);
+		System.out.println("GenerateSyllabus" + words.size());
 		String mainfolder = Utils.OUTPUTPATH + Utils.SlashIndicator + generator.getPerson().getName();
 		String ResultWordsFile = mainfolder + Utils.SlashIndicator + Utils.WordsOutputFileName;
 		String ResultPhrasesFile = mainfolder + Utils.SlashIndicator + Utils.PhrasesOutputFileName;
 		Utils.createdir(mainfolder);
 		Utils.createfile(ResultWordsFile);
-		
+
 		Utils.createfile(ResultPhrasesFile);
 
 		List<Direction> fv_list;
-		Stack<Direction> fv_stack = new Stack<Direction>();
+		Stack<Direction> fv_stack;
 		ArrayList<Point> tr_list;
 
 		for (Word w : words) {
-			try{
-			/*	Utils.copyFileUsingFileStreams(new File(w.getImageFilePath()),
-						new File(mainfolder + Utils.SlashIndicator + new File(w.getImageFilePath()).getName()));*/
+			try {
+				/*
+				 * Utils.copyFileUsingFileStreams(new
+				 * File(w.getImageFilePath()), new File(mainfolder +
+				 * Utils.SlashIndicator + new
+				 * File(w.getImageFilePath()).getName()));
+				 */
 				Utils.copyFileUsingFileStreams(new File(w.getSpeechFilePath()),
 						new File(mainfolder + Utils.SlashIndicator + new File(w.getSpeechFilePath()).getName()));
+
+				fv_stack = new Stack<Direction>();
 				fv_list = Arrays.asList(w.getFV());
 				fv_stack.addAll(fv_list);
 				Utils.writeDirectionStackTofile(fv_stack,
@@ -74,8 +84,9 @@ public class Loader {
 						mainfolder + Utils.SlashIndicator + w.getText() + Utils.AppenddedToOutputTriggerPointsfile);
 				Utils.writeStringToFile(w.getText(), ResultWordsFile);
 				Utils.writeStringToFile(w.getPhrase(), ResultPhrasesFile);
-			}catch(Exception e){
-				System.out.println(e.toString()+"        from:GenerateSyllabus");
+
+			} catch (Exception e) {
+				System.out.println(e.toString() + "        from:GenerateSyllabus");
 			}
 		}
 	}
@@ -84,6 +95,8 @@ public class Loader {
 		Map<Character, model.Character> characters = new HashMap<>();
 
 		if (Utils.state != State.DBWORDSLOADED) {
+
+			/// if already done
 			Utils.UpdateStateInConfigFile(State.CHARSPAINTED);
 
 		} else {
@@ -94,16 +107,29 @@ public class Loader {
 		}
 
 		Stack<String> charsfromfile = Utils.readfileintoStack(Utils.chars_db_txtfilepath);
-		for (String ch : charsfromfile) {
-			model.Character character = new model.Character(ch.charAt(0));
-			Character key_char = new Character(ch.charAt(0));
-			character.setFV(stringsToDirections(
-					Utils.readfileintoStack(Utils.FVOutputPATH + ch + Utils.AppenddedToOutputFVfile)));
-			character.setSpeechesFilePath(getspeechfilesforchar(ch.charAt(0)));
-			character.setImagesFilePath(getImagesfilesforchar(ch.charAt(0)));
-			character.setTiggerPoints(gettriggerpointsforchar(ch.charAt(0)));
-			characters.put(key_char, character);
+		for (int i=0;i<charsfromfile.size();i++) {
+			String ch = charsfromfile.get(i);
+			if(i%4==0){
+				model.Character character = new model.Character(ch.charAt(0));
+				Character key_char = new Character(ch.charAt(0));
+				Direction[][] directions = new Direction[4][];
+				directions[0] = stringsToDirections(
+						Utils.readfileintoStack(Utils.FVOutputPATH + ch + "2" + Utils.AppenddedToOutputFVfile));
+				directions[1] = stringsToDirections(
+						Utils.readfileintoStack(Utils.FVOutputPATH + charsfromfile.get(++i) + "1" + Utils.AppenddedToOutputFVfile));
+				directions[2] = stringsToDirections(
+						Utils.readfileintoStack(Utils.FVOutputPATH + charsfromfile.get(++i)+ "0" + Utils.AppenddedToOutputFVfile));
+				
+				directions[3] = stringsToDirections(
+						Utils.readfileintoStack(Utils.FVOutputPATH + charsfromfile.get(++i) + "3" + Utils.AppenddedToOutputFVfile));
+				character.setFV(directions);
+				character.setSpeechesFilePath(getspeechfilesforchar(ch.charAt(0)));
+				character.setImagesFilePath(getImagesfilesforchar(ch.charAt(0)));
+				characters.put(key_char, character);
+
+			}
 		}
+		
 		return characters;
 	}
 
@@ -158,6 +184,7 @@ public class Loader {
 		for (int i = 0; i < strings.size(); i++) {
 			String s = strings.get(i);
 			switch (s.charAt(0)) {
+
 			case 'U':
 				directios[i] = Direction.UP;
 				break;
@@ -176,6 +203,7 @@ public class Loader {
 			case 'E':
 				directios[i] = Direction.END;
 				break;
+
 			}
 		}
 		return directios;
@@ -183,11 +211,13 @@ public class Loader {
 
 	private void assignFolderPathsInsideSyllabusFolder(String SyllabusFolderPath) {
 		if (Utils.OUTPUTPATH.equals("")) {
+
 			Utils.OUTPUTPATH = SyllabusFolderPath;
 			Utils.SpeechOutputPATH = SyllabusFolderPath + Utils.SpeechOutputPATH;
 			Utils.ImagesOutputPATH = SyllabusFolderPath + Utils.ImagesOutputPATH;
 			Utils.FVOutputPATH = SyllabusFolderPath + Utils.FVOutputPATH;
 			Utils.TriggerPointsOutputPATH = SyllabusFolderPath + Utils.TriggerPointsOutputPATH;
+
 		}
 	}
 

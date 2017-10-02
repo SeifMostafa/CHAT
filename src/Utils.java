@@ -72,6 +72,7 @@ public class Utils {
 
 	public static final String AppenddedToOutputFVfile = "_fv.txt";
 	public static final String AppenddedToOutputTriggerPointsfile = "_trpoints.txt";
+	public static final String AppenddedToOutputImagefile = "_img";
 
 	public static final String CharLangWindowTitle = "Please, Choose the file contains language charcters";
 	public static final String DbWordsWindowTitle = "Please, Choose file contains language words";
@@ -88,27 +89,27 @@ public class Utils {
 		final Calendar c = Calendar.getInstance();
 		int todaysDate = (c.get(Calendar.YEAR) * 10000) + ((c.get(Calendar.MONTH) + 1) * 100)
 				+ (c.get(Calendar.DAY_OF_MONTH));
-		//System.out.println(String.valueOf(todaysDate));
+		// System.out.println(String.valueOf(todaysDate));
 		return (String.valueOf(todaysDate));
 	}
 
 	public static String DoTTS(String AudioFoler, String word, String lang) {
-		if(checkfileExist(AudioFoler)&&word.length()>0&&lang.length()==2){
-		word = word.replaceAll(" ", "+");
-		// filepath = audio folder
-		String file = AudioFoler + word;
-		if (!Utils.checkfileExist(file)) {
-			String DownloadSpeechFile_cmd = "wget -q -U Mozilla -O " + AudioFoler + Utils.SlashIndicator + word
-					+ " http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q="
-					+ word + "&tl=" + lang;
-			Utils.executeCommand(DownloadSpeechFile_cmd);
-			// exe cmd to create it as .wav
-			String Mp3ToSpecificWav_command = "ffmpeg -i " + file + " -ar 16000 -ac 1 " + file + " -y";
-			Utils.executeCommand(Mp3ToSpecificWav_command);
-		}
-		return file;
-		}else{
-			System.err.println("Invalid parameters!");
+		if (checkfileExist(AudioFoler) && word.length() > 0 && lang.length() == 2) {
+			word = word.replaceAll(" ", "+");
+			// filepath = audio folder
+			String file = AudioFoler + word;
+			if (!Utils.checkfileExist(file)) {
+				String DownloadSpeechFile_cmd = "wget -q -U Mozilla -O " + AudioFoler + Utils.SlashIndicator + word
+						+ " http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q="
+						+ word + "&tl=" + lang;
+				Utils.executeCommand(DownloadSpeechFile_cmd);
+				// exe cmd to create it as .wav
+				String Mp3ToSpecificWav_command = "ffmpeg -i " + file + " -ar 16000 -ac 1 " + file + " -y";
+				Utils.executeCommand(Mp3ToSpecificWav_command);
+			}
+			return file;
+		} else {
+			System.err.println("DoTTS:: Invalid parameters!");
 			return null;
 		}
 	}
@@ -116,14 +117,31 @@ public class Utils {
 	/*
 	 * need web service to download from
 	 */
-	public String FindHelpImage(String ImagesFolder, String word) {
-		word = word.replaceAll(" ", "+");
-		// file = audio folder
-		String file = ImagesFolder + word + ".png";
-		if (!Utils.checkfileExist(file)) {
-			// find image from webservice
+	public static String FindHelpImage(String ImagesFolder, String word) {
+		if (checkfileExist(ImagesFolder) && word.length() > 0) {
+			word = word.replaceAll(" ", "+");
+			String folder = ImagesFolder + word  ;
+			if (!Utils.checkfileExist(folder)) {
+				// find image from webservice
+				Utils.executeCommand("./googliser.sh -p "+"\""+word+"\""+" -n 1 -u 25000 -l 1000 -f 0 --minimum-pixels vga --output "+folder);
+				File[] listOfFiles = new File(folder).listFiles();
+				try {
+					createfile(folder+AppenddedToOutputImagefile);
+					copyFileUsingFileStreams(listOfFiles[0],new File(folder+AppenddedToOutputImagefile));
+				} catch (IOException e) {
+					System.err.println(e.getMessage());
+					e.printStackTrace();
+				}
+				
+				if(new File(folder).isDirectory()){
+					new File(folder).delete();
+				}
+			}
+			return folder+AppenddedToOutputImagefile;
+		} else {
+			System.err.println("FindHelpImage:: Invalid parameters!");
+			return null;
 		}
-		return file;
 	}
 
 	/*
@@ -137,7 +155,7 @@ public class Utils {
 			bufferedWriter.write(data + "\n");
 			bufferedWriter.close();
 
-		}catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -236,7 +254,7 @@ public class Utils {
 						currentstack.push(current);
 						result.remove(new Character(current.charAt(0)));
 						result.put(new Character(current.charAt(0)), currentstack);
-					}else{
+					} else {
 						Stack<String> currentstack = new Stack<>();
 						currentstack.push(current);
 						result.put(new Character(current.charAt(0)), currentstack);
@@ -250,31 +268,34 @@ public class Utils {
 		}
 		return result;
 	}
-	public static Map<String,String> readfileintoMap(String filepath){
+
+	public static Map<String, String> readfileintoMap(String filepath) {
 		Map<String, String> result = new HashMap<>();
-		try{
+		try {
 			FileReader reader = new FileReader(filepath);
 			BufferedReader bufferedReader = new BufferedReader(reader);
 
 			String line = bufferedReader.readLine();
-			String[] k_v= line.split(",");
+			String[] k_v = line.split(",");
 			result.put(k_v[0], k_v[1]);
 			reader.close();
-		}catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
+
 	public static int CharToASCII(final char character) {
 		return (int) character;
 	}
-	public static char CodeToChar(final int code){
+
+	public static char CodeToChar(final int code) {
 		return (char) code;
 	}
 
 	/*
-	 * remove non ar, symbols words and print them- ar words- into file 
-	 * line by line
+	 * remove non ar, symbols words and print them- ar words- into file line by
+	 * line
 	 */
 	public static void cleanwordsfile(String wordsfilepath) {
 		Stack<String> ret = new Stack<>();
@@ -286,8 +307,8 @@ public class Utils {
 			while ((line = bufferedReader.readLine()) != null) {
 
 				line = line.replaceAll("[!-~]", "");
-				for(int i=1610;i<1620;i++){
-					line = line.replaceAll(""+CodeToChar(i), "");
+				for (int i = 1610; i < 1620; i++) {
+					line = line.replaceAll("" + CodeToChar(i), "");
 				}
 				String words[] = line.split(" ");
 				for (String word : words) {
@@ -562,7 +583,8 @@ public class Utils {
 	}
 
 	/*
-	 * return text in image form, doing Text To Image and throw it into ImagesFolder(para1)
+	 * return text in image form, doing Text To Image and throw it into
+	 * ImagesFolder(para1)
 	 */
 	public static BufferedImage DoTTI(String ImagesFolder, String text) {
 
@@ -597,7 +619,6 @@ public class Utils {
 			e.printStackTrace();
 		}
 		return img;
-
 	}
 
 	public static BufferedImage invertImage(BufferedImage imageName) {
