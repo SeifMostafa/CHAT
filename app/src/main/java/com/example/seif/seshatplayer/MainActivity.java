@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     private Word form_word(int index) {
         try {
             return new Word(words.get(index), SF + words.get(index) + AppendedToImageFile, SF + words.get(index) + AppendedToSpeechFile, phrases.get(index)
-                    , getPoints(SF + words.get(index) + AppenddedToOutputTriggerPointsfile), getDirections(SF + words.get(index) + AppenddedToOutputFVfile));
+                    , null, getDirections(SF + words.get(index) + AppenddedToOutputFVfile));
         } catch (Exception e) {
             Log.e("form_wordE:", e.toString());
             e.printStackTrace();

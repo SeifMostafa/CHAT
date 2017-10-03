@@ -1,19 +1,22 @@
 package com.example.seif.seshatplayer.model;
 
-import android.graphics.Point;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
+
+
 public class Character {
+	public enum CharPosition {
+		FREE,FIRST,MIDDLE,LAST
+	}
 	char ch;
 	/*
 	 * Syllabus folder will contain CharactersFolder for data for this class
 	 */
 	// 3 files for character positions
 	private String ImagesFilePath[]= null, SpeechesFilePath[]= null;
-	private Direction[] FV= null;
-	private Point[] TiggerPoints = null;
+	private Direction[][] FV= null;
+	//private Point[][] TiggerPoints = null;
 
 	public char getCh() {
 		return ch;
@@ -39,11 +42,11 @@ public class Character {
 		SpeechesFilePath = speechesFilePath;
 	}
 
-	public Direction[] getFV() {
+	public Direction[][] getFV() {
 		return FV;
 	}
 
-	public void setFV(Direction[] fv) {
+	public void setFV(Direction[][] fv) {
 		FV = fv;
 	}
 
@@ -52,9 +55,9 @@ public class Character {
 		this.ch = ch;
 	}
 
-	public Direction[] getFVwithoutINIT() {
+	public Direction[] getFVwithoutINIT(CharPosition pos) {
 		try {
-			ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV));
+			ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV[CharPosition2PositionIndex(pos)]));
 			Direction[] a;
 			if (arrayList.size() > 0) {
 				arrayList.remove(0);
@@ -70,9 +73,9 @@ public class Character {
 		}
 	}
 
-	public Direction[] getFVwithoutEND() {
+	public Direction[] getFVwithoutEND(CharPosition pos) {
 		try {
-			ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV));
+			ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV[CharPosition2PositionIndex(pos)]));
 			Direction[] a;
 			if (arrayList.size() > 0) {
 				arrayList.remove(arrayList.size() - 1);
@@ -88,9 +91,9 @@ public class Character {
 		}
 	}
 
-	public Direction[] getFVwithoutEND_withoutINIT() {
+	public Direction[] getFVwithoutEND_withoutINIT(CharPosition pos) {
 		try {
-			ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV));
+			ArrayList<Direction> arrayList = new ArrayList<Direction>(Arrays.asList(FV[CharPosition2PositionIndex(pos)]));
 
 			Direction[] a;
 
@@ -109,19 +112,33 @@ public class Character {
 		}
 	}
 
-	public Point[] getTiggerPoints() {
+/*	public Point[] getTiggerPoints() {
 		
 		return TiggerPoints;
 	}
 
 	public void setTiggerPoints(Point[] tiggerPoints) {
 		TiggerPoints = tiggerPoints;
-	}
+	}*/
 
 	@Override
 	public String toString() {
-		return this.ch + this.FV.toString() + this.TiggerPoints.toString() + this.SpeechesFilePath
+		return this.ch + this.FV.toString()/* + this.TiggerPoints.toString()*/ + this.SpeechesFilePath
 				+ this.SpeechesFilePath;
+	}
+	private int CharPosition2PositionIndex(CharPosition charPosition){
+		switch(charPosition){
+		case FIRST:
+			return 0;
+		case FREE:
+			return 1;
+		case LAST:
+			return 3;
+		case MIDDLE:
+			return 2;
+		default:
+			return -1;
+		}
 	}
 
 }

@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.example.seif.seshatplayer.DrawView;
 import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
+import com.example.seif.seshatplayer.Utils;
 import com.example.seif.seshatplayer.model.Word;
 
 import java.util.ArrayList;
@@ -41,10 +42,19 @@ public class MainFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             this.words = (Word[]) getArguments().getParcelableArray(MainActivity.WordsArrayKey);
+            this.word = words[0];
             if (this.words.length > 0) {
-                this.word = words[0];
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for(Word w:words){
+                            w.setFV(Utils.clearedRedundancyList(w.getFV()));
+                        }
+                    }
+                }).start();
             }
         }
+
         Log.i("onCreate", "from MainFragment");
     }
 
@@ -57,15 +67,15 @@ public class MainFragment extends Fragment {
         drawView_MainText = (DrawView) view.findViewById(R.id.textView_maintext);
         drawView_MainText.setVisibility(View.VISIBLE);
 
-        if (!word.getTriggerpoints().equals(null)) {
-            drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
-        }
+       /* if (!word.getTriggerpoints().equals(null)) {
+            drawView_MainText.SetTriggerPoints(word.getTrigger.s());
+        }*/
         if (!word.getFV().equals(null)) {
             drawView_MainText.SetGuidedVector(word.getFV());
         }
 
-        Log.i("getTriggerpoints_length", "" + word.getTriggerpoints().length);
-        Log.i("getFV_length", "" + word.getFV().length);
+        // Log.i("getTriggerpoints_length", "" + word.getTriggerpoints().length);
+        // Log.i("getFV_length", "" + word.getFV().length);
 
         TextView custTextView = (TextView) view.findViewById(R.id.textView_maintext);
         custTextView.setText(word.getText());
@@ -96,13 +106,13 @@ public class MainFragment extends Fragment {
             public void onClick(View view) {
                 // request prev word
                 if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
-                CurrentWordsArrayIndex--;
-                word = words[CurrentWordsArrayIndex];
+                word = words[--CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
-                Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
+                drawView_MainText.SetGuidedVector(word.getFV());
+                //  drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
+                //  Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
                 setPreviBtnVisibilty();
-             //   CreateWordTripThread().start();
+                //   CreateWordTripThread().start();
 
             }
         });
@@ -114,12 +124,12 @@ public class MainFragment extends Fragment {
             public void onClick(View view) {
                 // request nxt word
                 if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
-                CurrentWordsArrayIndex++;
-                word = words[CurrentWordsArrayIndex];
+                word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
+                drawView_MainText.SetGuidedVector(word.getFV());
+                //  Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
                 setNextiBtnVisibility();
-              //  CreateWordTripThread().start();
+                //  CreateWordTripThread().start();
             }
         });
 
@@ -135,23 +145,12 @@ public class MainFragment extends Fragment {
                     Log.e("PlaySoundiBtn", e.toString());
                 }*/
                 if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
-                CurrentWordsArrayIndex++;
-                word = words[CurrentWordsArrayIndex];
+                word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-
-                if (!word.getTriggerpoints().equals(null)) {
-                    drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
-                }
-                if (!word.getFV().equals(null)) {
-                    drawView_MainText.SetGuidedVector(word.getFV());
-                }
-
-                Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
-                Log.i("getFV()", "" + word.getFV()[0] + word.getFV()[0]);
+                drawView_MainText.SetGuidedVector(word.getFV());
 
                 setNextiBtnVisibility();
-                //Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
-                //  CreateWordTripThread().start();
+
             }
         });
         DisplayImageiBtn = (ImageButton) view.findViewById(R.id.imagebutton_photohelp);
@@ -273,7 +272,7 @@ public class MainFragment extends Fragment {
     public void onStop() {
         super.onStop();
         Log.i("MainFragment", "onStop");
-        if (Thread_WordTrip!=null) {
+        if (Thread_WordTrip != null) {
             Thread_WordTrip.interrupt();
 
         }

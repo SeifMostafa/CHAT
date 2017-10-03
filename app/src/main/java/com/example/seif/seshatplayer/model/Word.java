@@ -46,7 +46,7 @@ public class Word  implements Parcelable {
 	}
 
 	public Word(String text, String imageFilePath, String speechFilePath, String phrase, Point[] triggerpoints,
-			Direction[] fV) {
+				Direction[] fV) {
 		super();
 		Text = text;
 		ImageFilePath = imageFilePath;
