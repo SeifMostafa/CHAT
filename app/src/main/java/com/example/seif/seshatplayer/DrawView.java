@@ -22,9 +22,8 @@ import com.example.seif.seshatplayer.model.Direction;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-
-import static com.example.seif.seshatplayer.Utils.clearedRedundancyList;
 
 
 public class DrawView extends TextView {
@@ -44,7 +43,8 @@ public class DrawView extends TextView {
     int TOLERANCE_MAX = 100;
     boolean INITisOK = false;
     private ArrayList<Point> touchedpoints;
-    private ArrayList<Direction> UserGuidedVector  = new ArrayList<>();
+    private ArrayList<Direction> UserGuidedVector = new ArrayList<>();
+    boolean skipinit = false;
 
 
     public DrawView(Context context) throws IOException {
@@ -119,6 +119,8 @@ public class DrawView extends TextView {
     private void touch_start(float x, float y) {
         mPath.reset();
         mPath.moveTo(x, y);
+        final float prev_x = mX, prev_y = mY, cur_x = x, cur_y = y;
+        Appending2UserGuidedVector(prev_x, prev_y, cur_x, cur_y);
         mX = x;
         mY = y;
     }
@@ -128,9 +130,11 @@ public class DrawView extends TextView {
         float dy = Math.abs(y - mY);
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
             mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+            final float prev_x = mX, prev_y = mY, cur_x = x, cur_y = y;
+            Appending2UserGuidedVector(prev_x, prev_y, cur_x, cur_y);
+
             mX = x;
             mY = y;
-
             circlePath.reset();
             circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
         }
@@ -143,6 +147,21 @@ public class DrawView extends TextView {
         mCanvas.drawPath(mPath, mPaint);
         // kill this so we don't double draw
         mPath.reset();
+        Log.i("DrawView.touch_up", "Direction::L" + UserGuidedVector.size());
+        Log.i("DrawView.touch_up", "Direction::OL" + GuidedVector.size());
+        if (UserGuidedVector.size() >= GuidedVector.size()) {
+            Log.i("DrawView.touch_up", "YUP");
+            boolean result = CompareGuidedVector(UserGuidedVector, GuidedVector);
+            Log.i("onTouchEvent", "ACTION_UP::GuidedVectorCMPR_Res:" + String.valueOf(result));
+
+            if (result) {
+                // nxt
+            } else {
+                // reset
+            }
+        } else {
+            Log.i("DrawView.touch_up", "NOPE");
+        }
     }
 
     @Override
@@ -154,53 +173,16 @@ public class DrawView extends TextView {
             case MotionEvent.ACTION_DOWN:
                 touch_start(x, y);
                 invalidate();
-                touchedpoints.add(new Point((int) x, (int) y));
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 touch_move(x, y);
                 invalidate();
-                touchedpoints.add(new Point((int) x, (int) y));
-                ArrayList<Direction> tempDirections = ComparePointsToCheckFV(touchedpoints);
-                if(UserGuidedVector.size()>=2 && tempDirections.size() == 2){
-                    if((UserGuidedVector.get(UserGuidedVector.size()-1) != tempDirections.get(tempDirections.size()-1)) ||
-                            (UserGuidedVector.get(UserGuidedVector.size()-2) != tempDirections.get(tempDirections.size()-2))){
-                        UserGuidedVector.addAll(tempDirections);
-                    }
-                }else{
-                    UserGuidedVector.addAll(tempDirections);
-                }
-                touchedpoints = new ArrayList<>();
                 break;
 
             case MotionEvent.ACTION_UP:
                 touch_up();
                 invalidate();
-
-
-                if (UserGuidedVector.size() >= 2) {
-
-                    Log.i("onTouchEvent", "ACTION_UP::UserGuidedVector::Directions before: " + UserGuidedVector.size());
-                     clearedRedundancyList(UserGuidedVector);
-                    Log.i("onTouchEvent", "ACTION_UP::UserGuidedVector::Directions after: " + UserGuidedVector.size());
-
-                  /*  for(Direction d:UserGuidedVector){
-                        Log.i("Direction: ",""+d);
-                    }*/
-
-                    if (UserGuidedVector.size() >= GuidedVector.size()) {
-
-                        boolean result = CompareGuidedVector(UserGuidedVector, GuidedVector);
-                        Log.i("onTouchEvent","ACTION_UP::GuidedVectorCMPR_Res:" + String.valueOf(result));
-                        if(result){
-                            // nxt
-                        }else{
-                            // reset
-                        }
-                    }else{
-                        Log.i("onTouchEvent","ACTION_UP::"+GuidedVector.size());
-                    }
-                }
                 break;
         }
         return true;
@@ -272,53 +254,73 @@ public class DrawView extends TextView {
     public void SetGuidedVector(Direction[] gv) {
         this.GuidedVector = new ArrayList();
         Collections.addAll(GuidedVector, gv);
-  //     clearedRedundancyList(GuidedVector);
         Log.i("SetGuidedVector", "   GdLength:" + GuidedVector.size());
     }
 
 
-    public ArrayList<Direction> ComparePointsToCheckFV(ArrayList<Point> touchedpoints) {
-        ArrayList<Direction> result = new ArrayList<>();
-        for (int i = 0; i < touchedpoints.size() - 1; i++) {
-            Point p1 = touchedpoints.get(i), p2 = touchedpoints.get(i + 1);
-            int x1 = p1.x, x2 = p2.x, y1 = p1.y, y2 = p2.y;
-            Direction direction[] = Utils.ComparePointsToCheckFV(x1, y1, x2, y2);
-            result.add(direction[0]);
-            result.add(direction[1]);
-        }
-        return result;
-    }
-
     private boolean CompareGuidedVector(ArrayList<Direction> USERgv, ArrayList<Direction> list_Org_Directions) {
+        int tolerance_failure = 0;
+        int orgI = 1;  // 0 index = INIT
 
-/*        int orgI = 1;  // 0 index = INIT
-        for(Direction direction:USERgv){
+    /*    for(Direction direction:USERgv){
             Log.i("USERgv:  ","Direction: "+ direction);
         }
+
         for(Direction direction:list_Org_Directions){
             Log.i("ORGgv:  ","Direction: "+ direction);
         }*/
+
         if (!list_Org_Directions.equals(null) && !USERgv.equals(null)) {
-            for (int i = 0; i < USERgv.size() - 1; i += 2) {
+            for (int i = 0; i < USERgv.size() - 3; ) {
                 Direction d_X = USERgv.get(i);
                 Direction d_Y = USERgv.get(i + 1);
                 Direction ORG_d_X = list_Org_Directions.get(i);
                 Direction ORG_d_Y = list_Org_Directions.get(i + 1);
+                try {
+                    if (d_X != null && d_Y != null && ORG_d_X != null && ORG_d_Y != null) {
 
-                if (d_X != null && d_Y != null && ORG_d_X != null && ORG_d_Y != null) {
-
-                    if (d_X != ORG_d_X && d_Y != ORG_d_Y) {
-                        return false;
-                    } /*else if (list_Org_Directions.get(orgI + 2) != null && list_Org_Directions.get(orgI + 3) != null) {
-                        if (d_X == list_Org_Directions.get(orgI + 2) && d_Y == list_Org_Directions.get(orgI + 3)) {
-                            orgI++;
+                        if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
+                            if (i + 3 < list_Org_Directions.size()) {
+                                if (d_X != list_Org_Directions.get(i + 2) || d_Y == list_Org_Directions.get(i + 3)) {
+                                    tolerance_failure++;
+                                } else tolerance_failure++;
+                            }
                         }
-                    }*//*else if(){
-                     */   // null's
-                    //}
+                    }
+                    i += 2;
+                    if (tolerance_failure <= list_Org_Directions.size() / 4) return true;
+                    else return false;
+                }catch (Exception e){
+                    Log.e("DrawView","CompareGuidedVector"+e.toString());
                 }
             }
         }
+
         return false;
+    }
+
+    private void Appending2UserGuidedVector(final float prev_x, final float prev_y, final float cur_x, final float cur_y) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Direction[] tempDirections = Utils.ComparePointsToCheckFV(prev_x, prev_y, cur_x, cur_y);
+                Direction temp_direction_x = tempDirections[tempDirections.length - 1];
+                Direction temp_direction_y = tempDirections[tempDirections.length - 2];
+
+                if (UserGuidedVector.size() >= 2) {
+                    Direction direction_x = UserGuidedVector.get(UserGuidedVector.size() - 1);
+                    Direction direction_y = UserGuidedVector.get(UserGuidedVector.size() - 2);
+                    if ((direction_x != temp_direction_x || direction_y != temp_direction_y) && temp_direction_x != null && temp_direction_y != null) {
+                        UserGuidedVector.addAll(Arrays.asList(tempDirections));
+                    }
+                } else if (skipinit) {
+                    if (temp_direction_x != null && temp_direction_y != null) {
+                        UserGuidedVector.addAll(Arrays.asList(tempDirections));
+                    }
+                } else {
+                    skipinit = true;
+                }
+            }
+        }).start();
     }
 }

@@ -43,18 +43,10 @@ public class MainFragment extends Fragment {
         if (getArguments() != null) {
             this.words = (Word[]) getArguments().getParcelableArray(MainActivity.WordsArrayKey);
             this.word = words[0];
-            if (this.words.length > 0) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(Word w:words){
-                            w.setFV(Utils.clearedRedundancyList(w.getFV()));
-                        }
-                    }
-                }).start();
-            }
         }
-
+       /* for(Word w:words){
+            w.setFV(Utils.clearedRedundancyList(word.getFV()));
+        }*/
         Log.i("onCreate", "from MainFragment");
     }
 
@@ -71,6 +63,7 @@ public class MainFragment extends Fragment {
             drawView_MainText.SetTriggerPoints(word.getTrigger.s());
         }*/
         if (!word.getFV().equals(null)) {
+
             drawView_MainText.SetGuidedVector(word.getFV());
         }
 
