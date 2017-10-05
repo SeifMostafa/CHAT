@@ -28,7 +28,7 @@ public class MainFragment extends Fragment {
     public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1500;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
     private Word[] words;
-    private  Word word= null;
+    private Word word = null;
     private int CurrentWordsArrayIndex = 0;
     DrawView drawView_MainText = null;
     private boolean Pronounced = false;
@@ -40,11 +40,11 @@ public class MainFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             this.words = (Word[]) getArguments().getParcelableArray(MainActivity.WordsArrayKey);
-           if(this.words.length > 0){
-               this.word = words[0];
-           }
+            if (this.words.length > 0) {
+                this.word = words[0];
+            }
         }
-        Log.i("onCreate","from MainFragment");
+        Log.i("onCreate", "from MainFragment");
     }
 
     @Override
@@ -85,12 +85,12 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 // request prev word
-                if(Thread_WordTrip!=null) Thread_WordTrip.interrupt();
+                if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
                 CurrentWordsArrayIndex--;
                 word = words[CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
                 drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
-                Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
+                Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
                 setPreviBtnVisibilty();
                 CreateWordTripThread().start();
 
@@ -103,16 +103,15 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 // request nxt word
-                if(Thread_WordTrip!=null) Thread_WordTrip.interrupt();
+                if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
                 CurrentWordsArrayIndex++;
                 word = words[CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
+                Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
                 setNextiBtnVisibility();
                 CreateWordTripThread().start();
             }
         });
-
 
 
         PlaySoundiBtn = (ImageButton) view.findViewById(R.id.imagebutton_soundhelp);
@@ -125,15 +124,15 @@ public class MainFragment extends Fragment {
                     e.printStackTrace();
                     Log.e("PlaySoundiBtn", e.toString());
                 }*/
-                if(Thread_WordTrip!=null) Thread_WordTrip.interrupt();
+                if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
                 CurrentWordsArrayIndex++;
                 word = words[CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
                 drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
-                Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
+                Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
                 setNextiBtnVisibility();
                 //Log.i("getTriggerpoints()",""+word.getTriggerpoints()[0].x+word.getTriggerpoints()[0].y);
-              //  CreateWordTripThread().start();
+                //  CreateWordTripThread().start();
             }
         });
         DisplayImageiBtn = (ImageButton) view.findViewById(R.id.imagebutton_photohelp);
@@ -160,23 +159,25 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void setNextiBtnVisibility(){
-        if(CurrentWordsArrayIndex== words.length-1){
+
+    private void setNextiBtnVisibility() {
+        if (CurrentWordsArrayIndex == words.length - 1) {
             NextiBtn.setVisibility(View.INVISIBLE);
-        }else{
+        } else {
             NextiBtn.setVisibility(View.VISIBLE);
         }
     }
 
-    private void setPreviBtnVisibilty(){
-        if(CurrentWordsArrayIndex == 0){
+
+    private void setPreviBtnVisibilty() {
+        if (CurrentWordsArrayIndex == 0) {
             PreviBtn.setVisibility(View.INVISIBLE);
-        }else{
+        } else {
             PreviBtn.setVisibility(View.VISIBLE);
         }
     }
 
-    private Thread CreateWordTripThread(){
+    private Thread CreateWordTripThread() {
         Thread_WordTrip = new Thread() {
             @Override
             public void run() {
@@ -210,7 +211,6 @@ public class MainFragment extends Fragment {
         };
         return Thread_WordTrip;
     }
-
 
     private void voicerec(View view) {
         if (view != null) {
@@ -253,7 +253,7 @@ public class MainFragment extends Fragment {
     public void onStop() {https://mail.google.com/mail/#inbox
         super.onStop();
         Log.i("MainFragment", "onStop");
-        if(!Thread_WordTrip.equals(null)){
+        if (!Thread_WordTrip.equals(null)) {
             Thread_WordTrip.interrupt();
 
         }
@@ -269,6 +269,5 @@ public class MainFragment extends Fragment {
     public void onPause() {
         super.onPause();
     }
-
 
 }

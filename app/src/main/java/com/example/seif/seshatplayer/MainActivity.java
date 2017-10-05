@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -31,6 +30,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import com.example.seif.seshatplayer.layout.AnimationFragment;
 import com.example.seif.seshatplayer.layout.HelpFragment;
 import com.example.seif.seshatplayer.layout.MainFragment;
 import com.example.seif.seshatplayer.layout.PhrasePickFragment;
@@ -55,15 +55,15 @@ import javax.microedition.khronos.opengles.GL10;
 public class MainActivity extends AppCompatActivity {
 
 
-    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
+    public static final String AnimationKey= "AK",WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     SharedPreferences sharedPreferences_words = null;
     SharedPreferences.Editor sharedPreferences_words_editor = null;
+    MediaPlayer mediaPlayer = null;
     private String WordsFilePath = "/SF/WORDS.txt", PhrasesFilePath = "/SF/PHRASES.txt", AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt", AppendedToImageFile = ".png", AppendedToSpeechFile = ".wav", SF = "/SF/";
     private ArrayList<String> words, phrases;
     private int word_loop = 0, word_index = 0;
     private String filename = "Archive.txt";
-    MediaPlayer mediaPlayer = null;
     private int DEFAULT_LESSON_LENGTH=5;
 
     public static String TAG = "MainActivity";
@@ -136,7 +136,8 @@ public class MainActivity extends AppCompatActivity {
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
         }
 
-        OpenMainFragment(word_index);
+        //OpenMainFragment(word_index);
+       // OpenAnimationFragment(word_index);
     }
 
     public String getNextWord() {
@@ -449,10 +450,8 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         MainFragment mainFragment = new MainFragment();
-
         Bundle bundle = new Bundle();
         Word[] wordsArray = fillWordsArray(DEFAULT_LESSON_LENGTH, i);
-
         bundle.putParcelableArray(WordsArrayKey, wordsArray);
         mainFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, mainFragment);
@@ -468,6 +467,16 @@ public class MainActivity extends AppCompatActivity {
         bundle.putString(WordKey, word);
         phrasePickFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, phrasePickFragment);
+        fragmentTransaction.commit();
+    }
+    public void OpenAnimationFragment(String word) {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        AnimationFragment animationFragment = new AnimationFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(AnimationKey,word);
+        animationFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragment_replacement, animationFragment);
         fragmentTransaction.commit();
     }
 
