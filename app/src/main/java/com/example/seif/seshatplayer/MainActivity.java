@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.media.MediaPlayer;
-import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -47,9 +46,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
-
-import javax.microedition.khronos.opengles.GL;
-import javax.microedition.khronos.opengles.GL10;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -103,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
                 (PackageManager.FEATURE_OPENGLES_EXTENSION_PACK));
         //OpenPhraseFragment("سيف مصطفى","سيف");
 
-
     }
 
     private void startApp() {
@@ -155,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
     private Word form_word(int index) {
         try {
             return new Word(words.get(index), SF + words.get(index) + AppendedToImageFile, SF + words.get(index) + AppendedToSpeechFile, phrases.get(index)
-                    , getPoints(SF + words.get(index) + AppenddedToOutputTriggerPointsfile), getDirections(SF + words.get(index) + AppenddedToOutputFVfile));
+                    , null, getDirections(SF + words.get(index) + AppenddedToOutputFVfile));
         } catch (Exception e) {
             Log.e("form_wordE:", e.toString());
             e.printStackTrace();
@@ -522,6 +517,4 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<String> getWords() {
         return new ArrayList<>(this.words);
     }
-
-
 }
