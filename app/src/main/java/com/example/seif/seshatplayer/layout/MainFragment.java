@@ -16,12 +16,12 @@ import android.widget.TextView;
 import com.example.seif.seshatplayer.DrawView;
 import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
-import com.example.seif.seshatplayer.Utils;
 import com.example.seif.seshatplayer.model.Word;
 
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
+import static java.lang.Thread.sleep;
 
 
 public class MainFragment extends Fragment {
@@ -36,6 +36,7 @@ public class MainFragment extends Fragment {
     private boolean Pronounced = false;
     private int PronouncedCounter = 0;
     Thread Thread_WordTrip = null;
+    private boolean justWord = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,8 +44,13 @@ public class MainFragment extends Fragment {
         if (getArguments() != null) {
             this.words = (Word[]) getArguments().getParcelableArray(MainActivity.WordsArrayKey);
 
-            if (this.words.length > 0) {
+            if (this.words != null) {
                 this.word = words[0];
+                Log.i("onCreate", "from MainFragment" + "words not null");
+
+            } else {
+                this.word = (Word) getArguments().getParcelable(MainActivity.WordKey);
+                justWord = true;
             }
         }
         Log.i("onCreate", "from MainFragment");
@@ -59,16 +65,9 @@ public class MainFragment extends Fragment {
         drawView_MainText = (DrawView) view.findViewById(R.id.textView_maintext);
         drawView_MainText.setVisibility(View.VISIBLE);
 
-       /* if (!word.getTriggerpoints().equals(null)) {
-            drawView_MainText.SetTriggerPoints(word.getTrigger.s());
-        }*/
-        if (!word.getFV().equals(null)) {
-
+        if (word.getFV() != null) {
             drawView_MainText.SetGuidedVector(word.getFV());
         }
-
-        // Log.i("getTriggerpoints_length", "" + word.getTriggerpoints().length);
-        // Log.i("getFV_length", "" + word.getFV().length);
 
         TextView custTextView = (TextView) view.findViewById(R.id.textView_maintext);
         custTextView.setText(word.getText());
@@ -92,7 +91,6 @@ public class MainFragment extends Fragment {
             }
         });
 
-
         PreviBtn = (ImageButton) view.findViewById(R.id.imagebutton_prevword);
         PreviBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,8 +101,6 @@ public class MainFragment extends Fragment {
                 word = words[--CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
                 drawView_MainText.SetGuidedVector(word.getFV());
-                //  drawView_MainText.SetTriggerPoints(word.getTriggerpoints());
-                //  Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
                 setPreviBtnVisibilty();
                 //   CreateWordTripThread().start();
 
@@ -122,7 +118,6 @@ public class MainFragment extends Fragment {
                 word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
                 drawView_MainText.SetGuidedVector(word.getFV());
-                //  Log.i("getTriggerpoints()", "" + word.getTriggerpoints()[0].x + word.getTriggerpoints()[0].y);
                 setNextiBtnVisibility();
                 //  CreateWordTripThread().start();
             }
@@ -144,7 +139,6 @@ public class MainFragment extends Fragment {
                 word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
                 drawView_MainText.SetGuidedVector(word.getFV());
-
                 setNextiBtnVisibility();
                 //  CreateWordTripThread().start();
 
@@ -169,9 +163,30 @@ public class MainFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
         if (!Pronounced) {
             final String s = this.word.getText();
             //CreateWordTripThread().start(); //start the thread
+        }
+
+        if (justWord) {
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        sleep(2000);
+                        ((MainActivity) getActivity()).voiceoffer(null, MainActivity.firstPhraseAudioPath);
+                        sleep(1100);
+                        ((MainActivity) getActivity()).voiceoffer(null, word.getText().split(" ")[2]);
+                        sleep(1900);
+                        ((MainActivity) getActivity()).updatelesson(0);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.e("PlaySoundiBtn", e.toString());
+                    }
+                }
+            }).start();
         }
     }
 
@@ -199,7 +214,7 @@ public class MainFragment extends Fragment {
             public void run() {
                 try {
                     Log.i("XX", "XX");
-                    Thread.sleep(WAIT2SayInstructions);
+                    sleep(WAIT2SayInstructions);
                 } catch (InterruptedException e) {
                 }
                 ((MainActivity) getActivity()).runOnUiThread(new Runnable() {
@@ -207,9 +222,9 @@ public class MainFragment extends Fragment {
                     public void run() {
                         try {
                             ((MainActivity) getActivity()).voiceoffer(null, word.getText());
-                            Thread.sleep(3000);
+                            sleep(3000);
                             ((MainActivity) getActivity()).voiceoffer(drawView_MainText, R.raw.speakinstruction);
-                            Thread.sleep(3000);
+                            sleep(3000);
                             voicerec(null);
                         } catch (Exception e) {
                             e.printStackTrace();

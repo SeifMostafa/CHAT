@@ -51,7 +51,7 @@ import java.util.Stack;
 public class MainActivity extends AppCompatActivity {
 
 
-    public static final String AnimationKey= "AK",WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
+    public static final String AnimationKey = "AK", WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     SharedPreferences sharedPreferences_words = null;
     SharedPreferences.Editor sharedPreferences_words_editor = null;
@@ -60,13 +60,17 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> words, phrases;
     private int word_loop = 0, word_index = 0;
     private String filename = "Archive.txt";
-    private int DEFAULT_LESSON_LENGTH=5;
+    private int DEFAULT_LESSON_LENGTH = 5;
+    private String firstPhrase = "أنا إسمي ";
+    public static String firstPhraseAudioPath = "myname";
+    private String firstTimekey = "1stTime";
 
     public static String TAG = "MainActivity";
+
     /*
   * read file into string and the end = \n and return this string
   */
-    public static Stack<String> readFileintoStack(String filepath) {
+    private  Stack<String> readFileintoStack(String filepath) {
 
         Stack<String> result = new Stack<>();
         try {
@@ -95,10 +99,6 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences_words_editor = sharedPreferences_words.edit();
         checkPermission_AndroidVersion();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        Log.i("AEP: ",""+getPackageManager().hasSystemFeature
-                (PackageManager.FEATURE_OPENGLES_EXTENSION_PACK));
-        //OpenPhraseFragment("سيف مصطفى","سيف");
-
     }
 
     private void startApp() {
@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e("StorageE:", e.toString());
             e.printStackTrace();
         }
+
         try {
             words = new ArrayList<>(readFileintoStack(WordsFilePath));
             phrases = new ArrayList<>(readFileintoStack(PhrasesFilePath));
@@ -120,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Log.e("words", "error");
         }
+
 
         if (sharedPreferences_words.getAll().isEmpty()) {
             word_loop = 0;
@@ -131,8 +133,13 @@ public class MainActivity extends AppCompatActivity {
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
         }
 
-        //OpenMainFragment(word_index);
-       // OpenAnimationFragment(word_index);
+        if (Boolean.valueOf(sharedPreferences_words.getString(firstTimekey, "true"))) {
+            Word phrase = new Word(firstPhrase + words.get(0));
+            OpenMainFragment(phrase);
+            SaveOnSharedPref(firstTimekey, String.valueOf(false));
+        }else {
+            OpenMainFragment(word_index);
+        }
     }
 
     public String getNextWord() {
@@ -194,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
             view.startAnimation(shake);
         }
         if (mediaPlayer != null) {
-            if (mediaPlayer.isLooping()||mediaPlayer.isPlaying()) {
+            if (mediaPlayer.isLooping() || mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
                 mediaPlayer.release();
             }
@@ -207,14 +214,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IllegalStateException | IOException e) {
             e.printStackTrace();
         }
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                mediaPlayer.stop();
-
-            }
-        });
+        mediaPlayer.setOnCompletionListener(mp -> mediaPlayer.stop());
     }
 
     public void voiceoffer(View view, int res_id) {
@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                 mediaPlayer.release();
             }
         }
-            
+
         try {
             mediaPlayer = MediaPlayer.create(this, res_id);
             mediaPlayer.start();
@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void StopMediaPlayer() {
         Log.i("MainActivity", "StopMediaPlayer");
-        if(mediaPlayer.isPlaying()||mediaPlayer.isLooping()){
+        if (mediaPlayer.isPlaying() || mediaPlayer.isLooping()) {
             mediaPlayer.stop();
         }
     }
@@ -288,12 +288,10 @@ public class MainActivity extends AppCompatActivity {
     private void checkPermission_AndroidVersion() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
-
         } else {
             // write your logic here if while testing under M.Devices
             // not granted!
         }
-
     }
 
     private void checkPermission() {
@@ -349,7 +347,6 @@ public class MainActivity extends AppCompatActivity {
                     boolean read_storagePermission = grantResults[0] == PackageManager.PERMISSION_GRANTED;
 
                     if (RecordAudioPermission && InternetPermission && write_storagePermission && read_storagePermission) {
-                        // write your logic here
                         startApp();
                     } else {
                         Log.i("onRequestPermResult", "" + RecordAudioPermission + "," + InternetPermission + "," + write_storagePermission + "," + read_storagePermission);
@@ -428,6 +425,7 @@ public class MainActivity extends AppCompatActivity {
         Point[] result = new Point[points.size()];
         return points.toArray(result);
     }
+
     /*
     dummy fn till getting data separated in lessons
      */
@@ -453,6 +451,17 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+    private void OpenMainFragment(Word word) {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        MainFragment mainFragment = new MainFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(WordKey, word);
+        mainFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragment_replacement, mainFragment);
+        fragmentTransaction.commit();
+    }
+
     public void OpenPhraseFragment(String phrase, String word) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -464,12 +473,13 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.fragment_replacement, phrasePickFragment);
         fragmentTransaction.commit();
     }
+
     public void OpenAnimationFragment(String word) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         AnimationFragment animationFragment = new AnimationFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(AnimationKey,word);
+        bundle.putString(AnimationKey, word);
         animationFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, animationFragment);
         fragmentTransaction.commit();
