@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -58,9 +59,12 @@ public class MainActivity extends AppCompatActivity {
     MediaPlayer mediaPlayer = null;
     private String WordsFilePath = "/SF/WORDS.txt", PhrasesFilePath = "/SF/PHRASES.txt", AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt", AppendedToImageFile = ".png", AppendedToSpeechFile = ".wav", SF = "/SF/";
     private ArrayList<String> words, phrases;
-    private int word_loop = 0, word_index = 0;
+    private int word_loop = 1, word_index = 0;
     private String filename = "Archive.txt";
     private int DEFAULT_LESSON_LENGTH = 5;
+    private int DEFAULT_LOOP_COUNTER = 4;
+    private int DEFAULT_TYPEFACE_LEVELS = 4;
+
     private String firstPhrase = "أنا إسمي ";
     public static String firstPhraseAudioPath = "myname";
     private String firstTimekey = "1stTime";
@@ -70,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     /*
   * read file into string and the end = \n and return this string
   */
-    private  Stack<String> readFileintoStack(String filepath) {
+    private Stack<String> readFileintoStack(String filepath) {
 
         Stack<String> result = new Stack<>();
         try {
@@ -137,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
             Word phrase = new Word(firstPhrase + words.get(0));
             OpenMainFragment(phrase);
             SaveOnSharedPref(firstTimekey, String.valueOf(false));
-        }else {
+        } else {
             OpenMainFragment(word_index);
         }
     }
@@ -153,6 +157,30 @@ public class MainActivity extends AppCompatActivity {
     public String getCurrentWord() {
         return words.get(word_index);
     }
+
+    public Typeface updateWordLoop() {
+        Typeface tf = null;
+
+        if (word_loop < (DEFAULT_LOOP_COUNTER * DEFAULT_TYPEFACE_LEVELS)) {
+            if (word_loop % DEFAULT_LOOP_COUNTER == 0) {
+                // change font
+                if (word_loop >= 0 && word_loop <= DEFAULT_LOOP_COUNTER) {
+                    tf = Typeface.createFromAsset(getAssets(), "fonts/lvl1.ttf");
+                } else if (word_loop > DEFAULT_LOOP_COUNTER && word_loop <= DEFAULT_LOOP_COUNTER * 2) {
+                    tf = Typeface.createFromAsset(getAssets(), "fonts/lvl2.ttf");
+                } else if (word_loop > DEFAULT_LOOP_COUNTER * 2 && word_loop <= DEFAULT_LOOP_COUNTER * 3) {
+                    tf = Typeface.createFromAsset(getAssets(), "fonts/lvl3.ttf");
+                }
+            }
+            word_loop++;
+        } else {
+            // change word
+            word_loop = 0;
+            updatelesson(1);
+        }
+        return tf;
+    }
+
 
     private Word form_word(int index) {
         try {

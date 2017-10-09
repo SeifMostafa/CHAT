@@ -2,6 +2,7 @@ package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
@@ -102,7 +103,7 @@ public class MainFragment extends Fragment {
                 custTextView.setText(word.getText());
                 drawView_MainText.SetGuidedVector(word.getFV());
                 setPreviBtnVisibilty();
-                //   CreateWordTripThread().start();
+              //  CreateWordTripThread().start();
 
             }
         });
@@ -119,7 +120,7 @@ public class MainFragment extends Fragment {
                 custTextView.setText(word.getText());
                 drawView_MainText.SetGuidedVector(word.getFV());
                 setNextiBtnVisibility();
-                //  CreateWordTripThread().start();
+                //CreateWordTripThread().start();
             }
         });
 
@@ -140,7 +141,7 @@ public class MainFragment extends Fragment {
                 custTextView.setText(word.getText());
                 drawView_MainText.SetGuidedVector(word.getFV());
                 setNextiBtnVisibility();
-                //  CreateWordTripThread().start();
+                //CreateWordTripThread().start();
 
             }
         });
@@ -207,6 +208,8 @@ public class MainFragment extends Fragment {
             PreviBtn.setVisibility(View.VISIBLE);
         }
     }
+
+
 
     private Thread CreateWordTripThread() {
         Thread_WordTrip = new Thread() {

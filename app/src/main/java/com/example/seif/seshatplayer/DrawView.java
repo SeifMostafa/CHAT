@@ -17,6 +17,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.seif.seshatplayer.model.Direction;
 
@@ -27,8 +28,14 @@ import java.util.Collections;
 
 
 public class DrawView extends TextView {
+
     private static final float TOUCH_TOLERANCE = 4;
     Context context;
+   // Point[] TriggerPoints;
+    ArrayList<Direction> GuidedVector;
+    int TOLERANCE_MIN = 10;
+    int TOLERANCE_MAX = 100;
+    boolean skipinit = false;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private Path mPath;
@@ -37,14 +44,8 @@ public class DrawView extends TextView {
     private Paint circlePaint;
     private Path circlePath;
     private float mX, mY;
-    Point[] TriggerPoints;
-    ArrayList<Direction> GuidedVector;
-    int TOLERANCE_MIN = 10;
-    int TOLERANCE_MAX = 100;
-    boolean INITisOK = false;
     private ArrayList<Point> touchedpoints;
     private ArrayList<Direction> UserGuidedVector = new ArrayList<>();
-    boolean skipinit = false;
 
 
     public DrawView(Context context) throws IOException {
@@ -56,16 +57,22 @@ public class DrawView extends TextView {
 
     public DrawView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
+
         init();
     }
 
     public DrawView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        this.context = context;
+
         init();
     }
 
     public DrawView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        this.context = context;
+
         init();
     }
 
@@ -73,6 +80,8 @@ public class DrawView extends TextView {
         Typeface tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
         this.setTypeface(tf);
         Log.i("init", "AM HERE!");
+
+
         mPath = new Path();
         touchedpoints = new ArrayList<>();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
@@ -93,6 +102,7 @@ public class DrawView extends TextView {
         mPaint.setStrokeWidth(14);
 
     }
+
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -147,19 +157,34 @@ public class DrawView extends TextView {
         mCanvas.drawPath(mPath, mPaint);
         // kill this so we don't double draw
         mPath.reset();
-        Log.i("DrawView.touch_up", "Direction::L" + UserGuidedVector.size());
-        Log.i("DrawView.touch_up", "Direction::OL" + GuidedVector.size());
+        //  Log.i("DrawView.touch_up", "Direction::L" + UserGuidedVector.size());
+        //   Log.i("DrawView.touch_up", "Direction::OL" + GuidedVector.size());
         if (UserGuidedVector.size() >= GuidedVector.size()) {
             Log.i("DrawView.touch_up", "YUP");
             boolean result = CompareGuidedVector(UserGuidedVector, GuidedVector);
             Log.i("onTouchEvent", "ACTION_UP::GuidedVectorCMPR_Res:" + String.valueOf(result));
-
             if (result) {
                 // nxt
+                Toast.makeText((MainActivity) context, "YUP", Toast.LENGTH_LONG).show();
+
+                Typeface newTypeface = ((MainActivity) context).updateWordLoop();
+                if (newTypeface == null) {
+                    Toast.makeText((MainActivity) context, "SAME FONT LOOP++", Toast.LENGTH_LONG).show();
+                    reset();
+
+                } else {
+                    this.setTypeface(newTypeface);
+                    reset();
+                    Toast.makeText((MainActivity) context, "NEW FONT", Toast.LENGTH_LONG).show();
+                }
+
             } else {
                 // reset
+                Toast.makeText(context, "NOPE", Toast.LENGTH_LONG).show();
+                ((MainActivity) context).updatelesson(0);
             }
-        } else {
+            UserGuidedVector.clear();
+        }    else {
             Log.i("DrawView.touch_up", "NOPE");
         }
     }
@@ -246,9 +271,9 @@ public class DrawView extends TextView {
         return super.animate();
     }
 
-    public void SetTriggerPoints(Point[] trpoints) {
+    /*public void SetTriggerPoints(Point[] trpoints) {
         this.TriggerPoints = trpoints;
-    }
+    }*/
 
     public void SetGuidedVector(Direction[] gv) {
         this.GuidedVector = new ArrayList();
@@ -270,7 +295,7 @@ public class DrawView extends TextView {
         }*/
 
         if (!list_Org_Directions.equals(null) && !USERgv.equals(null)) {
-            for (int i = 0; i < USERgv.size() - 3; ) {
+            for (int i = 0; i < USERgv.size() - 1; ) {
                 Direction d_X = USERgv.get(i);
                 Direction d_Y = USERgv.get(i + 1);
                 Direction ORG_d_X = list_Org_Directions.get(i);
@@ -279,18 +304,23 @@ public class DrawView extends TextView {
                     if (d_X != null && d_Y != null && ORG_d_X != null && ORG_d_Y != null) {
 
                         if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
-                            if (i + 3 < list_Org_Directions.size()) {
+
+                            tolerance_failure++;
+
+
+                          /*  if (i + 3 < list_Org_Directions.size()) {
                                 if (d_X != list_Org_Directions.get(i + 2) || d_Y == list_Org_Directions.get(i + 3)) {
                                     tolerance_failure++;
                                 } else tolerance_failure++;
-                            }
+                            }*/
                         }
                     }
                     i += 2;
-                    if (tolerance_failure <= list_Org_Directions.size() / 4) return true;
+                    Log.i("FAILED",""+tolerance_failure);
+                    if (tolerance_failure <=5) return true;
                     else return false;
-                }catch (Exception e){
-                    Log.e("DrawView","CompareGuidedVector"+e.toString());
+                } catch (Exception e) {
+                    Log.e("DrawView", "CompareGuidedVector" + e.toString());
                 }
             }
         }
