@@ -2,7 +2,6 @@ package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
@@ -25,15 +24,15 @@ import static android.app.Activity.RESULT_OK;
 import static java.lang.Thread.sleep;
 
 
+
 public class MainFragment extends Fragment {
 
     public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1500;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
+    DrawView drawView_MainText = null;
     private Word[] words;
     private Word word = null;
-
     private int CurrentWordsArrayIndex = 0;
-    DrawView drawView_MainText = null;
     private boolean Pronounced = false;
     private int PronouncedCounter = 0;
     Thread Thread_WordTrip = null;
@@ -54,6 +53,7 @@ public class MainFragment extends Fragment {
                 justWord = true;
             }
         }
+
         Log.i("onCreate", "from MainFragment");
     }
 
@@ -69,6 +69,13 @@ public class MainFragment extends Fragment {
         if (word.getFV() != null) {
             drawView_MainText.SetGuidedVector(word.getFV());
         }
+     /*   if (!word.getFV().equals(null)) {
+
+            drawView_MainText.SetGuidedVector(word.getFV());
+        }
+        */
+     //   Direction[][] directions = prepareWordGuidedVectors(word.getText());
+        //drawView_MainText.setWord_dirs(directions);
 
         TextView custTextView = (TextView) view.findViewById(R.id.textView_maintext);
         custTextView.setText(word.getText());
@@ -303,5 +310,33 @@ public class MainFragment extends Fragment {
     public void onPause() {
         super.onPause();
     }
+
+
+ /*   private Direction[][] prepareWordGuidedVectors(String word) {
+        Direction[][] result_directions = new Direction[word.length()][];
+        ArrayList<Character> differentchars = new ArrayList<>();
+        Character[] characters = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ','ا'};
+        differentchars.addAll(Arrays.asList(characters));
+        for (int i = 0; i < word.length(); i++) {
+            if (i == 0) {
+                result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 1 + AppenddedToOutputFVfile);
+            } else if (i == word.length() - 1) {
+                if (differentchars.contains(word.charAt(i-1))) {
+                    result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
+
+                }else{
+                    result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 0 + AppenddedToOutputFVfile);
+                }
+            } else {
+                if (differentchars.contains(word.charAt(i-1))) {
+                    result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
+
+                }else{
+                    result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 3 + AppenddedToOutputFVfile);
+                }
+            }
+        }
+        return result_directions;
+    }*/
 
 }

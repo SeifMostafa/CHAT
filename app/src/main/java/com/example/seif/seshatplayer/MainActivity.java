@@ -45,6 +45,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static String TAG = "MainActivity";
 
-    /*
+/*
   * read file into string and the end = \n and return this string
   */
     private Stack<String> readFileintoStack(String filepath) {
@@ -94,6 +95,43 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
+    public static Direction[] getDirections(String filepath) {
+        Stack<Direction> directions = new Stack<>();
+        File file = new File(filepath);
+        try {
+            Scanner scan = new Scanner(file);
+            while (scan.hasNextLine()) {
+                String line = null;
+                line = scan.nextLine();
+                switch (line.charAt(0)) {
+                    case 'I':
+                        directions.push(Direction.INIT);
+                        break;
+                    case 'E':
+                        directions.push(Direction.END);
+                        break;
+                    case 'L':
+                        directions.push(Direction.LEFT);
+                        break;
+                    case 'R':
+                        directions.push(Direction.RIGHT);
+                        break;
+                    case 'U':
+                        directions.push(Direction.UP);
+                        break;
+                    case 'D':
+                        directions.push(Direction.DOWN);
+                        break;
+                }
+            }
+            scan.close();
+        } catch (FileNotFoundException e) {
+            System.out.println(e.toString());
+        }
+        Direction[] result = new Direction[directions.size()];
+        return directions.toArray(result);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,6 +141,10 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences_words_editor = sharedPreferences_words.edit();
         checkPermission_AndroidVersion();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        Log.i("AEP: ", "" + getPackageManager().hasSystemFeature
+                (PackageManager.FEATURE_OPENGLES_EXTENSION_PACK));
+        //OpenPhraseFragment("سيف مصطفى","سيف");
+
     }
 
     private void startApp() {
@@ -396,44 +438,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    private Direction[] getDirections(String filepath) {
-        Stack<Direction> directions = new Stack<>();
-        File file = new File(filepath);
-        try {
-            Scanner scan = new Scanner(file);
-            while (scan.hasNextLine()) {
-                String line = null;
-                line = scan.nextLine();
-                switch (line.charAt(0)) {
-                    case 'I':
-                        directions.push(Direction.INIT);
-                        break;
-                    case 'E':
-                        directions.push(Direction.END);
-                        break;
-                    case 'L':
-                        directions.push(Direction.LEFT);
-                        break;
-                    case 'R':
-                        directions.push(Direction.RIGHT);
-                        break;
-                    case 'U':
-                        directions.push(Direction.UP);
-                        break;
-                    case 'D':
-                        directions.push(Direction.DOWN);
-                        break;
-                }
-            }
-            scan.close();
-        } catch (FileNotFoundException e) {
-            System.out.println(e.toString());
-        }
-        Direction[] result = new Direction[directions.size()];
-        return directions.toArray(result);
-    }
-
     private Point[] getPoints(String filepath) {
         Stack<Point> points = new Stack<>();
         File file = new File(filepath);
@@ -555,4 +559,5 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<String> getWords() {
         return new ArrayList<>(this.words);
     }
+
 }

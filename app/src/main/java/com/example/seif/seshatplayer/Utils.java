@@ -24,23 +24,6 @@ public class Utils {
 
     }
 
-    public static Direction[] ComparePointsToCheckFV(float x1, float y1, float x2, float y2) {
-        Direction direction[] = new Direction[2];
-        if (x1 > x2)
-            direction[0] = Direction.LEFT;
-        else if (x1 < x2)
-            direction[0] = Direction.RIGHT;
-        else
-            direction[0] = null;
-
-        if (y1 > y2)
-            direction[1] = Direction.UP;
-        else if (y1 < y2)
-            direction[1] = Direction.DOWN;
-        else
-            direction[1] = null;
-        return direction;
-    }
 
 
     public static ArrayList<Direction> clearedRedundancyList(ArrayList<Direction> dirtyList) {
