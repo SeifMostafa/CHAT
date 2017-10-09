@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,66 +15,61 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_gravity="left|center"
-            android:orientation="vertical">
-
+            >
             <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_prevlesson"
+                android:background="@color/colorWhity"
+                android:src="@drawable/prevlesson"/>
+            <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/colorWhity"
-                android:src="@drawable/prevlesson" />
-
-            <ImageButton
                 android:id="@+id/imagebutton_prevlesson_help"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:src="@drawable/sound" />
+                android:src="@drawable/sound"/>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_gravity="center"
-            android:orientation="vertical"
             android:paddingLeft="@dimen/activity_double_actionbar_margin">
-
             <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_currentlesson"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:src="@drawable/reset" />
-
+                android:src="@drawable/reset"/>
             <ImageButton
-                android:id="@+id/imagebutton_currentlesson_help"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/imagebutton_currentlesson_help"
                 android:background="@android:color/transparent"
-                android:src="@drawable/sound" />
+                android:src="@drawable/sound"/>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|center"
             android:orientation="vertical"
+            android:layout_gravity="right|center"
             android:paddingLeft="@dimen/activity_double_actionbar_margin">
-
             <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_achievedlessons"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:background="@color/colorWhity"
-                android:src="@drawable/achieved" />
-
+                android:src="@drawable/achieved"/>
             <ImageButton
-                android:id="@+id/imagebutton_achievedlessons_help"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/imagebutton_achievedlessons_help"
                 android:background="@android:color/transparent"
-                android:src="@drawable/sound" />
+                android:src="@drawable/sound"/>
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

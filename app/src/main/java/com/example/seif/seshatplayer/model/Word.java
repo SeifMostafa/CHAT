@@ -4,124 +4,126 @@ import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Word implements Parcelable {
-    public static final Creator<Word> CREATOR = new Creator<Word>() {
-        @Override
-        public Word createFromParcel(Parcel in) {
-            return new Word(in);
-        }
+import java.lang.*;
 
-        @Override
-        public Word[] newArray(int size) {
-            return new Word[size];
-        }
-    };
-    Point[] triggerpoints = null;
-    private String Text, ImageFilePath = null, SpeechFilePath = null, Phrase = null;
-    private Direction[] FV = null;
-    private boolean Achieved = false;
+public class Word  implements Parcelable {
+	private String Text, ImageFilePath=null, SpeechFilePath=null, Phrase=null;
+	Point[] triggerpoints=null;
+	private Direction[] FV=null;
+	private boolean Achieved = false;
 
-    protected Word(Parcel in) {
-        Text = in.readString();
-        ImageFilePath = in.readString();
-        SpeechFilePath = in.readString();
-        Phrase = in.readString();
-        triggerpoints = in.createTypedArray(Point.CREATOR);
-    }
+	protected Word(Parcel in) {
+		Text = in.readString();
+		ImageFilePath = in.readString();
+		SpeechFilePath = in.readString();
+		Phrase = in.readString();
+		triggerpoints = in.createTypedArray(Point.CREATOR);
+	}
 
-    public Word(String text) {
-        super();
-        Text = text;
-    }
+	public static final Creator<Word> CREATOR = new Creator<Word>() {
+		@Override
+		public Word createFromParcel(Parcel in) {
+			return new Word(in);
+		}
 
-    public Word(String text, String imageFilePath, String speechFilePath, String phrase, Point[] triggerpoints,
-                Direction[] fV) {
-        super();
-        Text = text;
-        ImageFilePath = imageFilePath;
-        SpeechFilePath = speechFilePath;
-        Phrase = phrase;
-        this.triggerpoints = triggerpoints;
-        FV = fV;
-    }
+		@Override
+		public Word[] newArray(int size) {
+			return new Word[size];
+		}
+	};
 
-    public Point[] getTriggerpoints() {
-        return triggerpoints;
-    }
+	public Point[] getTriggerpoints() {
+		return triggerpoints;
+	}
 
-    public void setTriggerpoints(Point[] triggerpoints) {
-        this.triggerpoints = triggerpoints;
-    }
+	public void setTriggerpoints(Point[] triggerpoints) {
+		this.triggerpoints = triggerpoints;
+	}
 
-    public String getText() {
-        return Text;
-    }
+	public Word(String text) {
+		super();
+		Text = text;
+	}
 
-    public void setText(String text) {
-        Text = text;
-    }
+	public Word(String text, String imageFilePath, String speechFilePath, String phrase, Point[] triggerpoints,
+				Direction[] fV) {
+		super();
+		Text = text;
+		ImageFilePath = imageFilePath;
+		SpeechFilePath = speechFilePath;
+		Phrase = phrase;
+		this.triggerpoints = triggerpoints;
+		FV = fV;
+	}
 
-    public String getImageFilePath() {
-        return ImageFilePath;
-    }
+	public String getText() {
+		return Text;
+	}
 
-    public void setImageFilePath(String imageFilePath) {
-        ImageFilePath = imageFilePath;
-    }
+	public void setText(String text) {
+		Text = text;
+	}
 
-    public String getSpeechFilePath() {
-        return SpeechFilePath;
-    }
+	public String getImageFilePath() {
+		return ImageFilePath;
+	}
 
-    public void setSpeechFilePath(String speechFilePath) {
-        SpeechFilePath = speechFilePath;
-    }
+	public void setImageFilePath(String imageFilePath) {
+		ImageFilePath = imageFilePath;
+	}
 
-    public java.lang.Character[] getWordChars() {
-        java.lang.Character[] chars = new java.lang.Character[this.Text.length()];
-        for (int i = 0; i < this.Text.length(); i++) {
-            java.lang.Character character;
-            character = new java.lang.Character(this.Text.charAt(i));
-            chars[i] = character;
-        }
-        return chars;
-    }
+	public String getSpeechFilePath() {
+		return SpeechFilePath;
+	}
 
-    public Direction[] getFV() {
-        return FV;
-    }
+	public void setSpeechFilePath(String speechFilePath) {
+		SpeechFilePath = speechFilePath;
+	}
 
-    public void setFV(Direction[] fV) {
-        FV = fV;
-    }
+	public java.lang.Character[] getWordChars() {
+		java.lang.Character[] chars = new java.lang.Character[this.Text.length()];
+		for (int i = 0; i < this.Text.length(); i++) {
+			java.lang.Character character;
+			character = new java.lang.Character(this.Text.charAt(i));
+			chars[i] = character;
+		}
+		return chars;
+	}
 
-    public String getPhrase() {
-        return Phrase;
-    }
+	public Direction[] getFV() {
+		return FV;
+	}
 
-    public void setPhrase(String phrase) {
-        Phrase = phrase;
-    }
+	public void setFV(Direction[] fV) {
+		FV = fV;
+	}
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+	public String getPhrase() {
+		return Phrase;
+	}
 
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(Text);
-        parcel.writeString(ImageFilePath);
-        parcel.writeString(SpeechFilePath);
-        parcel.writeString(Phrase);
-        parcel.writeTypedArray(triggerpoints, i);
-    }
+	public void setPhrase(String phrase) {
+		Phrase = phrase;
+	}
 
-    public boolean isAchieved() {
-        return Achieved;
-    }
+	@Override
+	public int describeContents() {
+		return 0;
+	}
 
-    public void SetAchieved() {
-        this.Achieved = true;
-    }
+	@Override
+	public void writeToParcel(Parcel parcel, int i) {
+		parcel.writeString(Text);
+		parcel.writeString(ImageFilePath);
+		parcel.writeString(SpeechFilePath);
+		parcel.writeString(Phrase);
+		parcel.writeTypedArray(triggerpoints, i);
+	}
+
+	public boolean isAchieved() {
+		return Achieved;
+	}
+	public void SetAchieved(){
+		this.Achieved = true;
+	}
 }

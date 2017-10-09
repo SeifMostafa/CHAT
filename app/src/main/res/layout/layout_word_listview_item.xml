@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/sound"
         android:id="@+id/imageButton_word_item_soundhelp"
-      />
+        />
 
     <TextView
         android:text="TextView"
