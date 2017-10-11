@@ -22,14 +22,15 @@ import android.widget.Toast;
 import com.example.seif.seshatplayer.model.Direction;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
 
 public class DrawView extends TextView {
     private static final float TOUCH_TOLERANCE = 4;
     Context context;
+
+    Direction[][] guidedVectors;
+    int wordCharsChecked = 0;
+    GestureDetector gestureDetector;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private Path mPath;
@@ -38,25 +39,11 @@ public class DrawView extends TextView {
     private Paint circlePaint;
     private Path circlePath;
     private float mX, mY;
-    Point[] TriggerPoints;
-    ArrayList<Direction> GuidedVector;
-    int wordCharsChecked = 0;
-
-
-
-    public Direction [][] word_dirs;
-    int TOLERANCE_MIN = 10;
-    int TOLERANCE_MAX = 100;
-    boolean INITisOK = false;
-    private ArrayList<Point> touchedpoints;
-    private ArrayList<Direction> UserGuidedVector = new ArrayList<>();
-    boolean skipinit = false;
 
 
     public DrawView(Context context) throws IOException {
         super(context);
         this.context = context;
-
         init();
     }
 
@@ -86,7 +73,6 @@ public class DrawView extends TextView {
         this.setTypeface(tf);
         Log.i("init", "AM HERE!");
         mPath = new Path();
-        touchedpoints = new ArrayList<>();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
         circlePaint = new Paint();
         circlePath = new Path();
@@ -103,7 +89,6 @@ public class DrawView extends TextView {
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(14);
-
     }
 
     @Override
@@ -131,10 +116,10 @@ public class DrawView extends TextView {
     private void touch_start(float x, float y) {
         mPath.reset();
         mPath.moveTo(x, y);
-        final float prev_x = mX, prev_y = mY, cur_x = x, cur_y = y;
-        //Appending2UserGuidedVector(prev_x, prev_y, cur_x, cur_y);
         mX = x;
         mY = y;
+
+        gestureDetector.appendpoint(x, y, GestureDetector.START);
     }
 
     private void touch_move(float x, float y) {
@@ -142,18 +127,17 @@ public class DrawView extends TextView {
         float dy = Math.abs(y - mY);
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
             mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
-            final float prev_x = mX, prev_y = mY, cur_x = x, cur_y = y;
-            //Appending2UserGuidedVector(prev_x, prev_y, cur_x, cur_y);
-
             mX = x;
             mY = y;
             circlePath.reset();
             circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
+
+            gestureDetector.appendpoint(x, y, GestureDetector.MIDDLE);
         }
     }
 
     private void touch_up() {
-        int tolerence_failure=0;
+        int tolerence_failure = 0;
         boolean failed = false;
         mPath.lineTo(mX, mY);
         circlePath.reset();
@@ -161,43 +145,16 @@ public class DrawView extends TextView {
         mCanvas.drawPath(mPath, mPaint);
         // kill this so we don't double draw
         mPath.reset();
-        //Log.i("DrawView.touch_up", "Direction::L" + UserGuidedVector.size());
-        //Log.i("DrawView.touch_up", "Direction::OL" + GuidedVector.size());
-        //Log.i("DrawView.touch_up", "word_dirs" + word_dirs.length);
-        //Log.i("DrawView.touch_up", "word_dirs0" + word_dirs[0].length);
+        gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL);
 
-       /* if (UserGuidedVector.size() >= GuidedVector.size()) {
-            Log.i("DrawView.touch_up", "YUP");
-            boolean result = CompareGuidedVector(UserGuidedVector, GuidedVector);
-            Log.i("onTouchEvent", "ACTION_UP::GuidedVectorCMPR_Res:" + String.valueOf(result));
-
-            if (result) {
-                // nxt
-            } else {
-                // reset
-            }
-        } else {
-            Log.i("DrawView.touch_up", "NOPE");
-        }*/
-
-       if(UserGuidedVector.size()>=word_dirs[wordCharsChecked].length-2){
-           for(int i=1;i<word_dirs[wordCharsChecked].length-1;i++){
-               Log.i("Directions","Direction: "+ word_dirs[wordCharsChecked][i]);
-               Log.i("Directions","Direction!O: "+ UserGuidedVector.get(i-1));
-               if(UserGuidedVector.get(i-1) != word_dirs[wordCharsChecked][i]){
-                   tolerence_failure ++;
-                   failed = true;
-               }
-           }
-           if(failed){
-               Toast.makeText(context,"Failed by "+tolerence_failure,Toast.LENGTH_SHORT).show();
-               reset();
-           }else{
-               Toast.makeText(context,"ok",Toast.LENGTH_SHORT).show();
-               wordCharsChecked++;
-           }
-           UserGuidedVector.clear();
-       }
+        if (gestureDetector.check()){
+            Toast.makeText(context,"OK",Toast.LENGTH_SHORT).show();
+            wordCharsChecked++;
+            gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL);
+        }else {
+            Toast.makeText(context,"NO",Toast.LENGTH_SHORT).show();
+            reset();
+        }
     }
 
     @Override
@@ -283,83 +240,10 @@ public class DrawView extends TextView {
         return super.animate();
     }
 
-    public void SetTriggerPoints(Point[] trpoints) {
-        this.TriggerPoints = trpoints;
-    }
 
-    public void SetGuidedVector(Direction[] gv) {
-        this.GuidedVector = new ArrayList();
-        Collections.addAll(GuidedVector, gv);
-        Log.i("SetGuidedVector", "   GdLength:" + GuidedVector.size());
-    }
+    public void SetGuidedVector(Direction[][] gv) {
+        guidedVectors = gv;
+        gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL);
 
-
-    private boolean CompareGuidedVector(ArrayList<Direction> USERgv, ArrayList<Direction> list_Org_Directions) {
-        int tolerance_failure = 0;
-        int orgI = 1;  // 0 index = INIT
-
-    /*    for(Direction direction:USERgv){
-            Log.i("USERgv:  ","Direction: "+ direction);
-        }
-
-        for(Direction direction:list_Org_Directions){
-            Log.i("ORGgv:  ","Direction: "+ direction);
-        }*/
-        Log.i("WORD_DIR",""+word_dirs.length);
-       /* if (!list_Org_Directions.equals(null) && !USERgv.equals(null)) {
-            for (int i = 0; i < USERgv.size() - 3; ) {
-                Direction d_X = USERgv.get(i);
-                Direction d_Y = USERgv.get(i + 1);
-                Direction ORG_d_X = list_Org_Directions.get(i);
-                Direction ORG_d_Y = list_Org_Directions.get(i + 1);
-                try {
-                    if (d_X != null && d_Y != null && ORG_d_X != null && ORG_d_Y != null) {
-
-                        if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
-                            if (i + 3 < list_Org_Directions.size()) {
-                                if (d_X != list_Org_Directions.get(i + 2) || d_Y == list_Org_Directions.get(i + 3)) {
-                                    tolerance_failure++;
-                                } else tolerance_failure++;
-                            }
-                        }
-                    }
-                    i += 2;
-                    if (tolerance_failure <= list_Org_Directions.size() / 4) return true;
-                    else return false;
-                }catch (Exception e){
-                    Log.e("DrawView","CompareGuidedVector"+e.toString());
-                }
-            }
-        }*/
-
-        return false;
-    }
-
-    /*private void Appending2UserGuidedVector(final float prev_x, final float prev_y, final float cur_x, final float cur_y) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Direction[] tempDirections = Utils.ComparePointsToCheckFV(prev_x, prev_y, cur_x, cur_y);
-                Direction temp_direction_x = tempDirections[tempDirections.length - 1];
-                Direction temp_direction_y = tempDirections[tempDirections.length - 2];
-
-                if (UserGuidedVector.size() >= 2) {
-                    Direction direction_x = UserGuidedVector.get(UserGuidedVector.size() - 1);
-                    Direction direction_y = UserGuidedVector.get(UserGuidedVector.size() - 2);
-                    if ((direction_x != temp_direction_x || direction_y != temp_direction_y) && temp_direction_x != null && temp_direction_y != null) {
-                        UserGuidedVector.addAll(Arrays.asList(tempDirections));
-                    }
-                } else if (skipinit) {
-                    if (temp_direction_x != null && temp_direction_y != null) {
-                        UserGuidedVector.addAll(Arrays.asList(tempDirections));
-                    }
-                } else {
-                    skipinit = true;
-                }
-            }
-        }).start();
-    }*/
-    public void setWord_dirs(Direction[][] word_dirs) {
-        this.word_dirs = word_dirs;
     }
 }

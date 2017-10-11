@@ -8,8 +8,7 @@ import java.lang.*;
 
 public class Word  implements Parcelable {
 	private String Text, ImageFilePath=null, SpeechFilePath=null, Phrase=null;
-	Point[] triggerpoints=null;
-	private Direction[] FV=null;
+	private Direction[][] guidedVectors=null;
 	private boolean Achieved = false;
 
 	protected Word(Parcel in) {
@@ -17,7 +16,6 @@ public class Word  implements Parcelable {
 		ImageFilePath = in.readString();
 		SpeechFilePath = in.readString();
 		Phrase = in.readString();
-		triggerpoints = in.createTypedArray(Point.CREATOR);
 	}
 
 	public static final Creator<Word> CREATOR = new Creator<Word>() {
@@ -32,28 +30,28 @@ public class Word  implements Parcelable {
 		}
 	};
 
-	public Point[] getTriggerpoints() {
-		return triggerpoints;
-	}
 
-	public void setTriggerpoints(Point[] triggerpoints) {
-		this.triggerpoints = triggerpoints;
-	}
 
 	public Word(String text) {
 		super();
 		Text = text;
 	}
 
-	public Word(String text, String imageFilePath, String speechFilePath, String phrase, Point[] triggerpoints,
-				Direction[] fV) {
+	public Word(String text, String imageFilePath, String speechFilePath, String phrase,
+				Direction[][] GuidedVectors) {
 		super();
 		Text = text;
 		ImageFilePath = imageFilePath;
 		SpeechFilePath = speechFilePath;
 		Phrase = phrase;
-		this.triggerpoints = triggerpoints;
-		FV = fV;
+		guidedVectors = GuidedVectors;
+	}
+	public Word(String text, String imageFilePath, String speechFilePath, String phrase) {
+		super();
+		Text = text;
+		ImageFilePath = imageFilePath;
+		SpeechFilePath = speechFilePath;
+		Phrase = phrase;
 	}
 
 	public String getText() {
@@ -90,12 +88,12 @@ public class Word  implements Parcelable {
 		return chars;
 	}
 
-	public Direction[] getFV() {
-		return FV;
+	public Direction[][] getFV() {
+		return guidedVectors;
 	}
 
-	public void setFV(Direction[] fV) {
-		FV = fV;
+	public void setFV(Direction[][] GuidedVectors) {
+		guidedVectors = GuidedVectors;
 	}
 
 	public String getPhrase() {
@@ -117,7 +115,6 @@ public class Word  implements Parcelable {
 		parcel.writeString(ImageFilePath);
 		parcel.writeString(SpeechFilePath);
 		parcel.writeString(Phrase);
-		parcel.writeTypedArray(triggerpoints, i);
 	}
 
 	public boolean isAchieved() {

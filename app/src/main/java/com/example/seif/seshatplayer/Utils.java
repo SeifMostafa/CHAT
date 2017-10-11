@@ -1,5 +1,6 @@
 package com.example.seif.seshatplayer;
 
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.example.seif.seshatplayer.model.Direction;
@@ -38,26 +39,6 @@ public class Utils {
         return dirtyList;
     }
 
-    public static Direction[] clearedRedundancyList(Direction[] GV) {
 
-        // setup for arraylist version .. clean without INIT,END
-        ArrayList<Direction> gv = new ArrayList<>();
-        for (int i = 1; i < GV.length - 4; ) {
-
-            Direction DX = GV[i];
-            Direction DY = GV[i + 1];
-            Direction DX_1 = GV[i + 2];
-            Direction DY_1 = GV[i + 3];
-
-            if (DX != DX_1 || DY != DY_1) {
-                gv.add(GV[i]);
-                gv.add(GV[i + 1]);
-            }
-            i += 2;
-        }
-        Direction[] result = new Direction[gv.size()];
-        gv.toArray(result);
-        return result;
-    }
 
 }

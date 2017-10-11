@@ -21,6 +21,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private String firstTimekey = "1stTime";
 
     public static String TAG = "MainActivity";
-
+    int height,width;
 /*
   * read file into string and the end = \n and return this string
   */
@@ -145,6 +146,10 @@ public class MainActivity extends AppCompatActivity {
                 (PackageManager.FEATURE_OPENGLES_EXTENSION_PACK));
         //OpenPhraseFragment("سيف مصطفى","سيف");
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+         height = displayMetrics.heightPixels;
+         width = displayMetrics.widthPixels;
     }
 
     private void startApp() {
@@ -226,15 +231,42 @@ public class MainActivity extends AppCompatActivity {
 
     private Word form_word(int index) {
         try {
-            return new Word(words.get(index), SF + words.get(index) + AppendedToImageFile, SF + words.get(index) + AppendedToSpeechFile, phrases.get(index)
-                    , null, getDirections(SF + words.get(index) + AppenddedToOutputFVfile));
-        } catch (Exception e) {
+            Word resultWord = new Word(words.get(index), SF + words.get(index) + AppendedToImageFile, SF + words.get(index) + AppendedToSpeechFile, phrases.get(index));
+                resultWord.setFV(prepareWordGuidedVectors(words.get(index)));
+            return resultWord;
+         } catch (Exception e) {
             Log.e("form_wordE:", e.toString());
             e.printStackTrace();
             return null;
         }
     }
 
+      private Direction[][] prepareWordGuidedVectors(String word) {
+           Direction[][] result_directions = new Direction[word.length()][];
+           ArrayList<Character> differentchars = new ArrayList<>();
+           Character[] characters = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ','ا'};
+           differentchars.addAll(Arrays.asList(characters));
+           for (int i = 0; i < word.length(); i++) {
+               if (i == 0) {
+                   result_directions[i] = getDirections(SF + word.charAt(i) + 1 + AppenddedToOutputFVfile);
+               } else if (i == word.length() - 1) {
+                   if (differentchars.contains(word.charAt(i-1))) {
+                       result_directions[i] = getDirections(SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
+
+                   }else{
+                       result_directions[i] = getDirections(SF + word.charAt(i) + 0 + AppenddedToOutputFVfile);
+                   }
+               } else {
+                   if (differentchars.contains(word.charAt(i-1))) {
+                       result_directions[i] = getDirections(SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
+
+                   }else{
+                       result_directions[i] = getDirections(SF + word.charAt(i) + 3 + AppenddedToOutputFVfile);
+                   }
+               }
+           }
+           return result_directions;
+       }
     /*
     ToFlag: if 0 = current, if -1 = prev;
      */
@@ -436,26 +468,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
         }
-    }
-
-    private Point[] getPoints(String filepath) {
-        Stack<Point> points = new Stack<>();
-        File file = new File(filepath);
-        try {
-            Scanner scan = new Scanner(file);
-            while (scan.hasNextLine()) {
-                String line = null;
-                line = scan.nextLine();
-                String[] x_y = line.split(",");
-                points.push(new Point(Integer.parseInt(x_y[0]), Integer.parseInt(x_y[1])));
-            }
-            scan.close();
-        } catch (FileNotFoundException e) {
-            System.out.println(e.toString());
-        }
-
-        Point[] result = new Point[points.size()];
-        return points.toArray(result);
     }
 
     /*

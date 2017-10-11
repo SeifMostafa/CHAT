@@ -312,31 +312,5 @@ public class MainFragment extends Fragment {
     }
 
 
- /*   private Direction[][] prepareWordGuidedVectors(String word) {
-        Direction[][] result_directions = new Direction[word.length()][];
-        ArrayList<Character> differentchars = new ArrayList<>();
-        Character[] characters = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ','ا'};
-        differentchars.addAll(Arrays.asList(characters));
-        for (int i = 0; i < word.length(); i++) {
-            if (i == 0) {
-                result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 1 + AppenddedToOutputFVfile);
-            } else if (i == word.length() - 1) {
-                if (differentchars.contains(word.charAt(i-1))) {
-                    result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
-
-                }else{
-                    result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 0 + AppenddedToOutputFVfile);
-                }
-            } else {
-                if (differentchars.contains(word.charAt(i-1))) {
-                    result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
-
-                }else{
-                    result_directions[i] = getDirections(MainActivity.SF + word.charAt(i) + 3 + AppenddedToOutputFVfile);
-                }
-            }
-        }
-        return result_directions;
-    }*/
 
 }
