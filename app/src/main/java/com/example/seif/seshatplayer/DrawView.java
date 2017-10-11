@@ -17,7 +17,6 @@ import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.seif.seshatplayer.model.Direction;
 
@@ -26,11 +25,13 @@ import java.io.IOException;
 
 public class DrawView extends TextView {
     private static final float TOUCH_TOLERANCE = 4;
+    private static final float POINT_WIDTH = 4;
     Context context;
 
     Direction[][] guidedVectors;
     int wordCharsChecked = 0;
     GestureDetector gestureDetector;
+    Boolean appendingResult;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private Path mPath;
@@ -39,6 +40,7 @@ public class DrawView extends TextView {
     private Paint circlePaint;
     private Path circlePath;
     private float mX, mY;
+    private float textviewSZ;
 
 
     public DrawView(Context context) throws IOException {
@@ -89,6 +91,7 @@ public class DrawView extends TextView {
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(14);
+        textviewSZ = this.getTextSize();
     }
 
     @Override
@@ -103,6 +106,7 @@ public class DrawView extends TextView {
         mBitmap.recycle();
         mBitmap = Bitmap.createBitmap(this.mBitmap.getWidth(), this.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
+        invalidate();
     }
 
     @Override
@@ -119,7 +123,15 @@ public class DrawView extends TextView {
         mX = x;
         mY = y;
 
-        gestureDetector.appendpoint(x, y, GestureDetector.START);
+        mPath.addCircle(mX, mY, POINT_WIDTH, Path.Direction.CW);
+
+        appendingResult = gestureDetector.appendpoint(x, y);
+        if (appendingResult != null) {
+            if (appendingResult) {
+                // animate char ,  reset gest detect, check if chars is completed
+                gestureDetector = new GestureDetector(guidedVectors[++wordCharsChecked], GestureDetector.NORMAL * textviewSZ);
+            }
+        }
     }
 
     private void touch_move(float x, float y) {
@@ -130,30 +142,35 @@ public class DrawView extends TextView {
             mX = x;
             mY = y;
             circlePath.reset();
-            circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
 
-            gestureDetector.appendpoint(x, y, GestureDetector.MIDDLE);
+            circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
+            appendingResult = gestureDetector.appendpoint(x, y);
         }
     }
 
     private void touch_up() {
-        int tolerence_failure = 0;
-        boolean failed = false;
+
         mPath.lineTo(mX, mY);
         circlePath.reset();
         // commit the path to our offscreen
         mCanvas.drawPath(mPath, mPaint);
         // kill this so we don't double draw
         mPath.reset();
-        gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL);
 
-        if (gestureDetector.check()){
-            Toast.makeText(context,"OK",Toast.LENGTH_SHORT).show();
-            wordCharsChecked++;
-            gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL);
-        }else {
-            Toast.makeText(context,"NO",Toast.LENGTH_SHORT).show();
-            reset();
+        if (appendingResult != null) {
+            if (appendingResult) {
+                // animate char ,  reset gest detect, check if chars is completed
+                if (wordCharsChecked == guidedVectors.length - 1) {
+                    // animate word - request next
+                } else {
+                    gestureDetector = new GestureDetector(guidedVectors[++wordCharsChecked], GestureDetector.NORMAL * textviewSZ);
+                }
+
+            } else {
+                reset();
+                wordCharsChecked = 0;
+                gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL * textviewSZ);
+            }
         }
     }
 
@@ -243,7 +260,7 @@ public class DrawView extends TextView {
 
     public void SetGuidedVector(Direction[][] gv) {
         guidedVectors = gv;
-        gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL);
+        gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL * textviewSZ);
 
     }
 }

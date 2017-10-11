@@ -4,7 +4,7 @@ import android.graphics.Point;
 import android.util.Log;
 
 import com.example.seif.seshatplayer.model.Direction;
-import static java.lang.Math.floorDiv;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -17,34 +17,21 @@ public class GestureDetector {
     public static final int NORMAL = 2;
     public static final int LOW = 3;
 
-    public static final int START = 4;
-    public static final int MIDDLE = 5;
-    public static final int END = 6;
 
     ArrayList<Direction> userGuidedVector;
+
     boolean skipinit = false;
     float prev_x, prev_y;
-    private int priority;
+    private float priority;
     private Direction[] gesture;
-    private ArrayList<Point> tp;
 
-    public GestureDetector(Direction[] Gesture, int Priority) {
+    public GestureDetector(Direction[] Gesture, float Priority) {
         this.gesture = Gesture;
-        Log.i("gesture", " " + gesture.length);
-
         this.gesture = clearedRedundancyList(this.gesture);
         this.priority = Priority;
-        tp = new ArrayList<>();
         userGuidedVector = new ArrayList<>();
-        for (Direction direction : gesture) Log.i("gesture", " " + direction);
     }
 
-    public GestureDetector(Direction[] Gesture) {
-        this.gesture = Gesture;
-        this.priority = NORMAL;
-        tp = new ArrayList<>();
-        userGuidedVector = new ArrayList<>();
-    }
 
     private Direction[] clearedRedundancyList(Direction[] GV) {
 
@@ -64,8 +51,6 @@ public class GestureDetector {
         }
         Direction[] result = new Direction[gv.size()];
         gv.toArray(result);
-        Log.i("gesture", " " + gv.size());
-
         return result;
     }
 
@@ -86,49 +71,45 @@ public class GestureDetector {
                 Log.e("GestureDetector", "check" + "shortage in touched points data");
             return isDetected;
         }
-
         return isDetected;
     }
 
-    public boolean check() {
-        boolean isDetected = false;
+    public Boolean check() {
+
+        Boolean isDetected = null;
+
         if (userGuidedVector.size() >= gesture.length) {
             isDetected = CompareGuidedVector();
-        } else Log.i("GestureDetector", "check" + "shortage in touched points data");
-
-        userGuidedVector.clear();
+        } else {
+            Log.i("GestureDetector", "check" + " shortage in touched points data::" + userGuidedVector.size() + "," + gesture.length);
+        }
         return isDetected;
     }
 
-    public void appendpoint(float x, float y, int PointPosition) {
-        tp.add(new Point((int) x, (int) y));
+
+    public Boolean appendpoint(float x, float y) {
+        Boolean result = Appending2UserGuidedVector(prev_x, prev_y, x, y);
+
         prev_x = x;
         prev_y = y;
-        if (PointPosition == START) {
-            Appending2UserGuidedVector(prev_x, prev_y, x, y);
-        } else if (PointPosition == END) {
-            check();
-        } else {
-            Appending2UserGuidedVector(prev_x, prev_y, x, y);
-        }
 
+        return result;
     }
 
-    private void Appending2UserGuidedVector(final float prev_x, final float prev_y, final float cur_x, final float cur_y) {
+    private Boolean Appending2UserGuidedVector(final float prev_x, final float prev_y, final float cur_x, final float cur_y) {
 
         Direction[] tempDirections = ComparePointsToCheckFV(prev_x, prev_y, cur_x, cur_y);
-        int DirectionReqIndex =tp.size();
-        if(DirectionReqIndex < gesture.length-1)
-        tempDirections = FilterDirectionsByTolerance(tempDirections, prev_x, prev_y, cur_x, cur_y, priority * R.dimen.activity_word_textsize, gesture[DirectionReqIndex], gesture[DirectionReqIndex+1]);
-
 
 
         Direction temp_direction_x = tempDirections[tempDirections.length - 1];
         Direction temp_direction_y = tempDirections[tempDirections.length - 2];
 
         if (userGuidedVector.size() >= 2) {
+
+            tempDirections = FilterDirectionsByTolerance(tempDirections, prev_x, prev_y, cur_x, cur_y, priority * 128, gesture[userGuidedVector.size() - 2], gesture[userGuidedVector.size() - 1]);
             Direction direction_x = userGuidedVector.get(userGuidedVector.size() - 1);
             Direction direction_y = userGuidedVector.get(userGuidedVector.size() - 2);
+
             if ((direction_x != temp_direction_x || direction_y != temp_direction_y) && temp_direction_x != null && temp_direction_y != null) {
                 userGuidedVector.addAll(Arrays.asList(tempDirections));
             }
@@ -139,8 +120,21 @@ public class GestureDetector {
         } else {
             skipinit = true;
         }
+        Log.i("GestureDetector", "appendind" + " SZSs::" + userGuidedVector.size() + "," + gesture.length);
+        Boolean checkResult = check();
 
-        Log.i("GestureDetector", "Appending2UserGuidedVector: " + userGuidedVector.size());
+
+
+        if (checkResult != null) {
+            if (checkResult) {
+                Log.i("GestureDetector", "appendind" + " SZSs::OK");
+                return true;
+            } else {
+                Log.i("GestureDetector", "appendind" + " SZSs::NO");
+                userGuidedVector.clear();
+                return false;
+            }
+        }else return checkResult;
     }
 
     private boolean CompareGuidedVector() {
@@ -150,6 +144,7 @@ public class GestureDetector {
                 Direction d_Y = userGuidedVector.get(i + 1);
                 Direction ORG_d_X = gesture[i];
                 Direction ORG_d_Y = gesture[i + 1];
+
 
                 Log.i("GestureDetector", "CompareGuidedVector" + "XD:  " + ORG_d_X);
                 Log.i("GestureDetector", "CompareGuidedVector" + "UXD:  " + d_X);
@@ -168,9 +163,9 @@ public class GestureDetector {
             return true;
         } else {
             if (gesture.equals(null))
-                Log.i("GestureDetector", "CompareGuidedVector: " + "gesture is null");
+                Log.e("GestureDetector", "CompareGuidedVector: " + "gesture is null");
             if (userGuidedVector.equals(null))
-                Log.i("GestureDetector", "CompareGuidedVector: " + "userGuidedVector is null");
+                Log.e("GestureDetector", "CompareGuidedVector: " + "userGuidedVector is null");
             return false;
         }
     }
@@ -179,16 +174,16 @@ public class GestureDetector {
 
         Direction direction[] = new Direction[2];
         if (x1 > x2)
-            direction[0] = Direction.RIGHT;
-        else if (x1 < x2)
             direction[0] = Direction.LEFT;
+        else if (x1 < x2)
+            direction[0] = Direction.RIGHT;
         else
             direction[0] = null;
 
         if (y1 > y2)
-            direction[1] = Direction.DOWN;
-        else if (y1 < y2)
             direction[1] = Direction.UP;
+        else if (y1 < y2)
+            direction[1] = Direction.DOWN;
         else
             direction[1] = null;
         return direction;
