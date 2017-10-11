@@ -102,7 +102,8 @@ public class GestureDetector {
 
     public void appendpoint(float x, float y, int PointPosition) {
         tp.add(new Point((int) x, (int) y));
-
+        prev_x = x;
+        prev_y = y;
         if (PointPosition == START) {
             Appending2UserGuidedVector(prev_x, prev_y, x, y);
         } else if (PointPosition == END) {
@@ -110,8 +111,7 @@ public class GestureDetector {
         } else {
             Appending2UserGuidedVector(prev_x, prev_y, x, y);
         }
-        prev_x = x;
-        prev_y = y;
+
     }
 
     private void Appending2UserGuidedVector(final float prev_x, final float prev_y, final float cur_x, final float cur_y) {
