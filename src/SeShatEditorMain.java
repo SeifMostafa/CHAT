@@ -1,7 +1,8 @@
 import java.awt.Dimension;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Stack;
 
+import model.Direction;
 import model.Person;
 
 public class SeShatEditorMain {
@@ -15,32 +16,27 @@ public class SeShatEditorMain {
 
 	static int phaseindex = 1;
 	static Map<Character, model.Character> characters = null;
-
+	static Utils utils;
 	public static void main(String[] args) {
-		new Utils().init();
-		switch (Utils.state) {
+		utils = Utils.getInstance();
+		
+		switch (utils.state) {
 		case CHARSNOTLOADED:
-			new FileChooser(REASON.LANG_CHARS, Utils.CharLangWindowTitle).setSize(new Dimension(500, 300));
+			new FileChooser(REASON.LANG_CHARS, utils.CharLangWindowTitle).setSize(new Dimension(500, 300));
 			break;
 		case CHARSLOADED:
-			Loader loader = Loader.getInstance();
-			Stack<String> words = Utils.readfileintoStack(Utils.chars_db_txtfilepath);
-			try {
-				new PointsThread(words).run();
-				new TextToImage(words, Utils.ImagesOutputPATH).run();
-				new TextToSpeech(words, Utils.SpeechOutputPATH, "AR").run();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			Loader loader = new Loader();
+			loader.loadchars();
+			
 			break;
 		case CHARSPAINTED:
-			loader = Loader.getInstance();
+			loader =  new Loader();
 			if (characters == null)
 				characters = loader.loadIn();
-			new FileChooser(REASON.DB_WORDS, Utils.DbWordsWindowTitle).setSize(new Dimension(500, 100));
+			new FileChooser(REASON.DB_WORDS, utils.DbWordsWindowTitle).setSize(new Dimension(500, 100));
 			break;
 		case DBWORDSLOADED:
-			loader = Loader.getInstance();
+			loader = new Loader();
 			if (characters == null)
 				characters = loader.loadIn();
 			new GUITakePersonInfo();
@@ -48,12 +44,10 @@ public class SeShatEditorMain {
 		default:
 			break;
 		}
-		// System.out.println(Utils.FindHelpImage("/home/seif/Desktop/",
-		// "heal"));
 	}
 
 	public static void GenerateSyllabus_Pressed(Person p) {
-		Loader loader = Loader.getInstance();
+		Loader loader = new Loader();
 		if (characters.equals(null))
 			characters = loader.loadIn();
 		new Thread(new Runnable() {
@@ -65,88 +59,23 @@ public class SeShatEditorMain {
 	}
 
 	public static void LangCharsFinishingPaint_FV_TR__Pressed() {
-		Loader loader = Loader.getInstance();
+		Loader loader = new Loader();
 		if (characters == null)
 			characters = loader.loadIn();
-		new FileChooser(REASON.DB_WORDS, Utils.DbWordsWindowTitle).setSize(new Dimension(500, 100));
+		new FileChooser(REASON.DB_WORDS, utils.DbWordsWindowTitle).setSize(new Dimension(500, 100));
 	}
 
 	public static void LangCharsChoosingFile_Pressed() {
-		Loader loader = Loader.getInstance();
-		/*
-		 * if (characters == null) characters = loader.loadIn();
-		 */
-		Stack<String> words = Utils.readfileintoStack(Utils.chars_db_txtfilepath);
-		try {
-			new PointsThread(words).run();
-			new TextToImage(words, Utils.ImagesOutputPATH).run();
-			new TextToSpeech(words, Utils.SpeechOutputPATH, "AR").run();
-		} catch (Exception e) {
-			System.out.println(e.toString() + "    from: LangCharsChoosingFile_Pressed");
-		}
+		Loader loader = new Loader();
+		loader.loadchars();
 	}
 
 	public static void LangWordsChoosingFile_Pressed() {
-		Loader loader = Loader.getInstance();
+		Loader loader = new Loader();
 		if (characters == null)
 			characters = loader.loadIn();
 		new GUITakePersonInfo();
 	}
 
-	static class TextToSpeech implements Runnable {
 
-		private Stack<String> words;
-		private String SpeechesPath;
-		private String Lang;
-
-		public TextToSpeech(Stack<String> words, String Speechespath, String language) {
-			super();
-			this.words = words;
-			this.SpeechesPath = Speechespath;
-			this.Lang = language;
-		}
-
-		@Override
-		public void run() {
-			// call function TTS
-			for (String w : words) {
-				Utils.DoTTS(this.SpeechesPath, w, Lang);
-			}
-		}
-	}
-
-	static class TextToImage implements Runnable {
-
-		private Stack<String> words;
-		private String ImagesPath;
-
-		public TextToImage(Stack<String> words, String Imagespath) {
-			super();
-			this.words = words;
-			this.ImagesPath = Imagespath;
-		}
-
-		@Override
-		public void run() {
-			// call function TTI
-			for (String w : words) {
-				Utils.DoTTI(this.ImagesPath, w);
-			}
-		}
-	}
-
-	static class PointsThread implements Runnable {
-		private Stack<String> words;
-
-		public PointsThread(Stack<String> words) {
-			super();
-			this.words = words;
-		}
-
-		@Override
-		public void run() {
-			// get fv and trigger ponts
-			new Painter(words);
-		}
-	}
 }

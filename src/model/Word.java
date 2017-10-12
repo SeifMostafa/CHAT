@@ -4,16 +4,7 @@ import java.awt.Point;
 
 public class Word {
 	private String Text, ImageFilePath=null, SpeechFilePath=null, Phrase=null;
-	Point[] triggerpoints=null;
-	private Direction[] FV=null;
-
-	public Point[] getTriggerpoints() {
-		return triggerpoints;
-	}
-
-	public void setTriggerpoints(Point[] triggerpoints) {
-		this.triggerpoints = triggerpoints;
-	}
+	
 
 	public Word(String text) {
 		super();
@@ -27,8 +18,7 @@ public class Word {
 		ImageFilePath = imageFilePath;
 		SpeechFilePath = speechFilePath;
 		Phrase = phrase;
-		this.triggerpoints = triggerpoints;
-		FV = fV;
+
 	}
 
 	public String getText() {
@@ -65,13 +55,6 @@ public class Word {
 		return chars;
 	}
 
-	public Direction[] getFV() {
-		return FV;
-	}
-
-	public void setFV(Direction[] fV) {
-		FV = fV;
-	}
 
 	public String getPhrase() {
 		return Phrase;

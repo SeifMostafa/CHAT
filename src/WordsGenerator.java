@@ -51,7 +51,7 @@ public class WordsGenerator {
 
 		Stack<String> SyllabusWords_txt = new Stack<>();
 		SyllabusWords_txt.push(this.person.getName().trim());
-		Stack<String> SyllabusWords_BasicWords  =  Utils.readfileintoStack(Utils.BasicWordsFileName);
+		Stack<String> SyllabusWords_BasicWords  =  SeShatEditorMain.utils.readfileintoStack(SeShatEditorMain.utils.BasicWordsFileName);
 		if(SyllabusWords_BasicWords.size()>NumberOfRequiredWords){
 			SyllabusWords_txt.addAll(SyllabusWords_BasicWords.subList(0, NumberOfRequiredWords));
 		}else{
@@ -64,16 +64,10 @@ public class WordsGenerator {
 			// check if exist and create audio files
 			Word word = new Word(word_txt);
 			//System.out.println(word_txt+"@@"+AudiosFolderPath+this.lang);
-			word.setSpeechFilePath(Utils.DoTTS(AudiosFolderPath,word_txt, this.lang));
+			word.setSpeechFilePath(SeShatEditorMain.utils.DoTTS(AudiosFolderPath,word_txt, this.lang));
 			// check if exist and create imagepath
-			// word.setImageFilePath(Utils.FindHelpImage(ImagesFolderPath, word.getText()));
+			// word.setImageFilePath(SeShatEditorMain.utils.FindHelpImage(ImagesFolderPath, word.getText()));
 			// check if exist and create fv
-			word.setFV(GenerateWordFV(word_txt));
-/*			try{
-				word.setTriggerpoints(GenerateWordTR(word_txt));
-			}catch(Exception e){
-				System.out.println(e.toString() + "         from:WordsGenerator::generate");
-			}*/
 			word.setPhrase(getWordPhrase(word_txt));
 			this.SyllabusWords.push(word);
 		}
@@ -81,7 +75,7 @@ public class WordsGenerator {
 	}
 	private Stack<String> GenerateWordsTree(String txtfilepath, int number_of_words) {
 		Stack<String> AdvancedWords = new Stack<>();
-		Map<java.lang.Character, Stack<String>> AvailableWordsOrganisedByCharacters = Utils.readfileintoMap(txtfilepath,0);
+		Map<java.lang.Character, Stack<String>> AvailableWordsOrganisedByCharacters = SeShatEditorMain.utils.readfileintoMap(txtfilepath,0);
 		int ASCIINUM4_1stArChar = 1575;
 
 		while (AdvancedWords.size() < number_of_words) {
@@ -97,8 +91,8 @@ public class WordsGenerator {
 					if (AdvancedWords.size() >= number_of_words)
 						break;
 				} catch (Exception e) {
-					// System.err.println("NULL: "+new
-					// java.lang.Character((char)(ASCIINUM4_1stArChar+i)));
+				 System.err.println("NULL: "+new
+				java.lang.Character((char)(ASCIINUM4_1stArChar+i)));
 				}
 			}
 		}
@@ -115,11 +109,11 @@ public class WordsGenerator {
 
 		for (int i = 0; i < word.length(); i++) {
 			if (i == 0) {
-				word_directions = Utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 0));
+				word_directions = SeShatEditorMain.utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 0));
 			} else if (i == (word.length() - 1)) {
-				word_directions = Utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 2));
+				word_directions = SeShatEditorMain.utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 2));
 			} else {
-				word_directions = Utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 1));
+				word_directions = SeShatEditorMain.utils.concatenate(word_directions, getCharacterFV(word.charAt(i), 1));
 			}
 		}
 		System.out.println("word_directions"+word_directions.length);
@@ -146,26 +140,39 @@ public class WordsGenerator {
 		}
 	}
 
-/*	public Point[] GenerateWordTR(String word) {
-		Point[] word_directions = new Point[0];
-
-		for (int i = 0; i < word.length(); i++) {
-			word_directions = Utils.concatenate(word_directions, getCharacterTR(word.charAt(i)));
-		}
-		return word_directions;
-	}*/
-
-/*	// pass char and get from db or model
-	private Point[] getCharacterTR(char c) {
-		model.Character character = SeShatEditorMain.characters.get(new java.lang.Character(c));
-		if(character.getTiggerPoints().equals(null))return new Point[0];
-		return character.getTiggerPoints();
-	}*/
 
 
 	private String getWordPhrase(String word){
 		return word;
 	}
-
+	/*
+	 * need web service to download from
+	 */
+/*	public static String FindHelpImage(String ImagesFolder, String word) {
+		if (SeShatEditorMain.utils.checkfileExist(ImagesFolder) && word.length() > 0) {
+			word = word.replaceAll(" ", "+");
+			String folder = ImagesFolder + word  ;
+			if (!SeShatEditorMain.utils.checkfileExist(folder)) {
+				// find image from webservice
+				SeShatEditorMain.utils.executeCommand("./googliser.sh -p "+"\""+word+"\""+" -n 1 -u 25000 -l 1000 -f 0 --minimum-pixels vga --output "+folder);
+				File[] listOfFiles = new File(folder).listFiles();
+				try {
+					createfile(folder+AppenddedToOutputImagefile);
+					copyFileUsingFileStreams(listOfFiles[0],new File(folder+AppenddedToOutputImagefile));
+				} catch (IOException e) {
+					System.err.println(e.getMessage());
+					e.printStackTrace();
+				}
+				
+				if(new File(folder).isDirectory()){
+					new File(folder).delete();
+				}
+			}
+			return folder+AppenddedToOutputImagefile;
+		} else {
+			System.err.println("FindHelpImage:: Invalid parameters!");
+			return null;
+		}
+	}*/
 
 }

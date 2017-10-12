@@ -112,15 +112,6 @@ public class Character {
 		}
 	}
 
-/*	public Point[] getTiggerPoints() {
-		
-		return TiggerPoints;
-	}
-
-	public void setTiggerPoints(Point[] tiggerPoints) {
-		TiggerPoints = tiggerPoints;
-	}*/
-
 	@Override
 	public String toString() {
 		return this.ch + this.FV.toString()/* + this.TiggerPoints.toString()*/ + this.SpeechesFilePath

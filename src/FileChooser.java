@@ -45,7 +45,7 @@ public class FileChooser extends JFrame {
 
 	public FileChooser(REASON R, String title) {
 		this.reason = R;
-		setBounds(100, 100, (int) Utils.width / 4, (int) Utils.height / 4);
+		setBounds(100, 100, (int) SeShatEditorMain.utils.width / 4, (int) SeShatEditorMain.utils.height / 4);
 		setLayout(new BorderLayout());
 		setTitle(title);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -80,21 +80,19 @@ public class FileChooser extends JFrame {
 				} else {
 					try {
 						JOptionPane.showMessageDialog(new JFrame(), Messages.getString("FileChooser.thanks"), Messages.getString("FileChooser.info"), JOptionPane.INFORMATION_MESSAGE); //$NON-NLS-1$ //$NON-NLS-2$
-						String BackupFile = new File(new File("").getAbsolutePath()+Utils.SlashIndicator+new File(filepath.getText()).getName()).getPath();
-						Utils.createfile(BackupFile);
-						Utils.copyFileUsingFileStreams(new File(filepath.getText()), new File(BackupFile));
-						Utils.cleanwordsfile(BackupFile);
+						String BackupFile = new File(new File("").getAbsolutePath()+SeShatEditorMain.utils.SlashIndicator+new File(filepath.getText()).getName()).getPath();
+						SeShatEditorMain.utils.createfile(BackupFile);
+						SeShatEditorMain.utils.copyFileUsingFileStreams(new File(filepath.getText()), new File(BackupFile));
+						SeShatEditorMain.utils.cleanwordsfile(BackupFile);
 						if (reason == REASON.LANG_CHARS) {
-							Utils.Lang = getSelectedButtonText();
-							Utils.writeStringToFile(Utils.LANGFILEKEY+ Utils.Lang ,Utils.SHAREDPREF);
-							Utils.writeStringToFile(Utils.CHARFILEKEY + BackupFile, Utils.SHAREDPREF);
-							Utils.UpdateStateInConfigFile(State.CHARSLOADED);
-							Utils.chars_db_txtfilepath =BackupFile;
+							SeShatEditorMain.utils.Lang = getSelectedButtonText();
+							SeShatEditorMain.utils.writeStringToFile(SeShatEditorMain.utils.LANGFILEKEY+ SeShatEditorMain.utils.Lang ,SeShatEditorMain.utils.SHAREDPREF);
+							SeShatEditorMain.utils.writeStringToFile(SeShatEditorMain.utils.CHARFILEKEY + BackupFile, SeShatEditorMain.utils.SHAREDPREF);
+							SeShatEditorMain.utils.UpdateStateInConfigFile(State.CHARSLOADED);
 							SeShatEditorMain.LangCharsChoosingFile_Pressed();
 						}else {
-							Utils.writeStringToFile(Utils.DBWORDSFILEKEY + BackupFile, Utils.SHAREDPREF);
-							Utils.UpdateStateInConfigFile(State.DBWORDSLOADED);
-							Utils.words_db_txtfilepath = BackupFile;
+							SeShatEditorMain.utils.writeStringToFile(SeShatEditorMain.utils.DBWORDSFILEKEY + BackupFile, SeShatEditorMain.utils.SHAREDPREF);
+							SeShatEditorMain.utils.UpdateStateInConfigFile(State.DBWORDSLOADED);
 							SeShatEditorMain.LangWordsChoosingFile_Pressed();
 						}
 					} catch (IOException e1) {
@@ -135,7 +133,7 @@ public class FileChooser extends JFrame {
 
 	public void initialize_langPanel() {
 
-		this.Added_langs = Utils.readfileintoStack(Utils.CONFIG, 1); //$NON-NLS-1$
+		this.Added_langs = SeShatEditorMain.utils.readfileintoStack(SeShatEditorMain.utils.CONFIG, 1); //$NON-NLS-1$
 		AddLangugesPanel = new JPanel();
 		AddLangugesPanel.setBorder(new BevelBorder(BevelBorder.RAISED));
 		AddLangugesPanel.setLayout(new GridLayout(1, 1));
@@ -174,7 +172,7 @@ public class FileChooser extends JFrame {
         for (Enumeration<AbstractButton> buttons = this.LangRadioBtnGroup.getElements(); buttons.hasMoreElements();) {
             AbstractButton button = buttons.nextElement();
             if (button.isSelected()) {
-                return Utils.readfileintoStack(Utils.CONFIG).elementAt(i++).toUpperCase(); // adding 1 for state line
+                return SeShatEditorMain.utils.readfileintoStack(SeShatEditorMain.utils.CONFIG).elementAt(i++).toUpperCase(); // adding 1 for state line
             }
         }
         return null;

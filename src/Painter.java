@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
@@ -26,22 +25,26 @@ import javax.swing.WindowConstants;
 import model.Direction;
 
 public class Painter {
+	private static final double TOLERANCE_SAME = 25;
 	private Graphics2D g2d;
 	public Font font;
 	private FontMetrics fm;
 	private BufferedImage image;
-	public Stack<String> words;
-	private CharactersCustomization pane;
+	public Stack<String> characters;
+	private CharacterCustomization charCustPane;
 	private String lang;
 	public JFrame frame;
+	int character_pos = 0;
+	Loader loader;
 
-	public Painter(Stack<String> WORDS) {
+	public Painter(Stack<String> Characters,Loader loadr) {
 		super();
-		this.words = WORDS;
+		this.characters = Characters;
+		this.loader = loadr;
 		image = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY);
 		g2d = image.createGraphics();
 
-		font = new Font(Utils.FONTNAME, Font.PLAIN, 512);
+		font = new Font(SeShatEditorMain.utils.FONTNAME, Font.PLAIN, 512);
 		g2d.setFont(font);
 		fm = g2d.getFontMetrics();
 
@@ -57,18 +60,15 @@ public class Painter {
 		fm = g2d.getFontMetrics();
 		g2d.dispose();
 
-		Utils.createdir(Utils.SpeechOutputPATH);
-		Utils.createdir(Utils.ImagesOutputPATH);
-		Utils.createdir(Utils.FVOutputPATH);
-		Utils.createdir(Utils.TriggerPointsOutputPATH);
+		
 
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				frame = new JFrame(Utils.CharCustWindowTitle);
+				frame = new JFrame(SeShatEditorMain.utils.CharCustWindowTitle);
 				frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-				pane = new CharactersCustomization();
-				frame.add(pane);
+				charCustPane = new CharacterCustomization();
+				frame.add(charCustPane);
 				frame.pack();
 				frame.setLocationRelativeTo(null);
 				frame.setVisible(true);
@@ -76,21 +76,18 @@ public class Painter {
 		});
 	}
 
-	public class CharactersCustomization extends JPanel {
+	public class CharacterCustomization extends JPanel {
 
 		private static final long serialVersionUID = 1L;
-		Direction[] directions;
-		ArrayList<Point> TriggerPoints;
+		Direction[] directions,pre_directions;
 		Point touchedpoint = null;
 		Point prev_touchedpoint = null;
-		String word;
-		int character_pos = 0;
-
-		public CharactersCustomization() {
-			word = words.pop();
+		String character;
+		
+		public CharacterCustomization() {
+			character = characters.pop();
 
 			directions = new Direction[0];
-			TriggerPoints = new ArrayList<>();
 			MouseAdapter ma = new MouseAdapter() {
 				@Override
 				public void mousePressed(MouseEvent e) {
@@ -105,8 +102,7 @@ public class Painter {
 				@Override
 				public void mouseReleased(MouseEvent e) {
 					touchedpoint = e.getPoint();
-					directions = Utils.concatenate(directions, fillDirections(touchedpoint, prev_touchedpoint));
-					TriggerPoints.add(touchedpoint);
+					directions = SeShatEditorMain.utils.concatenate(directions, fillDirections(touchedpoint, prev_touchedpoint));
 					prev_touchedpoint = touchedpoint;
 				}
 			};
@@ -121,32 +117,68 @@ public class Painter {
 			btn_nxt.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (words.isEmpty()) {
-						CleanSaveDirectionsAndTriggerPoints(TriggerPoints, directions, word);
+					if (characters.isEmpty()) {
+						CleanSaveDirections( directions, character);
 						
 						frame.dispose();
 						JOptionPane.showMessageDialog(new JFrame(), "finished language characters!", "Thanks!",
 								JOptionPane.INFORMATION_MESSAGE);
-						Utils.UpdateStateInConfigFile(State.CHARSPAINTED);
+						SeShatEditorMain.utils.UpdateStateInConfigFile(State.CHARSPAINTED);
 						SeShatEditorMain.LangCharsFinishingPaint_FV_TR__Pressed();
 					} else {
-							CleanSaveDirectionsAndTriggerPoints(TriggerPoints, directions, word);
-						word = words.pop();
+							CleanSaveDirections( directions, character);
+							character = characters.pop();
 						validate();
 						repaint();
+						pre_directions = new Direction[directions.length];
+						for(int i=0;i<directions.length;i++){
+							pre_directions[i] = directions[i];
+						}
 						directions = new Direction[0];
 						prev_touchedpoint = null;
-						TriggerPoints.clear();
 					}
 				}
 			});
 			add(btn_nxt, BorderLayout.EAST);
+			
+			JButton btn_same_as_previous;
+			btn_same_as_previous = new JButton("Same As Previous");
+			btn_same_as_previous.setPreferredSize(new Dimension(100, 100));
+			btn_same_as_previous.setVisible(true);
+			btn_same_as_previous.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					directions = pre_directions;
+					if (characters.isEmpty()) {
+						CleanSaveDirections( directions, character);
+						
+						frame.dispose();
+						JOptionPane.showMessageDialog(new JFrame(), "finished language characters!", "Thanks!",
+								JOptionPane.INFORMATION_MESSAGE);
+						SeShatEditorMain.utils.UpdateStateInConfigFile(State.CHARSPAINTED);
+						SeShatEditorMain.LangCharsFinishingPaint_FV_TR__Pressed();
+					} else {
+							CleanSaveDirections( directions, character);
+							character = characters.pop();
+						validate();
+						repaint();
+						pre_directions = new Direction[directions.length];
+						for(int i=0;i<directions.length;i++){
+							pre_directions[i] = directions[i];
+						}
+						directions = new Direction[0];
+						prev_touchedpoint = null;
+					}
+				}
+			});
+			add(btn_same_as_previous, BorderLayout.PAGE_END);
+		
 		}
 
 		@Override
 		public Dimension getPreferredSize() {
 
-			return new Dimension((int) Utils.width, (int) Utils.height);
+			return new Dimension((int) SeShatEditorMain.utils.width, (int) SeShatEditorMain.utils.height);
 		}
 
 		@Override
@@ -157,7 +189,7 @@ public class Painter {
 
 			fm = g2d.getFontMetrics();
 			int height = fm.getHeight();
-			int width = fm.stringWidth(word);
+			int width = fm.stringWidth(character);
 			image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
 			g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
 					RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
@@ -171,7 +203,8 @@ public class Painter {
 			g2d.setFont(font);
 
 			fm = g2d.getFontMetrics();
-			g2d.drawString(word, 0, fm.getAscent());
+			
+			g2d.drawString(character, 0, fm.getAscent());
 			g2d.dispose();
 			g2d.drawImage(image, 0, 0, null);
 			if (touchedpoint != null)
@@ -179,20 +212,14 @@ public class Painter {
 			validate();
 			repaint();
 		}
-		private void CleanSaveDirectionsAndTriggerPoints(ArrayList<Point> triggerpoints, Direction[] dirs, String word) {
+		private void CleanSaveDirections(Direction[] dirs, String character) {
 			Direction [] last_dir = new Direction[1];
 			last_dir[0] = Direction.END;
-			dirs = Utils.concatenate(dirs,last_dir);
+			dirs = SeShatEditorMain.utils.concatenate(dirs,last_dir);
 			List<Direction> list = Arrays.asList(dirs);
 			Stack<Direction> fvStack = new Stack<Direction>();
 			fvStack.addAll(list);
-			Utils.createfile(Utils.FVOutputPATH + word + Utils.AppenddedToOutputFVfile);
-			Utils.createfile(Utils.TriggerPointsOutputPATH + word + Utils.AppenddedToOutputTriggerPointsfile);
-			
-			Utils.writeDirectionStackTofile(fvStack, Utils.FVOutputPATH + word + character_pos +Utils.AppenddedToOutputFVfile);
-			Utils.writePointsStackTofile(triggerpoints,
-					Utils.TriggerPointsOutputPATH + word + character_pos + Utils.AppenddedToOutputTriggerPointsfile);
-			
+			loader.writeDirectionStackTofile(fvStack,  character + character_pos);
 			if(character_pos == 3){
 				character_pos = 0;	
 			}else{
@@ -207,12 +234,31 @@ public class Painter {
 			directions[0] = Direction.INIT;
 			return directions;
 		} else {
-			return Utils.ComparePointsToCheckFV(p.getX(), p.getY(), prev.getX(), prev.getY());
+			return ComparePointsToCheckFV(p.getX(), p.getY(), prev.getX(), prev.getY());
 		}
 	}
 
 
+	private  Direction[] ComparePointsToCheckFV(double x1, double y1, double x2, double y2) {
+		Direction direction[] = new Direction[2];
+		if (x1 > x2)
+			direction[0] = Direction.RIGHT;
+		else if (x1 < x2)
+			direction[0] = Direction.LEFT;
+		else if(Math.abs(x1-x2) <= TOLERANCE_SAME)
+			direction[0] = Direction.SAME;
+		else direction[0] = null;
 
+		if (y1 > y2)
+			direction[1] = Direction.DOWN;
+		else if (y1 < y2)
+			direction[1] = Direction.UP;
+		else if(Math.abs(y1-y2) <= TOLERANCE_SAME)
+			direction[0] = Direction.SAME;
+		else
+			direction[1] = null;
+		return direction;
+	}
 	public String getLang() {
 		return lang;
 	}

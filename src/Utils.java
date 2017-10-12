@@ -1,16 +1,9 @@
-import java.awt.Color;
 import java.awt.DisplayMode;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -26,7 +19,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,10 +26,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Stream;
 
-import javax.imageio.ImageIO;
 import javax.swing.JButton;
-
-import model.Direction;
 
 /*
  * Hello,This class is responsible about initialize configuration for Desktop program cross platform(Win,Linux and Mac)
@@ -50,41 +39,37 @@ enum State {
 public class Utils {
 
 	private String OSNAME = "";
+	private static Utils utils = new Utils();
 
-	public static String ImagesOutputPATH = "/SF/IF/";
-	public static String FVOutputPATH = "/SF/FV/";
-	public static String TriggerPointsOutputPATH = "/SF/TPF/";
-	public static String SpeechOutputPATH = "/SF/AF/";
-	public static String words_db_txtfilepath = "";
-	public static String chars_db_txtfilepath = "";
-	public static String OUTPUTPATH = "";
-	public static String SlashIndicator = "/";
-	public static String Lang = "AR";
-	public static final String SHAREDPREF = "sharedpref";
-	public static final String CONFIG = "Config";
-	public static final String BasicWordsFileName = "basicwords.txt";
-	public static final String PhrasesInputFile = "phrases";
-	public static final String CHARFILEKEY = "chars:";
-	public static final String DBWORDSFILEKEY = "dbwords:";
-	public static final String LANGFILEKEY = "lang:";
-	public static final String WordsOutputFileName = "WORDS.txt";
-	public static final String PhrasesOutputFileName = "PHRASES.txt";
 
-	public static final String AppenddedToOutputFVfile = "_fv.txt";
-	public static final String AppenddedToOutputTriggerPointsfile = "_trpoints.txt";
-	public static final String AppenddedToOutputImagefile = "_img";
+	public String SlashIndicator = "/";
+	public String Lang = "AR";
+	public final String SHAREDPREF = "sharedpref";
+	public final String CONFIG = "Config";
+	public final String BasicWordsFileName = "basicwords.txt";
+	public final String PhrasesInputFile = "phrases";
+	public final String CHARFILEKEY = "chars:";
+	public final String DBWORDSFILEKEY = "dbwords:";
+	public final String LANGFILEKEY = "lang:";
+	public final String WordsOutputFileName = "WORDS.txt";
+	public final String PhrasesOutputFileName = "PHRASES.txt";
 
-	public static final String CharLangWindowTitle = "Please, Choose the file contains language charcters";
-	public static final String DbWordsWindowTitle = "Please, Choose file contains language words";
-	public static final String CharCustWindowTitle = "Customize language characters";
-	public static final String FONTNAME = "KFGQPC Alphabet Dotted";
-	public static State state = State.CHARSNOTLOADED;
-	public static double width, height;
+
+
+	public final String CharLangWindowTitle = "Please, Choose the file contains language charcters";
+	public final String DbWordsWindowTitle = "Please, Choose file contains language words";
+	public final String CharCustWindowTitle = "Customize language characters";
+	public final String FONTNAME = "KFGQPC Alphabet Dotted";
+	public State state = State.CHARSNOTLOADED;
+	public double width, height;
 
 	/*
 	 * Get today's date from OS
 	 */
-	public static String getTodaysDate() {
+	private Utils(){
+		this.init();
+	}
+	public String getTodaysDate() {
 
 		final Calendar c = Calendar.getInstance();
 		int todaysDate = (c.get(Calendar.YEAR) * 10000) + ((c.get(Calendar.MONTH) + 1) * 100)
@@ -93,61 +78,37 @@ public class Utils {
 		return (String.valueOf(todaysDate));
 	}
 
-	public static String DoTTS(String AudioFoler, String word, String lang) {
+	public String DoTTS(String AudioFoler, String word, String lang) {
 		if (checkfileExist(AudioFoler) && word.length() > 0 && lang.length() == 2) {
 			word = word.replaceAll(" ", "+");
 			// filepath = audio folder
 			String file = AudioFoler + word;
-			if (!Utils.checkfileExist(file)) {
-				String DownloadSpeechFile_cmd = "wget -q -U Mozilla -O " + AudioFoler + Utils.SlashIndicator + word
+			if (!checkfileExist(file)) {
+				String DownloadSpeechFile_cmd = "wget -q -U Mozilla -O " + AudioFoler + SlashIndicator + word
 						+ " http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q="
 						+ word + "&tl=" + lang;
-				Utils.executeCommand(DownloadSpeechFile_cmd);
+				executeCommand(DownloadSpeechFile_cmd);
 				// exe cmd to create it as .wav
 				String Mp3ToSpecificWav_command = "ffmpeg -i " + file + " -ar 16000 -ac 1 " + file + " -y";
-				Utils.executeCommand(Mp3ToSpecificWav_command);
+				executeCommand(Mp3ToSpecificWav_command);
 			}
 			return file;
 		} else {
 			System.err.println("DoTTS:: Invalid parameters!");
+			System.err.println("DoTTS:: lang:: "+lang);
+			System.err.println("DoTTS:: word:: "+word);
+			System.err.println("DoTTS:: path:: "+AudioFoler);
+
 			return null;
 		}
 	}
 
-	/*
-	 * need web service to download from
-	 */
-	public static String FindHelpImage(String ImagesFolder, String word) {
-		if (checkfileExist(ImagesFolder) && word.length() > 0) {
-			word = word.replaceAll(" ", "+");
-			String folder = ImagesFolder + word  ;
-			if (!Utils.checkfileExist(folder)) {
-				// find image from webservice
-				Utils.executeCommand("./googliser.sh -p "+"\""+word+"\""+" -n 1 -u 25000 -l 1000 -f 0 --minimum-pixels vga --output "+folder);
-				File[] listOfFiles = new File(folder).listFiles();
-				try {
-					createfile(folder+AppenddedToOutputImagefile);
-					copyFileUsingFileStreams(listOfFiles[0],new File(folder+AppenddedToOutputImagefile));
-				} catch (IOException e) {
-					System.err.println(e.getMessage());
-					e.printStackTrace();
-				}
-				
-				if(new File(folder).isDirectory()){
-					new File(folder).delete();
-				}
-			}
-			return folder+AppenddedToOutputImagefile;
-		} else {
-			System.err.println("FindHelpImage:: Invalid parameters!");
-			return null;
-		}
-	}
+
 
 	/*
 	 * write String into file and \n at the end
 	 */
-	public static void writeStringToFile(String data, String filepath) {
+	public void writeStringToFile(String data, String filepath) {
 		try {
 			FileWriter writer = new FileWriter(filepath, true);
 			BufferedWriter bufferedWriter = new BufferedWriter(writer);
@@ -163,7 +124,7 @@ public class Utils {
 	/*
 	 * read file into string and the end = \n and return this string
 	 */
-	public static String readFileintoString(String filepath) {
+	public String readFileintoString(String filepath) {
 
 		String ret = "";
 
@@ -188,7 +149,7 @@ public class Utils {
 	 * write stack into file first para is stack to be written sec para is
 	 * filepath of the file to save the content of stack in
 	 */
-	public static void writeStackTofile(Stack<String> result_words, String filepath) {
+	public void writeStackTofile(Stack<String> result_words, String filepath) {
 		try {
 			FileWriter writer = new FileWriter(filepath, false);
 			BufferedWriter bufferedWriter = new BufferedWriter(writer);
@@ -207,7 +168,7 @@ public class Utils {
 	/*
 	 * read the content of the file into stack by endline return stack
 	 */
-	public static Stack<String> readfileintoStack(String filepath) {
+	public Stack<String> readfileintoStack(String filepath) {
 		Stack<String> words = new Stack<>();
 		try {
 			FileReader reader = new FileReader(filepath);
@@ -225,7 +186,7 @@ public class Utils {
 		return words;
 	}
 
-	public static Stack<String> readfileintoStack(String filepath, int afterlines) {
+	public Stack<String> readfileintoStack(String filepath, int afterlines) {
 		Stack<String> words = new Stack<>();
 		try {
 			try (Stream<String> lines = Files.lines(Paths.get(filepath))) {
@@ -242,7 +203,7 @@ public class Utils {
 		return words;
 	}
 
-	public static Map<Character, Stack<String>> readfileintoMap(String filepath, int afterlines) {
+	public Map<Character, Stack<String>> readfileintoMap(String filepath, int afterlines) {
 		Map<Character, Stack<String>> result = new HashMap<>();
 		try {
 			try (Stream<String> lines = Files.lines(Paths.get(filepath))) {
@@ -269,7 +230,7 @@ public class Utils {
 		return result;
 	}
 
-	public static Map<String, String> readfileintoMap(String filepath) {
+	public Map<String, String> readfileintoMap(String filepath) {
 		Map<String, String> result = new HashMap<>();
 		try {
 			FileReader reader = new FileReader(filepath);
@@ -285,11 +246,11 @@ public class Utils {
 		return result;
 	}
 
-	public static int CharToASCII(final char character) {
+	public int CharToASCII(final char character) {
 		return (int) character;
 	}
 
-	public static char CodeToChar(final int code) {
+	public char CodeToChar(final int code) {
 		return (char) code;
 	}
 
@@ -297,7 +258,7 @@ public class Utils {
 	 * remove non ar, symbols words and print them- ar words- into file line by
 	 * line
 	 */
-	public static void cleanwordsfile(String wordsfilepath) {
+	public void cleanwordsfile(String wordsfilepath) {
 		Stack<String> ret = new Stack<>();
 		try {
 			FileReader reader = new FileReader(wordsfilepath);
@@ -330,7 +291,7 @@ public class Utils {
 	 * NOT TO COUNT ALL FILE LINES, IT HAS LIMIT (MaxNumofWordsEachLoad), and
 	 * flag (biggerThan10K) as runtime says.
 	 */
-	public static int countLines(String filename, int afterlines) throws IOException {
+	public int countLines(String filename, int afterlines) throws IOException {
 
 		InputStream is = new BufferedInputStream(new FileInputStream(filename));
 
@@ -360,7 +321,7 @@ public class Utils {
 	/*
 	 * it can be used to listen to enter btn from keyboard.
 	 */
-	public static KeyListener enter = new KeyAdapter() {
+	public KeyListener enter = new KeyAdapter() {
 		@Override
 		public void keyTyped(KeyEvent e) {
 			if (e.getKeyChar() == KeyEvent.VK_ENTER) {
@@ -369,6 +330,8 @@ public class Utils {
 		}
 	};
 
+
+
 	/*
 	 * to work on cross-platform , MWS has to know what is the filepath schema
 	 * should it be obaied read the OSName from OS itself
@@ -376,12 +339,12 @@ public class Utils {
 	private void setOSName() {
 		this.OSNAME = System.getProperty("os.name");
 		if (OSNAME.charAt(0) == 'W' || OSNAME.charAt(0) == 'w') {
-			Utils.SlashIndicator = "\\";
+			SlashIndicator = "\\";
 		} else if (OSNAME.charAt(0) == 'W' || OSNAME.charAt(0) == 'w') {
-			Utils.SlashIndicator = "/";
+			SlashIndicator = "/";
 		} else {
 			// Mac
-			Utils.SlashIndicator = "/";
+			SlashIndicator = "/";
 		}
 	}
 
@@ -389,7 +352,7 @@ public class Utils {
 	 * it's used to get current path to be used to save files to make sure that
 	 * is path is exist be easy for user to navi to output files
 	 */
-	public static String getCurrentPath() throws IOException {
+	public String getCurrentPath() throws IOException {
 		String path = new File(".").getCanonicalPath();
 		return path;
 	}
@@ -411,11 +374,11 @@ public class Utils {
 	 * be saved it saved in filepath_output beside the selected file contain the
 	 * words
 	 */
-	public static void createfile(String filepath) {
+	public void createfile(String filepath) {
 		new File(filepath);
 	}
 
-	public static void createdir(String dirpath) {
+	public void createdir(String dirpath) {
 		new File(dirpath).mkdirs();
 	}
 
@@ -426,7 +389,7 @@ public class Utils {
 	public void init() {
 		setOSName();
 		SetScreenWidthHeight();
-		Utils.state = InterpretToState(Integer.parseInt(Utils.readfileintoStack("Config").get(0)));
+		state = InterpretToState(Integer.parseInt(readfileintoStack("Config").get(0)));
 	}
 
 	private State InterpretToState(int parseInt) {
@@ -443,7 +406,7 @@ public class Utils {
 		return null;
 	}
 
-	private static int InterpretState(State s) {
+	private int InterpretState(State s) {
 		switch (s) {
 		case CHARSLOADED:
 			return 0;
@@ -459,7 +422,7 @@ public class Utils {
 		return 0;
 	}
 
-	public static Stack<String> read1MfromfileintoStack(String filepath, int afterlines) {
+	public Stack<String> read1MfromfileintoStack(String filepath, int afterlines) {
 		Stack<String> data = new Stack<>();
 		try {
 			try (Stream<String> lines = Files.lines(Paths.get(filepath))) {
@@ -478,37 +441,7 @@ public class Utils {
 		return data;
 	}
 
-	public static void writeDirectionStackTofile(Stack<Direction> result_words, String filepath) {
-		try {
-			FileWriter writer = new FileWriter(filepath, false);
-			BufferedWriter bufferedWriter = new BufferedWriter(writer);
-
-			for (Direction s : result_words) {
-				bufferedWriter.write(s + "\n");
-			}
-			bufferedWriter.close();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void writePointsStackTofile(ArrayList<Point> result_words, String filepath) {
-		try {
-			FileWriter writer = new FileWriter(filepath, false);
-			BufferedWriter bufferedWriter = new BufferedWriter(writer);
-
-			for (Point p : result_words) {
-				bufferedWriter.write(p.x + "," + p.y + "\n");
-			}
-			bufferedWriter.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	public static void copyFileUsingFileStreams(File source, File dest) throws IOException {
+	public void copyFileUsingFileStreams(File source, File dest) throws IOException {
 		InputStream input = null;
 		OutputStream output = null;
 		try {
@@ -525,7 +458,7 @@ public class Utils {
 		}
 	}
 
-	public static String executeCommand(String command) {
+	public String executeCommand(String command) {
 
 		StringBuffer output = new StringBuffer();
 
@@ -544,7 +477,7 @@ public class Utils {
 		return output.toString();
 	}
 
-	public static <T> T[] concatenate(T[] a, T[] b) {
+	public <T> T[] concatenate(T[] a, T[] b) {
 		int aLen = a.length;
 		int bLen = b.length;
 
@@ -556,7 +489,7 @@ public class Utils {
 		return c;
 	}
 
-	public static boolean checkfileExist(String filepath) {
+	public boolean checkfileExist(String filepath) {
 		File f = new File(filepath);
 		if (f.exists()) {
 			return true;
@@ -564,82 +497,16 @@ public class Utils {
 			return false;
 	}
 
-	public static Direction[] ComparePointsToCheckFV(double x1, double y1, double x2, double y2) {
-		Direction direction[] = new Direction[2];
-		if (x1 > x2)
-			direction[0] = Direction.RIGHT;
-		else if (x1 < x2)
-			direction[0] = Direction.LEFT;
-		else
-			direction[0] = null;
-
-		if (y1 > y2)
-			direction[1] = Direction.DOWN;
-		else if (y1 < y2)
-			direction[1] = Direction.UP;
-		else
-			direction[1] = null;
-		return direction;
-	}
-
-	/*
-	 * return text in image form, doing Text To Image and throw it into
-	 * ImagesFolder(para1)
-	 */
-	public static BufferedImage DoTTI(String ImagesFolder, String text) {
-
-		BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY);
-		Graphics2D g2d = img.createGraphics();
-		Font font = new Font("Level One Logica", Font.PLAIN, 512);
-		g2d.setFont(font);
-		FontMetrics fm = g2d.getFontMetrics();
-		int height = fm.getHeight();
-		int width = fm.stringWidth(text);
-		img = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
-		g2d = img.createGraphics();
-		g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-		g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-		g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-		g2d.setFont(font);
-
-		fm = g2d.getFontMetrics();
-		g2d.drawString(text, 0, fm.getAscent());
-		g2d.dispose();
-		img = invertImage(img);
-
-		try {
-			File outputFile = new File(ImagesFolder + text + ".png");
-			ImageIO.write(img, "png", outputFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return img;
-	}
-
-	public static BufferedImage invertImage(BufferedImage imageName) {
-
-		for (int x = 0; x < imageName.getWidth(); x++) {
-			for (int y = 0; y < imageName.getHeight(); y++) {
-				int rgba = imageName.getRGB(x, y);
-				Color col = new Color(rgba, true);
-				col = new Color(255 - col.getRed(), 255 - col.getGreen(), 255 - col.getBlue());
-				imageName.setRGB(x, y, col.getRGB());
-			}
-		}
-		return imageName;
-	}
-
-	public static void UpdateStateInConfigFile(State s) {
-		Utils.state = s;
-		Stack<String> config_content = Utils.readfileintoStack(CONFIG);
+	public void UpdateStateInConfigFile(State s) {
+		state = s;
+		Stack<String> config_content = readfileintoStack(CONFIG);
 		config_content.remove(0);
 		config_content.add(0, "" + InterpretState(s));
-		Utils.writeStackTofile(config_content, CONFIG);
+		writeStackTofile(config_content, CONFIG);
+	}
+
+	public static Utils getInstance() {
+		return utils;
 	}
 
 }

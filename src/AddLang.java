@@ -49,7 +49,7 @@ public class AddLang extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!checkifalreadyadded(locales[dropdownlist.getSelectedIndex()])) {
-					Utils.writeStringToFile(locales[dropdownlist.getSelectedIndex()], Utils.CONFIG);
+					SeShatEditorMain.utils.writeStringToFile(locales[dropdownlist.getSelectedIndex()], SeShatEditorMain.utils.CONFIG);
 					Added_langs.push(locales[dropdownlist.getSelectedIndex()]);
 					chooser.setAdded_langs(Added_langs);
 
@@ -81,7 +81,7 @@ public class AddLang extends JFrame {
 				dispose();
 			}
 		});
-		setBounds((int) Utils.width / 2, (int) Utils.height / 2, 500, 500);
+		setBounds((int) SeShatEditorMain.utils.width / 2, (int) SeShatEditorMain.utils.height / 2, 500, 500);
 		add(MainPanel, BorderLayout.SOUTH);
 		pack();
 		setTitle("Pick language");
