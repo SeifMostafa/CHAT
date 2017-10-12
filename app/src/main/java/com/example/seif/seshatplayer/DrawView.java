@@ -25,7 +25,7 @@ import java.io.IOException;
 
 public class DrawView extends TextView {
     private static final float TOUCH_TOLERANCE = 4;
-    private static final float POINT_WIDTH = 4;
+    private static final float POINT_WIDTH = 2;
     Context context;
 
     Direction[][] guidedVectors;

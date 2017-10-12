@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -56,9 +55,12 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String AnimationKey = "AK", WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
+    public static String firstPhraseAudioPath = "myname";
+    public static String TAG = "MainActivity";
     SharedPreferences sharedPreferences_words = null;
     SharedPreferences.Editor sharedPreferences_words_editor = null;
     MediaPlayer mediaPlayer = null;
+    int height, width;
     private String WordsFilePath = "/SF/WORDS.txt", PhrasesFilePath = "/SF/PHRASES.txt", AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt", AppendedToImageFile = ".png", AppendedToSpeechFile = ".wav", SF = "/SF/";
     private ArrayList<String> words, phrases;
     private int word_loop = 1, word_index = 0;
@@ -66,36 +68,9 @@ public class MainActivity extends AppCompatActivity {
     private int DEFAULT_LESSON_LENGTH = 5;
     private int DEFAULT_LOOP_COUNTER = 4;
     private int DEFAULT_TYPEFACE_LEVELS = 4;
-
     private String firstPhrase = "أنا إسمي ";
-    public static String firstPhraseAudioPath = "myname";
     private String firstTimekey = "1stTime";
-
-    public static String TAG = "MainActivity";
-    int height,width;
-/*
-  * read file into string and the end = \n and return this string
-  */
-    private Stack<String> readFileintoStack(String filepath) {
-
-        Stack<String> result = new Stack<>();
-        try {
-            FileReader reader = new FileReader(filepath);
-            BufferedReader bufferedReader = new BufferedReader(reader);
-
-            String line;
-
-            while ((line = bufferedReader.readLine()) != null) {
-                result.push(line);
-            }
-            reader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
+    private char[] CharsWithDots = {'ب', 'ت', 'ث', 'ج', 'خ', 'ذ', 'ز', 'ش', 'ض', 'ظ', 'غ', 'ف', 'ق', 'ن', 'ة', 'ي'};
     public static Direction[] getDirections(String filepath) {
         Stack<Direction> directions = new Stack<>();
         File file = new File(filepath);
@@ -123,6 +98,10 @@ public class MainActivity extends AppCompatActivity {
                     case 'D':
                         directions.push(Direction.DOWN);
                         break;
+                    case 'S':
+                        directions.push(Direction.SAME);
+                    case 'n':
+                        directions.push(null);
                 }
             }
             scan.close();
@@ -131,6 +110,29 @@ public class MainActivity extends AppCompatActivity {
         }
         Direction[] result = new Direction[directions.size()];
         return directions.toArray(result);
+    }
+
+    /*
+      * read file into string and the end = \n and return this string
+      */
+    private Stack<String> readFileintoStack(String filepath) {
+
+        Stack<String> result = new Stack<>();
+        try {
+            FileReader reader = new FileReader(filepath);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                result.push(line);
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override
@@ -142,14 +144,16 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences_words_editor = sharedPreferences_words.edit();
         checkPermission_AndroidVersion();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        Log.i("AEP: ", "" + getPackageManager().hasSystemFeature
-                (PackageManager.FEATURE_OPENGLES_EXTENSION_PACK));
-        //OpenPhraseFragment("سيف مصطفى","سيف");
+        getScreenInfo();
 
+
+    }
+
+    private void getScreenInfo() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-         height = displayMetrics.heightPixels;
-         width = displayMetrics.widthPixels;
+        height = displayMetrics.heightPixels;
+        width = displayMetrics.widthPixels;
     }
 
     private void startApp() {
@@ -232,41 +236,42 @@ public class MainActivity extends AppCompatActivity {
     private Word form_word(int index) {
         try {
             Word resultWord = new Word(words.get(index), SF + words.get(index) + AppendedToImageFile, SF + words.get(index) + AppendedToSpeechFile, phrases.get(index));
-                resultWord.setFV(prepareWordGuidedVectors(words.get(index)));
+            resultWord.setFV(prepareWordGuidedVectors(words.get(index)));
             return resultWord;
-         } catch (Exception e) {
+        } catch (Exception e) {
             Log.e("form_wordE:", e.toString());
             e.printStackTrace();
             return null;
         }
     }
 
-      private Direction[][] prepareWordGuidedVectors(String word) {
-           Direction[][] result_directions = new Direction[word.length()][];
-           ArrayList<Character> differentchars = new ArrayList<>();
-           Character[] characters = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ','ا'};
-           differentchars.addAll(Arrays.asList(characters));
-           for (int i = 0; i < word.length(); i++) {
-               if (i == 0) {
-                   result_directions[i] = getDirections(SF + word.charAt(i) + 1 + AppenddedToOutputFVfile);
-               } else if (i == word.length() - 1) {
-                   if (differentchars.contains(word.charAt(i-1))) {
-                       result_directions[i] = getDirections(SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
+    private Direction[][] prepareWordGuidedVectors(String word) {
+        Direction[][] result_directions = new Direction[word.length()][];
+        ArrayList<Character> differentchars = new ArrayList<>();
+        Character[] characters = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ', 'ا'};
+        differentchars.addAll(Arrays.asList(characters));
+        for (int i = 0; i < word.length(); i++) {
+            if (i == 0) {
+                result_directions[i] = getDirections(SF + word.charAt(i) + 1 + AppenddedToOutputFVfile);
+            } else if (i == word.length() - 1) {
+                if (differentchars.contains(word.charAt(i - 1))) {
+                    result_directions[i] = getDirections(SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
 
-                   }else{
-                       result_directions[i] = getDirections(SF + word.charAt(i) + 0 + AppenddedToOutputFVfile);
-                   }
-               } else {
-                   if (differentchars.contains(word.charAt(i-1))) {
-                       result_directions[i] = getDirections(SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
+                } else {
+                    result_directions[i] = getDirections(SF + word.charAt(i) + 0 + AppenddedToOutputFVfile);
+                }
+            } else {
+                if (differentchars.contains(word.charAt(i - 1))) {
+                    result_directions[i] = getDirections(SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
 
-                   }else{
-                       result_directions[i] = getDirections(SF + word.charAt(i) + 3 + AppenddedToOutputFVfile);
-                   }
-               }
-           }
-           return result_directions;
-       }
+                } else {
+                    result_directions[i] = getDirections(SF + word.charAt(i) + 3 + AppenddedToOutputFVfile);
+                }
+            }
+        }
+        return result_directions;
+    }
+
     /*
     ToFlag: if 0 = current, if -1 = prev;
      */
