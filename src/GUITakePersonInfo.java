@@ -5,6 +5,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -64,16 +68,20 @@ public class GUITakePersonInfo {
 	private JButton btnGenerate;
 	private ArrayList<String> favNames = new ArrayList<>();
 	private ArrayList<String> whyMsgs = new ArrayList<>();
-	private JList<String> whyList;
+	private JList whyList;
 	private JScrollPane scrollPane;
 	private JPanel panel;
 	private JRadioButton maleRadio;
 	private JRadioButton femaleRadio;
+	private JMenuBar menuBar;
+	private JMenu mnFile;
+	private JMenuItem language;
+	private JMenuItem exit;
 
 	private static void writeToXml(Person p)
 			throws ParserConfigurationException, SAXException, IOException, TransformerException {
 
-		String filepath = Messages.getString("LastPersonFile"); 
+		String filepath = Messages.getString("LastPersonFile");
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 		org.w3c.dom.Document doc = docBuilder.parse(filepath);
@@ -82,7 +90,7 @@ public class GUITakePersonInfo {
 		// Node persons = doc.getFirstChild();
 
 		// Get the element by tag name directly
-		Node person = doc.getElementsByTagName(Messages.getString("PersonElement")).item(0); 
+		Node person = doc.getElementsByTagName(Messages.getString("PersonElement")).item(0);
 
 		// // update staff attribute
 		// NamedNodeMap attr = person.getAttributes();
@@ -94,25 +102,25 @@ public class GUITakePersonInfo {
 			Node node = list.item(i);
 
 			// get the element, and update the value
-			if (Messages.getString("NameTag").equals(node.getNodeName())) { 
+			if (Messages.getString("NameTag").equals(node.getNodeName())) {
 				node.setTextContent(p.getName());
-			} else if (Messages.getString("AgeTag").equals(node.getNodeName())) { 
+			} else if (Messages.getString("AgeTag").equals(node.getNodeName())) {
 				node.setTextContent(String.valueOf(p.getAge()));
-			} else if (Messages.getString("AddressTag").equals(node.getNodeName())) { 
+			} else if (Messages.getString("AddressTag").equals(node.getNodeName())) {
 				node.setTextContent(p.getAddress());
-			} else if (Messages.getString("JopTag").equals(node.getNodeName())) { 
+			} else if (Messages.getString("JopTag").equals(node.getNodeName())) {
 				node.setTextContent(p.getJob());
-			} else if (Messages.getString("FavNamesTag").equals(node.getNodeName())) { 
+			} else if (Messages.getString("FavNamesTag").equals(node.getNodeName())) {
 				node.setTextContent(p.getFavNames().toString());
-			} else if (Messages.getString("WhyLearnTag").equals(node.getNodeName())) { 
+			} else if (Messages.getString("WhyLearnTag").equals(node.getNodeName())) {
 				node.setTextContent(p.getWhyLearn().toString());
-			} else if (Messages.getString("GenderTag").equals(node.getNodeName())) { 
+			} else if (Messages.getString("GenderTag").equals(node.getNodeName())) {
 				node.setTextContent(p.getGender());
-			} else if (Messages.getString("BirthAddressTag").equals(node.getNodeName())) { 
+			} else if (Messages.getString("BirthAddressTag").equals(node.getNodeName())) {
 				node.setTextContent(p.getBirthAddress());
-			} else if (Messages.getString("EnvLocationTag").equals(node.getNodeName())) { 
+			} else if (Messages.getString("EnvLocationTag").equals(node.getNodeName())) {
 				node.setTextContent(p.getEnvLocation());
-			} else if (Messages.getString("orgHomeTag").equals(node.getNodeName())) { 
+			} else if (Messages.getString("orgHomeTag").equals(node.getNodeName())) {
 				node.setTextContent(p.getOrgHome());
 			}
 
@@ -125,14 +133,14 @@ public class GUITakePersonInfo {
 		StreamResult result = new StreamResult(new File(filepath));
 		transformer.transform(source, result);
 
-		System.out.println(Messages.getString("SaveMessage")); 
+		System.out.println(Messages.getString("SaveMessage"));
 	}
 
 	public void xmlappend(Person person)
 			throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-		Document document = documentBuilder.parse(Messages.getString("PersonsFile")); 
+		Document document = documentBuilder.parse(Messages.getString("PersonsFile"));
 		Element root = document.getDocumentElement();
 
 		Collection<Person> persons = new ArrayList<Person>();
@@ -140,45 +148,45 @@ public class GUITakePersonInfo {
 
 		for (Person p : persons) {
 			// server elements
-			Element newPerson = document.createElement(Messages.getString("PersonElement")); 
+			Element newPerson = document.createElement(Messages.getString("PersonElement"));
 
-			Element name = document.createElement(Messages.getString("NameTag")); 
+			Element name = document.createElement(Messages.getString("NameTag"));
 			name.appendChild(document.createTextNode(p.getName()));
 			newPerson.appendChild(name);
 
-			Element age = document.createElement(Messages.getString("AgeTag")); 
+			Element age = document.createElement(Messages.getString("AgeTag"));
 			age.appendChild(document.createTextNode(Integer.toString(p.getAge())));
 			newPerson.appendChild(age);
 
-			Element address = document.createElement(Messages.getString("AddressTag")); 
+			Element address = document.createElement(Messages.getString("AddressTag"));
 			address.appendChild(document.createTextNode(p.getAddress()));
 			newPerson.appendChild(address);
 
-			Element jop = document.createElement(Messages.getString("JopTag")); 
+			Element jop = document.createElement(Messages.getString("JopTag"));
 			jop.appendChild(document.createTextNode(p.getJob()));
 			newPerson.appendChild(jop);
 
-			Element favNames = document.createElement(Messages.getString("FavNamesTag")); 
+			Element favNames = document.createElement(Messages.getString("FavNamesTag"));
 			favNames.appendChild(document.createTextNode(p.getFavNames().toString()));
 			newPerson.appendChild(favNames);
 
-			Element whyLearn = document.createElement(Messages.getString("WhyLearnTag")); 
+			Element whyLearn = document.createElement(Messages.getString("WhyLearnTag"));
 			whyLearn.appendChild(document.createTextNode(p.getWhyLearn().toString()));
 			newPerson.appendChild(whyLearn);
 
-			Element gender = document.createElement(Messages.getString("GenderTag")); 
+			Element gender = document.createElement(Messages.getString("GenderTag"));
 			gender.appendChild(document.createTextNode(p.getGender()));
 			newPerson.appendChild(gender);
 
-			Element birthAddress = document.createElement("birthAddress"); 
+			Element birthAddress = document.createElement("birthAddress");
 			birthAddress.appendChild(document.createTextNode(p.getBirthAddress()));
 			newPerson.appendChild(birthAddress);
 
-			Element envLocation = document.createElement(Messages.getString("EnvLocationTag")); 
+			Element envLocation = document.createElement(Messages.getString("EnvLocationTag"));
 			envLocation.appendChild(document.createTextNode(p.getEnvLocation()));
 			newPerson.appendChild(envLocation);
 
-			Element orgName = document.createElement("orgHome"); 
+			Element orgName = document.createElement("orgHome");
 			orgName.appendChild(document.createTextNode(p.getOrgHome()));
 			newPerson.appendChild(orgName);
 
@@ -189,12 +197,13 @@ public class GUITakePersonInfo {
 
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		Transformer transformer = transformerFactory.newTransformer();
-		StreamResult result = new StreamResult(Messages.getString("PersonsFile")); 
+		StreamResult result = new StreamResult(Messages.getString("PersonsFile"));
 		transformer.transform(source, result);
 	}
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					GUITakePersonInfo window = new GUITakePersonInfo();
@@ -237,7 +246,7 @@ public class GUITakePersonInfo {
 		frame.getContentPane().add(nameText, gbc_nameText);
 		nameText.setColumns(10);
 		// Name Label
-		JLabel nameLabel = new JLabel(Messages.getString("NameLabel")); 
+		JLabel nameLabel = new JLabel(Messages.getString("NameLabel"));
 		nameLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		nameLabel.setVerticalAlignment(SwingConstants.TOP);
 		GridBagConstraints gbc_nameLabel = new GridBagConstraints();
@@ -256,7 +265,7 @@ public class GUITakePersonInfo {
 		gbc_panel.gridy = 1;
 		frame.getContentPane().add(panel, gbc_panel);
 
-		femaleRadio = new JRadioButton(Messages.getString("GUITakePersonInfo.radioButton_1.text")); 
+		femaleRadio = new JRadioButton(Messages.getString("GUITakePersonInfo.radioButton_1.text"));
 		femaleRadio.setHorizontalAlignment(SwingConstants.LEFT);
 		panel.add(femaleRadio);
 
@@ -264,7 +273,7 @@ public class GUITakePersonInfo {
 		maleRadio.setHorizontalAlignment(SwingConstants.RIGHT);
 		panel.add(maleRadio);
 
-		genderLabel = new JLabel(Messages.getString("GenderLabel")); 
+		genderLabel = new JLabel(Messages.getString("GenderLabel"));
 		GridBagConstraints gbc_genderLabel = new GridBagConstraints();
 		gbc_genderLabel.anchor = GridBagConstraints.WEST;
 		gbc_genderLabel.gridwidth = 2;
@@ -282,7 +291,7 @@ public class GUITakePersonInfo {
 		frame.getContentPane().add(ageText, gbc_ageText);
 		ageText.setColumns(10);
 
-		ageLabel = new JLabel(Messages.getString("AgeLabel")); 
+		ageLabel = new JLabel(Messages.getString("AgeLabel"));
 		ageLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		GridBagConstraints gbc_ageLabel = new GridBagConstraints();
 		gbc_ageLabel.anchor = GridBagConstraints.WEST;
@@ -301,7 +310,7 @@ public class GUITakePersonInfo {
 		frame.getContentPane().add(addressText, gbc_addressText);
 		addressText.setColumns(10);
 
-		addressLabel = new JLabel(Messages.getString("AddressLabel")); 
+		addressLabel = new JLabel(Messages.getString("AddressLabel"));
 		GridBagConstraints gbc_addressLabel = new GridBagConstraints();
 		gbc_addressLabel.anchor = GridBagConstraints.WEST;
 		gbc_addressLabel.gridwidth = 2;
@@ -319,7 +328,7 @@ public class GUITakePersonInfo {
 		frame.getContentPane().add(birthAddressText, gbc_birthAdressText);
 		birthAddressText.setColumns(10);
 
-		birthAddressLabel = new JLabel(Messages.getString("BirthAddressLabel")); 
+		birthAddressLabel = new JLabel(Messages.getString("BirthAddressLabel"));
 		GridBagConstraints gbc_birthAddressLabel = new GridBagConstraints();
 		gbc_birthAddressLabel.anchor = GridBagConstraints.WEST;
 		gbc_birthAddressLabel.gridwidth = 2;
@@ -336,14 +345,14 @@ public class GUITakePersonInfo {
 		gbc_envCombo.gridy = 5;
 		frame.setBounds(100, 100, 671, 453);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		String environments[] = { "قروي", "حضري", "بدوي", "ساحلي", "نوبي" };
+		String environments[] = { "Ù‚Ø±ÙˆÙŠ", "Ø­Ø¶Ø±ÙŠ", "Ø¨Ø¯ÙˆÙŠ", "Ø³Ø§Ø­Ù„ÙŠ", "Ù†ÙˆØ¨ÙŠ" };
 		for (int i = 0; i < environments.length; i++) {
 			envCombo.addItem(environments[i]);
 		}
 
 		frame.getContentPane().add(envCombo, gbc_envCombo);
 
-		envLabel = new JLabel(Messages.getString("EnvLabel")); 
+		envLabel = new JLabel(Messages.getString("EnvLabel"));
 		GridBagConstraints gbc_envLabel = new GridBagConstraints();
 		gbc_envLabel.anchor = GridBagConstraints.WEST;
 		gbc_envLabel.gridwidth = 2;
@@ -359,14 +368,14 @@ public class GUITakePersonInfo {
 		gbc_orgCombo.gridx = 2;
 		gbc_orgCombo.gridy = 6;
 
-		String homes[] = { "مهاجر", "حضري", "صعيد", "ساحلي" };
+		String homes[] = { "Ù…Ù‡Ø§Ø¬Ø±", "Ø­Ø¶Ø±ÙŠ", "ØµØ¹ÙŠØ¯", "Ø³Ø§Ø­Ù„ÙŠ" };
 		for (int i = 0; i < homes.length; i++) {
 			orgCombo.addItem(homes[i]);
 		}
 
 		frame.getContentPane().add(orgCombo, gbc_orgCombo);
 
-		orgHomeLabel = new JLabel(Messages.getString("OrgHomeLabel")); 
+		orgHomeLabel = new JLabel(Messages.getString("OrgHomeLabel"));
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel.gridwidth = 2;
@@ -381,13 +390,14 @@ public class GUITakePersonInfo {
 		gbc_jobCombo.insets = new Insets(0, 0, 5, 5);
 		gbc_jobCombo.gridx = 2;
 		gbc_jobCombo.gridy = 7;
-		String jobs[] = { "عامل صناعي", "عامل زراعي", "مكتبي", "منزلي", "حرفي", "عمل حر", "معاش", "طفل", "لا يعمل" };
+		String jobs[] = { "Ø¹Ø§Ù…Ù„ ØµÙ†Ø§Ø¹ÙŠ", "Ø¹Ø§Ù…Ù„ Ø²Ø±Ø§Ø¹ÙŠ", "Ù…ÙƒØªØ¨ÙŠ", "Ù…Ù†Ø²Ù„ÙŠ", "Ø­Ø±Ù�ÙŠ",
+				"Ø¹Ù…Ù„ Ø­Ø±", "Ù…Ø¹Ø§Ø´", "Ø·Ù�Ù„", "Ù„Ø§ ÙŠØ¹Ù…Ù„" };
 		for (int i = 0; i < jobs.length; i++) {
 			jobCombo.addItem(jobs[i]);
 		}
 		frame.getContentPane().add(jobCombo, gbc_jobCombo);
 
-		workLabel = new JLabel(Messages.getString("WorkLabel")); 
+		workLabel = new JLabel(Messages.getString("WorkLabel"));
 		GridBagConstraints gbc_label = new GridBagConstraints();
 		gbc_label.anchor = GridBagConstraints.WEST;
 		gbc_label.gridwidth = 2;
@@ -404,7 +414,7 @@ public class GUITakePersonInfo {
 		gbc_favNames.gridy = 8;
 		frame.getContentPane().add(favNamePane, gbc_favNames);
 
-		favNamesLabel = new JLabel(Messages.getString("FavNamesLabel")); 
+		favNamesLabel = new JLabel(Messages.getString("FavNamesLabel"));
 		GridBagConstraints gbc_label_1 = new GridBagConstraints();
 		gbc_label_1.anchor = GridBagConstraints.WEST;
 		gbc_label_1.gridwidth = 2;
@@ -413,7 +423,7 @@ public class GUITakePersonInfo {
 		gbc_label_1.gridy = 8;
 		frame.getContentPane().add(favNamesLabel, gbc_label_1);
 
-		whyLabel = new JLabel(Messages.getString("WhyLabel")); 
+		whyLabel = new JLabel(Messages.getString("WhyLabel"));
 		GridBagConstraints gbc_label_2 = new GridBagConstraints();
 		gbc_label_2.anchor = GridBagConstraints.WEST;
 		gbc_label_2.gridwidth = 2;
@@ -429,10 +439,12 @@ public class GUITakePersonInfo {
 		gbc_scrollPane.gridy = 9;
 
 		frame.getContentPane().add(scrollPane, gbc_scrollPane);
-		String why[] = { "سخريه و خداع", "العمل", "التقدم في شئ ما", "تكملة التعليم", "التكنولوجيا", "مساعدة  أولاده", 
-				"التعامل مع البيئه المحيطه", "السفر", "علم الأديان السماويه" };
+		String why[] = { "Ø³Ø®Ø±ÙŠÙ‡ Ùˆ Ø®Ø¯Ø§Ø¹", "Ø§Ù„Ø¹Ù…Ù„", "Ø§Ù„ØªÙ‚Ø¯Ù… Ù�ÙŠ Ø´Ø¦ Ù…Ø§",
+				"ØªÙƒÙ…Ù„Ø© Ø§Ù„ØªØ¹Ù„ÙŠÙ…", "Ø§Ù„ØªÙƒÙ†ÙˆÙ„ÙˆØ¬ÙŠØ§", "Ù…Ø³Ø§Ø¹Ø¯Ø©  Ø£ÙˆÙ„Ø§Ø¯Ù‡",
+				"Ø§Ù„ØªØ¹Ø§Ù…Ù„ Ù…Ø¹ Ø§Ù„Ø¨ÙŠØ¦Ù‡ Ø§Ù„Ù…Ø­ÙŠØ·Ù‡", "Ø§Ù„Ø³Ù�Ø±",
+				"Ø¹Ù„Ù… Ø§Ù„Ø£Ø¯ÙŠØ§Ù† Ø§Ù„Ø³Ù…Ø§ÙˆÙŠÙ‡" };
 
-		whyList = new JList<String>(why);
+		whyList = new JList(why);
 
 		scrollPane.setViewportView(whyList);
 
@@ -447,27 +459,27 @@ public class GUITakePersonInfo {
 		});
 		frame.getContentPane().add(whyLabel, gbc_label_2);
 
-		btnGenerate = new JButton(Messages.getString("GenerateBtn")); 
+		btnGenerate = new JButton(Messages.getString("GenerateBtn"));
 		btnGenerate.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				Person p = new Person();
 
-				if (orgCombo.getSelectedItem().toString().equals("") || jobCombo.getSelectedItem().toString().equals("")  //$NON-NLS-2$
-						|| favNamePane.getText().equals("") || whyList.isSelectionEmpty() 
-						|| nameText.getText().equals("") || addressText.getText().equals("")  //$NON-NLS-2$
-						|| ageText.getText().equals("") || birthAddressText.getText().equals("")  //$NON-NLS-2$
-						|| envCombo.getSelectedItem().toString().equals("")) { 
-					JOptionPane.showMessageDialog(null, Messages.getString("NullException")); 
+				if (orgCombo.getSelectedItem().toString().equals("") || jobCombo.getSelectedItem().toString().equals("") //$NON-NLS-2$
+						|| favNamePane.getText().equals("") || whyList.isSelectionEmpty()
+						|| nameText.getText().equals("") || addressText.getText().equals("") //$NON-NLS-2$
+						|| ageText.getText().equals("") || birthAddressText.getText().equals("") //$NON-NLS-2$
+						|| envCombo.getSelectedItem().toString().equals("")) {
+					JOptionPane.showMessageDialog(null, Messages.getString("NullException"));
 				} else {
 					try {
 						p.setAge(Integer.parseInt(ageText.getText()));
 					} catch (NumberFormatException e) {
-						JOptionPane.showMessageDialog(null, Messages.getString("AgeException")); 
-						ageText.setText(""); 
+						JOptionPane.showMessageDialog(null, Messages.getString("AgeException"));
+						ageText.setText("");
 						return;
 					}
-					favNames.add(favNamePane.getText() + " "); 
+					favNames.add(favNamePane.getText() + " ");
 					p.setName(nameText.getText());
 					p.setAddress(addressText.getText());
 					p.setBirthAddress(birthAddressText.getText());
@@ -476,8 +488,7 @@ public class GUITakePersonInfo {
 					if (maleRadio.isSelected()) {
 						femaleRadio.setSelected(false);
 						p.setGender(maleRadio.getText());
-					} 
-					else if (femaleRadio.isSelected()) {
+					} else if (femaleRadio.isSelected()) {
 						maleRadio.setSelected(false);
 						p.setGender(femaleRadio.getText());
 					}
@@ -507,7 +518,7 @@ public class GUITakePersonInfo {
 						e.printStackTrace();
 					}
 					clear();
-					 SeShatEditorMain.GenerateSyllabus_Pressed(p);
+					SeShatEditorMain.GenerateSyllabus_Pressed(p);
 				}
 
 			}
@@ -517,23 +528,55 @@ public class GUITakePersonInfo {
 		gbc_btnGenerate.gridx = 2;
 		gbc_btnGenerate.gridy = 10;
 		frame.getContentPane().add(btnGenerate, gbc_btnGenerate);
+
+		menuBar = new JMenuBar();
+
+		mnFile = new JMenu(Messages.getString("GUITakePersonInfo.mnFile.text")); //$NON-NLS-1$
+		mnFile.setMnemonic(KeyEvent.VK_F);
+
+		exit = new JMenuItem(Messages.getString("GUITakePersonInfo.mntmExit.text")); //$NON-NLS-1$
+		exit.setMnemonic(KeyEvent.VK_E);
+		exit.setToolTipText("Exit application");
+		exit.addActionListener((ActionEvent event) -> {
+			System.exit(0);
+		});
+
+		// menuBar.setVisible(true);
+
+		menuBar.add(mnFile);
+
+		language = new JMenuItem("Add Language"); //$NON-NLS-1$
+		language.setMnemonic(KeyEvent.VK_E);
+		language.setToolTipText("language change");
+
+		language.addActionListener((ActionEvent event) -> {
+			AddLang addlang = new AddLang();
+			
+		});
+
+		mnFile.add(language);
+
+		mnFile.addSeparator();
+		mnFile.add(exit);
+		frame.setJMenuBar(menuBar);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+
 		frame.setVisible(true);
 
 	}
 
 	public void clear() {
-		nameText.setText(""); 
+		nameText.setText("");
 		maleRadio.setSelected(false);
 		femaleRadio.setSelected(false);
-		ageText.setText(""); 
-		favNamePane.setText(""); 
-		addressText.setText(""); 
-		birthAddressText.setText(""); 
+		ageText.setText("");
+		favNamePane.setText("");
+		addressText.setText("");
+		birthAddressText.setText("");
 		whyList.setSelectionMode(0);
-		JOptionPane.showMessageDialog(null, Messages.getString("SuccessMessage")); 
+		JOptionPane.showMessageDialog(null, Messages.getString("SuccessMessage"));
 	}
 }
