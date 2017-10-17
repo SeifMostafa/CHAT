@@ -53,7 +53,6 @@ public class MainFragment extends Fragment {
                 justWord = true;
             }
         }
-
         Log.i("onCreate", "from MainFragment");
     }
 
@@ -166,8 +165,6 @@ public class MainFragment extends Fragment {
         });
         return view;
     }
-
-
     @Override
     public void onResume() {
         super.onResume();
@@ -183,12 +180,17 @@ public class MainFragment extends Fragment {
                 @Override
                 public void run() {
                     try {
+
                         sleep(2000);
                         ((MainActivity) getActivity()).voiceoffer(null, MainActivity.firstPhraseAudioPath);
                         sleep(1100);
-                        ((MainActivity) getActivity()).voiceoffer(null, word.getText().split(" ")[2]);
+                        if(word.getText().length()>1){
+                            ((MainActivity) getActivity()).voiceoffer(null, word.getText().split(" ")[2]);
+                        }else{
+                            ((MainActivity) getActivity()).voiceoffer(null, word.getText());
+                        }
                         sleep(1900);
-                        ((MainActivity) getActivity()).updatelesson(0);
+                        //((MainActivity) getActivity()).updatelesson(0);
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.e("PlaySoundiBtn", e.toString());
@@ -198,7 +200,6 @@ public class MainFragment extends Fragment {
         }
     }
 
-
     private void setNextiBtnVisibility() {
         if (CurrentWordsArrayIndex == words.length - 1) {
             NextiBtn.setVisibility(View.INVISIBLE);
@@ -207,7 +208,6 @@ public class MainFragment extends Fragment {
         }
     }
 
-
     private void setPreviBtnVisibilty() {
         if (CurrentWordsArrayIndex == 0) {
             PreviBtn.setVisibility(View.INVISIBLE);
@@ -215,8 +215,6 @@ public class MainFragment extends Fragment {
             PreviBtn.setVisibility(View.VISIBLE);
         }
     }
-
-
 
     private Thread CreateWordTripThread() {
         Thread_WordTrip = new Thread() {
@@ -310,7 +308,5 @@ public class MainFragment extends Fragment {
     public void onPause() {
         super.onPause();
     }
-
-
 
 }
