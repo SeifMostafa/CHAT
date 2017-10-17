@@ -6,7 +6,7 @@
     tools:context=".layout.MainFragment">
 
 
-    <com.example.seif.seshatplayer.DrawView
+    <com.example.seif.seshatplayer.ConnectDotsView
         android:id="@+id/textView_maintext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
