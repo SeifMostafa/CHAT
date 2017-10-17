@@ -25,7 +25,7 @@ import java.util.Stack;
 
 
 public class DrawView extends TextView {
-    private static final float TOUCH_TOLERANCE = 4;
+    private static final float TOUCH_TOLERANCE = 16;
     private static final float POINT_WIDTH = 2;
     Context context;
 
@@ -130,7 +130,7 @@ public class DrawView extends TextView {
         if (appendingResult != null) {
             if (appendingResult) {
                 // animate char ,  reset gest detect, check if chars is completed
-                gestureDetector = new GestureDetector(guidedVectors[++wordCharsChecked], GestureDetector.NORMAL * textviewSZ);
+                gestureDetector = new GestureDetector(guidedVectors[++wordCharsChecked], GestureDetector.LOW * textviewSZ);
             }
         }
     }
@@ -164,13 +164,13 @@ public class DrawView extends TextView {
                 if (wordCharsChecked == guidedVectors.length - 1) {
                     // animate word - request next
                 } else {
-                    gestureDetector = new GestureDetector(guidedVectors[++wordCharsChecked], GestureDetector.NORMAL * textviewSZ);
+                    gestureDetector = new GestureDetector(guidedVectors[++wordCharsChecked], GestureDetector.LOW * textviewSZ);
                 }
 
             } else {
                 reset();
                 wordCharsChecked = 0;
-                gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL * textviewSZ);
+                gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.LOW * textviewSZ);
             }
         }
     }
@@ -258,10 +258,11 @@ public class DrawView extends TextView {
         return super.animate();
     }
 
-
     public void SetGuidedVector(Direction[][] gv) {
         guidedVectors = gv;
-        gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL * textviewSZ);
-
+        gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.LOW * textviewSZ);
+        for(Direction direction:gv[0]){
+            Log.i("SetGuidedVector: ","direction: " + direction);
+        }
     }
 }
