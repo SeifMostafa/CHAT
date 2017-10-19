@@ -2,7 +2,6 @@ package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
@@ -14,14 +13,12 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.example.seif.seshatplayer.ConnectDotsView;
 import com.example.seif.seshatplayer.DrawView;
 import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
 import com.example.seif.seshatplayer.model.Word;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 import static java.lang.Thread.sleep;
@@ -32,7 +29,7 @@ public class MainFragment extends Fragment {
 
     public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1500;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
-    ConnectDotsView drawView_MainText = null;
+    DrawView drawView_MainText = null;
     private Word[] words;
     private Word word = null;
     private int CurrentWordsArrayIndex = 0;
@@ -65,23 +62,19 @@ public class MainFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
-        drawView_MainText = (ConnectDotsView) view.findViewById(R.id.textView_maintext);
+        drawView_MainText = (DrawView) view.findViewById(R.id.textView_maintext);
         drawView_MainText.setVisibility(View.VISIBLE);
-        List<Point> points = new ArrayList<>();
-        for(int i=0;i<500;i++){
-            points.add(new Point(i,i));
-        }
-        drawView_MainText.setPoints(points);
-        /*if (word.getFV() != null) {
+
+        if (word.getFV() != null) {
             drawView_MainText.SetGuidedVector(word.getFV());
-        }*/
+
+        }
      /*   if (!word.getFV().equals(null)) {
 
             drawView_MainText.SetGuidedVector(word.getFV());
         }
         */
-     //   Direction[][] directions = prepareWordGuidedVectors(word.getText());
-        //drawView_MainText.setWord_dirs(directions);
+
 
         TextView custTextView = (TextView) view.findViewById(R.id.textView_maintext);
         custTextView.setText(word.getText());
@@ -114,7 +107,7 @@ public class MainFragment extends Fragment {
 
                 word = words[--CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                //drawView_MainText.SetGuidedVector(word.getFV());
+                drawView_MainText.SetGuidedVector(word.getFV());
                 setPreviBtnVisibilty();
               //  CreateWordTripThread().start();
 
@@ -131,7 +124,7 @@ public class MainFragment extends Fragment {
 
                 word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                //drawView_MainText.SetGuidedVector(word.getFV());
+                drawView_MainText.SetGuidedVector(word.getFV());
                 setNextiBtnVisibility();
                 //CreateWordTripThread().start();
             }
@@ -152,7 +145,7 @@ public class MainFragment extends Fragment {
 
                 word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-               // drawView_MainText.SetGuidedVector(word.getFV());
+                drawView_MainText.SetGuidedVector(word.getFV());
                 setNextiBtnVisibility();
                 //CreateWordTripThread().start();
 
@@ -189,12 +182,12 @@ public class MainFragment extends Fragment {
                     try {
 
                         sleep(2000);
-                        ((MainActivity) getActivity()).voiceoffer(null, MainActivity.firstPhraseAudioPath);
+                        //((MainActivity) getActivity()).voiceoffer(null, MainActivity.firstPhraseAudioPath);
                         sleep(1100);
                         if(word.getText().length()>1){
-                            ((MainActivity) getActivity()).voiceoffer(null, word.getText().split(" ")[2]);
+//                            ((MainActivity) getActivity()).voiceoffer(null, word.getText().split(" ")[2]);
                         }else{
-                            ((MainActivity) getActivity()).voiceoffer(null, word.getText());
+                        //    ((MainActivity) getActivity()).voiceoffer(null, word.getText());
                         }
                         sleep(1900);
                         //((MainActivity) getActivity()).updatelesson(0);

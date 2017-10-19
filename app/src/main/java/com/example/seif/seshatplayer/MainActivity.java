@@ -192,8 +192,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Word word = new Word("س");
             Direction [][] word_directions = new Direction[1][];
-            word_directions[0] = Utils.getDirectionsFromAssets(this,SF + "س" + 2 + AppenddedToOutputFVfile);
-
+            word_directions[0] = getDirections(SF + "س" + 2 + AppenddedToOutputFVfile);
             word.setFV(word_directions);
             OpenMainFragment(word);
         }
