@@ -1,6 +1,5 @@
 package com.example.seif.seshatplayer;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -13,24 +12,20 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.ViewPropertyAnimator;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.seif.seshatplayer.model.Direction;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 public class DrawView extends TextView {
-    private static final float TOUCH_TOLERANCE = 4;
+    private static final float POINT_WIDTH = 2;
     Context context;
 
-    Direction[][] guidedVectors;
+    ArrayList<Direction> mUserGuidedVectors;
     int wordCharsChecked = 0;
-    GestureDetector gestureDetector;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private Path mPath;
@@ -38,7 +33,10 @@ public class DrawView extends TextView {
     private Paint mBitmapPaint;
     private Paint circlePaint;
     private Path circlePath;
-    private float mX, mY;
+    private float mX, mY, mFingerFat;
+    private Point lastPoint;
+    private float textviewSZ;
+    private ArrayList<Point> mTouchedPoints;
 
 
     public DrawView(Context context) throws IOException {
@@ -50,7 +48,6 @@ public class DrawView extends TextView {
     public DrawView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
-
         init();
     }
 
@@ -89,6 +86,8 @@ public class DrawView extends TextView {
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(14);
+        textviewSZ = this.getTextSize();
+        mUserGuidedVectors = new ArrayList<>();
     }
 
     @Override
@@ -103,6 +102,7 @@ public class DrawView extends TextView {
         mBitmap.recycle();
         mBitmap = Bitmap.createBitmap(this.mBitmap.getWidth(), this.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
+        invalidate();
     }
 
     @Override
@@ -113,62 +113,80 @@ public class DrawView extends TextView {
         canvas.drawPath(circlePath, circlePaint);
     }
 
-    private void touch_start(float x, float y) {
+    private void touch_start(float x, float y, float ff) {
         mPath.reset();
         mPath.moveTo(x, y);
         mX = x;
         mY = y;
-
-        gestureDetector.appendpoint(x, y, GestureDetector.START);
+        mFingerFat = ff;
+        mPath.addCircle(mX, mY, POINT_WIDTH, Path.Direction.CW);
+        Log.i("CustTextView", "touch_start: FingerFat: " + ff);
+        mTouchedPoints = new ArrayList<>();
+        mTouchedPoints.add(new Point((int) x, (int) y));
     }
 
     private void touch_move(float x, float y) {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
-        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+        if (dx >= mFingerFat || dy >= mFingerFat) {
             mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
             mX = x;
             mY = y;
             circlePath.reset();
             circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
-
-            gestureDetector.appendpoint(x, y, GestureDetector.MIDDLE);
+            mTouchedPoints.add(new Point((int) x, (int) y));
         }
     }
 
     private void touch_up() {
-        int tolerence_failure = 0;
-        boolean failed = false;
+
         mPath.lineTo(mX, mY);
         circlePath.reset();
         // commit the path to our offscreen
         mCanvas.drawPath(mPath, mPaint);
         // kill this so we don't double draw
         mPath.reset();
-
-        if (gestureDetector.check()){
-            Toast.makeText(context,"OK",Toast.LENGTH_SHORT).show();
-            wordCharsChecked++;
-            if(wordCharsChecked == guidedVectors.length){
-                Toast.makeText(context,"Complete Word!",Toast.LENGTH_SHORT).show();
-            }else{
-                gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL);
+        if (mTouchedPoints.size() >= 2) {
+            for (int i = 0; i < mTouchedPoints.size() - 1; i++) {
+                Point point1 = mTouchedPoints.get(i);
+                Point point2 = mTouchedPoints.get(i + 1);
+                Direction[] directions = ComparePointsToCheckFV(point1, point2);
+                Direction XDirection = directions[0];
+                Direction YDirection = directions[1];
+                if (XDirection != null && YDirection != null) {
+                    if (mUserGuidedVectors.size() > 0) {
+                        if (mUserGuidedVectors.get(mUserGuidedVectors.size() - 2) != XDirection || mUserGuidedVectors.get(mUserGuidedVectors.size() - 1) != YDirection) {
+                            mUserGuidedVectors.add(XDirection);
+                            mUserGuidedVectors.add(YDirection);
+                        }
+                    } else {
+                        mUserGuidedVectors.add(XDirection);
+                        mUserGuidedVectors.add(YDirection);
+                    }
+                }
             }
-        }else {
-            Toast.makeText(context,"NO",Toast.LENGTH_SHORT).show();
-            // reset usergv
-            reset();
+        } else {
+            // single point
+            if (mUserGuidedVectors.size() != 0) {
+                Direction[] directions = ComparePointsToCheckFV(lastPoint, mTouchedPoints.get(mTouchedPoints.size() - 1));
+                mUserGuidedVectors.add(directions[0]);
+                mUserGuidedVectors.add(directions[1]);
+            }
         }
+        for (Direction direction : mUserGuidedVectors)
+            Log.i("CustTextView", "dir: " + direction);
+        lastPoint = new Point(mTouchedPoints.get(mTouchedPoints.size() - 1));
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
+        float fingerfat = (event.getSize() * 100);
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                touch_start(x, y);
+                touch_start(x, y, fingerfat);
                 invalidate();
                 break;
 
@@ -185,69 +203,20 @@ public class DrawView extends TextView {
         return true;
     }
 
-    @Override
-    public ViewPropertyAnimator animate() {
+    private Direction[] ComparePointsToCheckFV(Point point1, Point point2) {
+        float dx = Math.abs(point1.x - point2.x);
+        float dy = Math.abs(point1.y - point2.y);
 
-        int screenWidth, currentMsg;
-        Animation.AnimationListener myAnimationListener = null;
+        Direction XDirection = null, YDirection = null;
 
-        // Get the screen width
-        Point size = new Point();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getSize(size);
-        screenWidth = (int) size.x;
+        if (point1.y > point2.y) YDirection = Direction.UP;
+        else if (point1.y < point2.y) YDirection = Direction.DOWN;
+        if (dy <= mFingerFat) YDirection = Direction.SAME;
 
-        // Measure the size of textView
-        this.measure(0, 0);
-        // Get textView width
-        int textWidth = this.getMeasuredWidth();
-        // Create the animation
-        Animation animation = new TranslateAnimation(-textWidth, screenWidth, 0, 0);
-        animation.setDuration(5000);
-        animation.setRepeatMode(Animation.RESTART);
-        animation.setRepeatCount(Animation.INFINITE);
-
-        // Create the animation listener
-        Animation.AnimationListener finalMyAnimationListener = myAnimationListener;
-        myAnimationListener = new Animation.AnimationListener() {
-
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-                // If out of messages loop from start
-
-                // Measure the size of textView // this is important
-                DrawView.this.measure(0, 0);
-                // Get textView width
-                int textWidth = DrawView.this.getMeasuredWidth();
-                // Create the animation
-                animation = new TranslateAnimation(-textWidth, screenWidth, 0, 0);
-
-                animation.setDuration(5000);
-                animation.setRepeatMode(Animation.RESTART);
-                animation.setRepeatCount(Animation.INFINITE);
-                animation.setAnimationListener(finalMyAnimationListener);
-                DrawView.this.setAnimation(animation);
-            }
-        };
-        animation.setAnimationListener(myAnimationListener);
-
-        DrawView.this.setAnimation(animation);
-        return super.animate();
+        if (point1.x > point2.x) XDirection = Direction.LEFT;
+        else if (point1.x < point2.x) XDirection = Direction.RIGHT;
+        if (dx <= mFingerFat) XDirection = Direction.SAME;
+        return new Direction[]{XDirection, YDirection};
     }
 
-
-    public void SetGuidedVector(Direction[][] gv) {
-        guidedVectors = gv;
-        int valueInPixels = (int) getResources().getDimension(R.dimen.activity_word_textsize);
-        gestureDetector = new GestureDetector(guidedVectors[wordCharsChecked], GestureDetector.NORMAL * valueInPixels);
-    }
 }

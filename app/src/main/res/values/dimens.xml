@@ -6,4 +6,6 @@
     <dimen name="activity_double_actionbar_margin">48dp</dimen>
     <dimen name="activity_word_textsize">128sp</dimen>
     <dimen name="activity_word_textsize_listitem">36sp</dimen>
+    <integer name="activity_word_textsize">64</integer>
+        <bool name="isTablet">true</bool>
 </resources>

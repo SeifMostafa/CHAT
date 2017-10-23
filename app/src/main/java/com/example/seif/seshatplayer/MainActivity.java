@@ -125,8 +125,8 @@ public class MainActivity extends AppCompatActivity {
                     case 'S':
                         directions.push(Direction.SAME);
                         break;
-                    case 'n':
-                        directions.push(null);
+                    case 'N':
+                        directions.push(Direction.NOMATTER);
                         break;
                 }
             }
@@ -141,8 +141,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
+
         sharedPreferences_words = this.getSharedPreferences(WORDS_PREFS_NAME, Context.MODE_PRIVATE);
         sharedPreferences_words_editor = sharedPreferences_words.edit();
         checkPermission_AndroidVersion();
@@ -150,10 +150,14 @@ public class MainActivity extends AppCompatActivity {
 
         //OpenPhraseFragment("سيف مصطفى","سيف");
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-         height = displayMetrics.heightPixels;
-         width = displayMetrics.widthPixels;
+        Direction [] directions = new Direction[]{Direction.SAME,Direction.DOWN,Direction.LEFT,Direction.SAME};
+        Direction [] org_directions = new Direction[]{Direction.RIGHT,Direction.NOMATTER};
+        GestureDetector gestureDetector = new GestureDetector(org_directions);
+
+        ArrayList<Direction>directions1 = new ArrayList<>();
+        directions1.addAll(Arrays.asList(directions));
+
+        Log.i("LittleCheck: ",gestureDetector.check(directions1)+" ");
     }
 
     private void startApp() {
@@ -246,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-      private Direction[][] prepareWordGuidedVectors(String word) {
+    private Direction[][] prepareWordGuidedVectors(String word) {
            Direction[][] result_directions = new Direction[word.length()][];
            ArrayList<Character> differentchars = new ArrayList<>();
            Character[] characters = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ','ا'};

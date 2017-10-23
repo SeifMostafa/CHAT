@@ -65,10 +65,10 @@ public class MainFragment extends Fragment {
         drawView_MainText = (DrawView) view.findViewById(R.id.textView_maintext);
         drawView_MainText.setVisibility(View.VISIBLE);
 
-        if (word.getFV() != null) {
+        /*if (word.getFV() != null) {
             drawView_MainText.SetGuidedVector(word.getFV());
 
-        }
+        }*/
      /*   if (!word.getFV().equals(null)) {
 
             drawView_MainText.SetGuidedVector(word.getFV());
@@ -107,7 +107,7 @@ public class MainFragment extends Fragment {
 
                 word = words[--CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                drawView_MainText.SetGuidedVector(word.getFV());
+           //     drawView_MainText.SetGuidedVector(word.getFV());
                 setPreviBtnVisibilty();
               //  CreateWordTripThread().start();
 
@@ -124,7 +124,7 @@ public class MainFragment extends Fragment {
 
                 word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                drawView_MainText.SetGuidedVector(word.getFV());
+               // drawView_MainText.SetGuidedVector(word.getFV());
                 setNextiBtnVisibility();
                 //CreateWordTripThread().start();
             }
@@ -145,7 +145,7 @@ public class MainFragment extends Fragment {
 
                 word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                drawView_MainText.SetGuidedVector(word.getFV());
+           //     drawView_MainText.SetGuidedVector(word.getFV());
                 setNextiBtnVisibility();
                 //CreateWordTripThread().start();
 
