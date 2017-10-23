@@ -13,6 +13,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.seif.seshatplayer.model.Direction;
 
@@ -37,6 +38,7 @@ public class DrawView extends TextView {
     private Point lastPoint;
     private float textviewSZ;
     private ArrayList<Point> mTouchedPoints;
+    private GestureDetector mGestureDetector;
 
 
     public DrawView(Context context) throws IOException {
@@ -175,6 +177,20 @@ public class DrawView extends TextView {
         }
         for (Direction direction : mUserGuidedVectors)
             Log.i("CustTextView", "dir: " + direction);
+
+        boolean checkResult = mGestureDetector.check(mUserGuidedVectors);
+        Log.i("CustTextView: ","touch_up: check result= "+ checkResult);
+
+        if(checkResult || mGestureDetector.getSuccessPercentage() > 70){
+
+            // next
+             reset();
+            Toast.makeText(context,"Congrats",Toast.LENGTH_LONG).show();
+
+        }
+        Toast.makeText(context,"Percentage " + mGestureDetector.getSuccessPercentage()  ,Toast.LENGTH_LONG).show();
+
+
         lastPoint = new Point(mTouchedPoints.get(mTouchedPoints.size() - 1));
     }
 
@@ -218,5 +234,7 @@ public class DrawView extends TextView {
         if (dx <= mFingerFat) XDirection = Direction.SAME;
         return new Direction[]{XDirection, YDirection};
     }
-
+    public void SetGuidedVector(Direction[]directions){
+        mGestureDetector = new GestureDetector(directions);
+    }
 }

@@ -104,12 +104,12 @@ public class MainActivity extends AppCompatActivity {
                 String line = null;
                 line = scan.nextLine();
                 switch (line.charAt(0)) {
-                    case 'I':
+                  /*  case 'I':
                         directions.push(Direction.INIT);
                         break;
                     case 'E':
                         directions.push(Direction.END);
-                        break;
+                        break;*/
                     case 'L':
                         directions.push(Direction.LEFT);
                         break;
@@ -150,14 +150,6 @@ public class MainActivity extends AppCompatActivity {
 
         //OpenPhraseFragment("سيف مصطفى","سيف");
 
-        Direction [] directions = new Direction[]{Direction.SAME,Direction.DOWN,Direction.LEFT,Direction.SAME};
-        Direction [] org_directions = new Direction[]{Direction.RIGHT,Direction.NOMATTER};
-        GestureDetector gestureDetector = new GestureDetector(org_directions);
-
-        ArrayList<Direction>directions1 = new ArrayList<>();
-        directions1.addAll(Arrays.asList(directions));
-
-        Log.i("LittleCheck: ",gestureDetector.check(directions1)+" ");
     }
 
     private void startApp() {

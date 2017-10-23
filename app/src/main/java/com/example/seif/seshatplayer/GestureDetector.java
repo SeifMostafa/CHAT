@@ -14,8 +14,8 @@ public class GestureDetector {
 
     public boolean resetRequested = false;
     boolean skipinit = false;
+    double successPercentage = 0;
     private ArrayList<Direction> mUserGuidedVector;
-    private int priority;
     private Direction[] gesture;
 
     public GestureDetector(Direction[] Gesture) {
@@ -28,6 +28,8 @@ public class GestureDetector {
     }
 
     public boolean check(ArrayList<Direction>mUserGV) {
+        successPercentage =0;
+        double progressStep = 100.0 / (double)gesture.length ;
         this.mUserGuidedVector = mUserGV;
         boolean isDetected = false;
         if (mUserGuidedVector.size() >= gesture.length) {
@@ -59,6 +61,7 @@ public class GestureDetector {
                         }
                     }
                     i += 2;
+                    successPercentage+=(progressStep*2);
                 } catch (Exception e) {
                     Log.e("GestureDetector", "CompareGuidedVector" + e.toString());
                 }
@@ -105,5 +108,7 @@ public class GestureDetector {
         return isDetected;
     }
 
-
+    public double getSuccessPercentage(){
+        return successPercentage;
+    }
 }
