@@ -29,9 +29,6 @@ public class Utils {
         return (String.valueOf(currentTime));
 
     }
-
-
-
     public static ArrayList<Direction> clearedRedundancyList(ArrayList<Direction> dirtyList) {
         for (int i = 0; i < dirtyList.size() - 1; i++) {
             Direction d = dirtyList.get(i);

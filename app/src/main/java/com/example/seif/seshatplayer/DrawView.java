@@ -175,21 +175,21 @@ public class DrawView extends TextView {
                 mUserGuidedVectors.add(directions[1]);
             }
         }
-        for (Direction direction : mUserGuidedVectors)
-            Log.i("CustTextView", "dir: " + direction);
 
         boolean checkResult = mGestureDetector.check(mUserGuidedVectors);
+        double percentage = mGestureDetector.getSuccessPercentage();
+
         Log.i("CustTextView: ","touch_up: check result= "+ checkResult);
 
-        if(checkResult || mGestureDetector.getSuccessPercentage() > 70){
-
+        if(checkResult || percentage > 70){
             // next
              reset();
             Toast.makeText(context,"Congrats",Toast.LENGTH_LONG).show();
-
+        }else{
+            reset();
+            Toast.makeText(context,"FAILED",Toast.LENGTH_LONG).show();
         }
         Toast.makeText(context,"Percentage " + mGestureDetector.getSuccessPercentage()  ,Toast.LENGTH_LONG).show();
-
 
         lastPoint = new Point(mTouchedPoints.get(mTouchedPoints.size() - 1));
     }

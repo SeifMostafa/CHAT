@@ -12,8 +12,6 @@ import java.util.ArrayList;
 
 public class GestureDetector {
 
-    public boolean resetRequested = false;
-    boolean skipinit = false;
     double successPercentage = 0;
     private ArrayList<Direction> mUserGuidedVector;
     private Direction[] gesture;
@@ -28,10 +26,11 @@ public class GestureDetector {
     }
 
     public boolean check(ArrayList<Direction>mUserGV) {
-        successPercentage =0;
-        double progressStep = 100.0 / (double)gesture.length ;
+        successPercentage =100;
+        double progressStep = 100.0 / ((double)gesture.length/2.0) ;
         this.mUserGuidedVector = mUserGV;
-        boolean isDetected = false;
+        boolean isDetected = true;
+
         if (mUserGuidedVector.size() >= gesture.length) {
             for (int i = 0; i < gesture.length - 1; ) {
                 Direction d_X = mUserGuidedVector.get(i);
@@ -48,26 +47,32 @@ public class GestureDetector {
                     if (ORG_d_X == Direction.NOMATTER || ORG_d_Y == Direction.NOMATTER) {
                         if (ORG_d_X == Direction.NOMATTER && ORG_d_Y != Direction.NOMATTER) {
                             if (d_Y != ORG_d_Y) {
-                                if (!approximateCheck(ORG_d_X, ORG_d_Y, i)) return isDetected;
+                                if (!approximateCheck(ORG_d_X, ORG_d_Y, i)) {
+                                    successPercentage-=(progressStep);
+                                     isDetected =false;
+                                }
                             }
                         } else if (ORG_d_X != Direction.NOMATTER && ORG_d_Y == Direction.NOMATTER) {
                             if (d_X != ORG_d_X) {
-                                if (!approximateCheck(ORG_d_X, ORG_d_Y, i)) return isDetected;
+                                if (!approximateCheck(ORG_d_X, ORG_d_Y, i)){
+                                    successPercentage-=(progressStep);
+                                    isDetected =false;
+                                }
                             }
                         }
                     } else {
                         if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
-                            if (!approximateCheck(ORG_d_X, ORG_d_Y, i)) return isDetected;
+                            if (!approximateCheck(ORG_d_X, ORG_d_Y, i)){
+                                successPercentage-=(progressStep);
+                                isDetected =false;
+                            }
                         }
                     }
                     i += 2;
-                    successPercentage+=(progressStep*2);
                 } catch (Exception e) {
                     Log.e("GestureDetector", "CompareGuidedVector" + e.toString());
                 }
             }
-            isDetected = true;
-            resetRequested = true;
             mUserGuidedVector.clear();
         } else {
             Log.i("GestureDetector", "check" + "shortage in touched points data");

@@ -20,7 +20,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,9 +42,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -53,47 +55,23 @@ import java.util.Stack;
 public class MainActivity extends AppCompatActivity {
 
 
-    public static final String AnimationKey = "AK", WORDS_PREFS_NAME = "WordsPrefsFile", WordLoopKey = "WL", WordIndexKey = "WI", WordKey = "w", PhraseKey = "p", WordsArrayKey = "WA";
+    public static final String AnimationKey = "AK", WORDS_PREFS_NAME = "WordsPrefsFile", WordIndexKey = "i", WordKey = "w", PhraseKey = "p", LessonKey = "L";
+    public static final String SFKEY = "SF";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
+
     SharedPreferences sharedPreferences_words = null;
     SharedPreferences.Editor sharedPreferences_words_editor = null;
     MediaPlayer mediaPlayer = null;
-    private String WordsFilePath = "/SF/WORDS.txt", PhrasesFilePath = "/SF/PHRASES.txt", AppenddedToOutputFVfile = "_fv.txt", AppenddedToOutputTriggerPointsfile = "_trpoints.txt", AppendedToImageFile = ".png", AppendedToSpeechFile = ".wav", SF = "/SF/";
-    private ArrayList<String> words, phrases;
-    private int word_loop = 1, word_index = 0;
-    private String filename = "Archive.txt";
-    private int DEFAULT_LESSON_LENGTH = 5;
-    private int DEFAULT_LOOP_COUNTER = 4;
-    private int DEFAULT_TYPEFACE_LEVELS = 4;
+
+    private String WordsFilePath = "WORDS.txt", PhrasesFilePath = "PHRASES.txt", SF = "/SeShatSF/";
+    private String FileWordsAchieved = "Archive.txt";
+
+    private Map<Integer, Word[]>lessons;
+    private int  word_index = 0;
+    private int  lesson_index = 0;
 
     private String firstPhrase = "أنا إسمي ";
-    public static String firstPhraseAudioPath = "myname";
     private String firstTimekey = "1stTime";
-
-    public static String TAG = "MainActivity";
-    int height,width;
-/*
-  * read file into string and the end = \n and return this string
-  */
-    private Stack<String> readFileintoStack(String filepath) {
-
-        Stack<String> result = new Stack<>();
-        try {
-            FileReader reader = new FileReader(filepath);
-            BufferedReader bufferedReader = new BufferedReader(reader);
-
-            String line;
-
-            while ((line = bufferedReader.readLine()) != null) {
-                result.push(line);
-            }
-            reader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
 
     public static Direction[] getDirections(String filepath) {
         Stack<Direction> directions = new Stack<>();
@@ -138,6 +116,10 @@ public class MainActivity extends AppCompatActivity {
         return directions.toArray(result);
     }
 
+    /*
+      * read file into string and the end = \n and return this string
+      */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,94 +130,64 @@ public class MainActivity extends AppCompatActivity {
         checkPermission_AndroidVersion();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        //OpenPhraseFragment("سيف مصطفى","سيف");
-
-    }
+        }
 
     private void startApp() {
-        // read file into words
-        try {
-            WordsFilePath = Environment.getExternalStorageDirectory() + WordsFilePath;
-            PhrasesFilePath = Environment.getExternalStorageDirectory() + PhrasesFilePath;
-            new File(Environment.getExternalStorageDirectory(), filename);
-            SF = Environment.getExternalStorageDirectory() + SF;
-        } catch (Exception e) {
-            Log.e("StorageE:", e.toString());
-            e.printStackTrace();
-        }
-        try {
-            words = new ArrayList<>(readFileintoStack(WordsFilePath));
-            phrases = new ArrayList<>(readFileintoStack(PhrasesFilePath));
-            Log.i("words:", "" + words.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e("words", "error");
-        }
-        if (sharedPreferences_words.getAll().isEmpty()) {
-            word_loop = 0;
-            word_index = 0;
-            SaveOnSharedPref(WordLoopKey, String.valueOf(word_loop));
-            SaveOnSharedPref(WordIndexKey, String.valueOf(word_index));
-        } else {
-            word_loop = Integer.parseInt(sharedPreferences_words.getString(WordLoopKey, "0"));
-            word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
-        }
-
         if (Boolean.valueOf(sharedPreferences_words.getString(firstTimekey, "true"))) {
-            Word phrase = new Word(firstPhrase + words.get(0));
-            OpenMainFragment(phrase);
-            SaveOnSharedPref(firstTimekey, String.valueOf(false));
-        } else {
-            Word word = new Word("س");
-            Direction [][] word_directions = new Direction[1][];
-            word_directions[0] = getDirections(SF + "س" + 2 + AppenddedToOutputFVfile);
-            word.setFV(word_directions);
-            OpenMainFragment(word);
-        }
-    }
+            lesson_index = 0;
+            setLessons(lesson_index);
+            word_index = 0;
 
-    public String getNextWord() {
-        return words.get(++word_index);
-    }
-
-    public String getPrevWord() {
-        return words.get(--word_index);
-    }
-
-    public String getCurrentWord() {
-        return words.get(word_index);
-    }
-
-    public Typeface updateWordLoop() {
-        Typeface tf = null;
-
-        if (word_loop < (DEFAULT_LOOP_COUNTER * DEFAULT_TYPEFACE_LEVELS)) {
-            if (word_loop % DEFAULT_LOOP_COUNTER == 0) {
-                // change font
-                if (word_loop >= 0 && word_loop <= DEFAULT_LOOP_COUNTER) {
-                    tf = Typeface.createFromAsset(getAssets(), "fonts/lvl1.ttf");
-                } else if (word_loop > DEFAULT_LOOP_COUNTER && word_loop <= DEFAULT_LOOP_COUNTER * 2) {
-                    tf = Typeface.createFromAsset(getAssets(), "fonts/lvl2.ttf");
-                } else if (word_loop > DEFAULT_LOOP_COUNTER * 2 && word_loop <= DEFAULT_LOOP_COUNTER * 3) {
-                    tf = Typeface.createFromAsset(getAssets(), "fonts/lvl3.ttf");
+            SF = Environment.getExternalStorageDirectory() + SF;
+            File file = new File(SF);
+            String[] directories = file.list(new FilenameFilter() {
+                @Override
+                public boolean accept(File current, String name) {
+                    return new File(current, name).isDirectory();
                 }
-            }
-            word_loop++;
+            });
+
+            SF = SF + directories[0] + "/";
+            WordsFilePath = SF + WordsFilePath;
+            PhrasesFilePath = SF + PhrasesFilePath;
+            new File(Environment.getExternalStorageDirectory(), FileWordsAchieved);
+            Word phrase = new Word(firstPhrase + directories[0]);
+            OpenMainFragment(phrase);
+
+            SaveOnSharedPref(LessonKey, String.valueOf(lesson_index));
+            SaveOnSharedPref(WordIndexKey, String.valueOf(word_index));
+            SaveOnSharedPref(SFKEY, SF);
+            SaveOnSharedPref(firstTimekey, String.valueOf(false));
+
         } else {
-            // change word
-            word_loop = 0;
-            updatelesson(1);
+
+            lesson_index = Integer.parseInt(sharedPreferences_words.getString(LessonKey, "0"));
+            setLessons(lesson_index);
+
+            word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
+            SF = sharedPreferences_words.getString(SFKEY,SF);
+            WordsFilePath = SF + WordsFilePath;
+            PhrasesFilePath = SF + PhrasesFilePath;
+
+           /* Word word = new Word("س");
+            Direction[][] word_directions = new Direction[1][];
+            word_directions[0] = getDirections(SF + "س" + 2);
+            word.setFV(word_directions);*/
+            //OpenMainFragment(word);
+            OpenMainFragment(lesson_index);
         }
-        return tf;
     }
 
 
-    private Word form_word(int index) {
+
+
+
+    private Word form_word(String txt, String phrase) {
         try {
-            Word resultWord = new Word(words.get(index), SF + words.get(index) + AppendedToImageFile, SF + words.get(index) + AppendedToSpeechFile, phrases.get(index));
-                resultWord.setFV(prepareWordGuidedVectors(words.get(index)));
+            Word resultWord = new Word(txt, SF + txt + ".png", SF + txt + ".mp3", phrase);
+            resultWord.setFV(prepareWordGuidedVectors(txt));
             return resultWord;
-         } catch (Exception e) {
+        } catch (Exception e) {
             Log.e("form_wordE:", e.toString());
             e.printStackTrace();
             return null;
@@ -243,60 +195,53 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Direction[][] prepareWordGuidedVectors(String word) {
-           Direction[][] result_directions = new Direction[word.length()][];
-           ArrayList<Character> differentchars = new ArrayList<>();
-           Character[] characters = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ','ا'};
-           differentchars.addAll(Arrays.asList(characters));
-           for (int i = 0; i < word.length(); i++) {
-               if (i == 0) {
-                   result_directions[i] = getDirections(SF + word.charAt(i) + 1 + AppenddedToOutputFVfile);
-               } else if (i == word.length() - 1) {
-                   if (differentchars.contains(word.charAt(i-1))) {
-                       result_directions[i] = getDirections(SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
+        Direction[][] result_directions = new Direction[word.length()][];
+        ArrayList<Character> differentchars = new ArrayList<>();
+        Character[] characters = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ', 'ا'};
+        differentchars.addAll(Arrays.asList(characters));
+        for (int i = 0; i < word.length(); i++) {
+            if (i == 0) {
+                result_directions[i] = getDirections(SF + word.charAt(i) + 1 );
+            } else if (i == word.length() - 1) {
+                if (differentchars.contains(word.charAt(i - 1))) {
+                    result_directions[i] = getDirections(SF + word.charAt(i) + 2 );
 
-                   }else{
-                       result_directions[i] = getDirections(SF + word.charAt(i) + 0 + AppenddedToOutputFVfile);
-                   }
-               } else {
-                   if (differentchars.contains(word.charAt(i-1))) {
-                       result_directions[i] = getDirections(SF + word.charAt(i) + 2 + AppenddedToOutputFVfile);
+                } else {
+                    result_directions[i] = getDirections(SF + word.charAt(i) + 0 );
+                }
+            } else {
+                if (differentchars.contains(word.charAt(i - 1))) {
+                    result_directions[i] = getDirections(SF + word.charAt(i) + 2 );
 
-                   }else{
-                       result_directions[i] = getDirections(SF + word.charAt(i) + 3 + AppenddedToOutputFVfile);
-                   }
-               }
-           }
-           return result_directions;
-       }
+                } else {
+                    result_directions[i] = getDirections(SF + word.charAt(i) + 3 );
+                }
+            }
+        }
+        return result_directions;
+    }
+
     /*
     ToFlag: if 0 = current, if -1 = prev;
      */
-    public void updatelesson(int ToFlag) {
-        switch (ToFlag) {
-            case 0:
-                OpenMainFragment(word_index);
-                break;
-            case -1:
-                if (word_index == 0) {
-                    OpenMainFragment(word_index);
-                } else {
-                    OpenMainFragment(--word_index);
-                }
-                break;
-            case 1:
-                OpenMainFragment(++word_index);
-                break;
+    public void updatelesson(int ToFlag,boolean flag) {
+        if(flag) {
+            switch (ToFlag) {
+                case 0:
+                    OpenMainFragment(lesson_index);
+                    break;
+                case -1:
+                    OpenMainFragment(--lesson_index);
+                    break;
+                case 1:
+                    OpenMainFragment(++lesson_index);
+                    break;
+            }
+        }else{
+            OpenMainFragment(ToFlag);
         }
     }
 
-    public void updatelesson(String word) {
-        if (word != null) {
-            OpenMainFragment(words.indexOf(word));
-        } else {
-            finish();
-            Log.e("updatelessonE:", "word == null");
-        }
-    }
 
     public void voiceoffer(View view, String DataPath2Bplayed) {
         if (view != null) {
@@ -471,26 +416,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /*
-    dummy fn till getting data separated in lessons
-     */
-    private Word[] fillWordsArray(int arraySize, int index) {
-
-        Word[] wordsArray = new Word[arraySize];
-        for (int i = 0; i < arraySize; i++) {
-            wordsArray[i] = form_word(index);
-            index++;
-        }
-        return wordsArray;
-    }
 
     private void OpenMainFragment(int i) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         MainFragment mainFragment = new MainFragment();
         Bundle bundle = new Bundle();
-        Word[] wordsArray = fillWordsArray(DEFAULT_LESSON_LENGTH, i);
-        bundle.putParcelableArray(WordsArrayKey, wordsArray);
+        Word[] lesson = lessons.get(lesson_index);
+        bundle.putParcelableArray(LessonKey, lesson);
         mainFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, mainFragment);
         fragmentTransaction.commit();
@@ -541,7 +474,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void AssignWordAsFinished(String Word) {
         try {
-            FileWriter writer = new FileWriter(filename, true);
+            FileWriter writer = new FileWriter(FileWordsAchieved, true);
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
             bufferedWriter.write(Word + "\n");
             bufferedWriter.close();
@@ -554,7 +487,7 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<String> ReadArchiveWords() {
         ArrayList<String> words = new ArrayList<>();
         try {
-            FileReader reader = new FileReader(filename);
+            FileReader reader = new FileReader(FileWordsAchieved);
             BufferedReader bufferedReader = new BufferedReader(reader);
 
             String line;
@@ -569,8 +502,34 @@ public class MainActivity extends AppCompatActivity {
         return words;
     }
 
-    public ArrayList<String> getWords() {
-        return new ArrayList<>(this.words);
-    }
+    private   void setLessons(int lesson_index) {
+        lessons = new HashMap<>();
+        int lessonIndex = 1;
 
-}
+        try {
+            FileReader wordsReader = new FileReader(WordsFilePath);
+            FileReader phrasesReader = new FileReader(PhrasesFilePath);
+
+            BufferedReader PhrasesBufferedReader = new BufferedReader(phrasesReader);
+            BufferedReader WordsBufferedReader = new BufferedReader(wordsReader);
+            String StringlessonCapacity = WordsBufferedReader.readLine();
+            while (StringlessonCapacity != null) {
+                int lessonNum = lessonIndex++;
+                int lessonCapacity = Integer.parseInt(StringlessonCapacity);
+                Word[] lessonWords = new Word[lessonCapacity];
+
+                for (int i = 0; i < lessonCapacity; i++) {
+                    String word_txt = WordsBufferedReader.readLine();
+                    String phrase = PhrasesBufferedReader.readLine();
+                    lessonWords[i] =   form_word(word_txt,phrase);
+                }
+                lessons.put(lessonNum, lessonWords);
+                StringlessonCapacity = WordsBufferedReader.readLine();
+            }
+                wordsReader.close();
+                phrasesReader.close();
+            } catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+    }

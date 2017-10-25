@@ -2,6 +2,7 @@ package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
@@ -38,11 +39,16 @@ public class MainFragment extends Fragment {
     Thread Thread_WordTrip = null;
     private boolean justWord = false;
 
+    private int DEFAULT_LOOP_COUNTER = 4;
+    private int DEFAULT_TYPEFACE_LEVELS = 4;
+    private int word_loop =1;
+    private int localWordIndx =0;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.words = (Word[]) getArguments().getParcelableArray(MainActivity.WordsArrayKey);
+            this.words = (Word[]) getArguments().getParcelableArray(MainActivity.LessonKey);
 
             if (this.words != null) {
                 this.word = words[0];
@@ -226,7 +232,7 @@ public class MainFragment extends Fragment {
                         try {
                             ((MainActivity) getActivity()).voiceoffer(null, word.getText());
                             sleep(3000);
-                            ((MainActivity) getActivity()).voiceoffer(drawView_MainText, R.raw.speakinstruction);
+                            ((MainActivity) getActivity()).voiceoffer(drawView_MainText, "speakinstruction.wav");
                             sleep(3000);
                             voicerec(null);
                         } catch (Exception e) {
@@ -261,7 +267,29 @@ public class MainFragment extends Fragment {
         startActivityForResult(voicerecogize, RESULT_SPEECH);
 
     }
+    public Typeface updateWordLoop() {
+        Typeface tf = null;
 
+        if (word_loop < (DEFAULT_LOOP_COUNTER * DEFAULT_TYPEFACE_LEVELS)) {
+            if (word_loop % DEFAULT_LOOP_COUNTER == 0) {
+                // change font
+                if (word_loop >= 0 && word_loop <= DEFAULT_LOOP_COUNTER) {
+                    tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lvl1.ttf");
+                } else if (word_loop > DEFAULT_LOOP_COUNTER && word_loop <= DEFAULT_LOOP_COUNTER * 2) {
+                    tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lvl2.ttf");
+                } else if (word_loop > DEFAULT_LOOP_COUNTER * 2 && word_loop <= DEFAULT_LOOP_COUNTER * 3) {
+                    tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lvl3.ttf");
+                }
+            }
+            word_loop++;
+        } else {
+            // change word
+            word_loop = 1;
+            localWordIndx++;
+            //
+        }
+        return tf;
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

@@ -41,7 +41,7 @@ public class HelpFragment extends Fragment {
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity)getActivity()).voiceoffer(helpiBtn,R.raw.helpfragmenthelpbtninstr);
+                ((MainActivity)getActivity()).voiceoffer(helpiBtn,"helpfragmenthelpbtninstr.wav");
             }
         });
 
@@ -98,7 +98,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).voiceoffer(PrevlessoniBtn_help, R.raw.backprevlesson);
+                    ((MainActivity) getActivity()).voiceoffer(PrevlessoniBtn_help, "backprevlesson.wav");
                 }catch (Exception e){
                     e.printStackTrace();
                     Log.e("PrevlessoniBtn_help",e.toString());
@@ -110,7 +110,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).voiceoffer(CurrentlessoniBtn_help, R.raw.backcurrentlesson);
+                    ((MainActivity) getActivity()).voiceoffer(CurrentlessoniBtn_help, "backcurrentlesson.wav");
                 }catch (Exception e){
                     e.printStackTrace();
                     Log.e("CurrentlessoniBtn_help",e.toString());
@@ -124,7 +124,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).voiceoffer(AchievedlessoniBtn_help, R.raw.urachievements);
+                    ((MainActivity) getActivity()).voiceoffer(AchievedlessoniBtn_help, "urachievements.wav");
                 }catch (Exception e){
                     e.printStackTrace();
                     Log.e("CurrentlessoniBtn_help",e.toString());

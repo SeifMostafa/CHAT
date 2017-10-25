@@ -22,7 +22,7 @@ public class AnimationFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            this.word = new Word(getArguments().getString(MainActivity.AnimationKey));
+            //this.word = new Word(getArguments().getString(MainActivity.AnimationKey));
         }
     }
 
