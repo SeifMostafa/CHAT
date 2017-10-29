@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
-public class Typewriter extends TextView {
+public class TypeWriter extends TextView {
     Context context;
     private CharSequence mText;
     private int mIndex;
@@ -30,7 +30,7 @@ public class Typewriter extends TextView {
             if (mIndex <= mText.length()) {
                 mHandler.postDelayed(characterAdder, mDelay);
                 ((MainActivity) context).voiceoffer(null, String.valueOf(mText.charAt(idx)));
-                Log.i("xx" + idx, mText.charAt(idx) + "");
+                Log.i("TypeWriter::characterAdder Runnable " + idx, mText.charAt(idx) + "");
                 idx++;
             } else {
 
@@ -40,12 +40,12 @@ public class Typewriter extends TextView {
     };
 
 
-    public Typewriter(Context context) throws IOException {
+    public TypeWriter(Context context) throws IOException {
         super(context);
         this.context = context;
     }
 
-    public Typewriter(Context context, AttributeSet attrs) throws IOException {
+    public TypeWriter(Context context, AttributeSet attrs) throws IOException {
         super(context, attrs);
         this.context = context;
     }

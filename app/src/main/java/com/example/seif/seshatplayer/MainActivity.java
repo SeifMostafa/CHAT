@@ -5,12 +5,10 @@ import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,7 +29,7 @@ import android.widget.ImageView;
 
 import com.example.seif.seshatplayer.layout.AnimationFragment;
 import com.example.seif.seshatplayer.layout.HelpFragment;
-import com.example.seif.seshatplayer.layout.MainFragment;
+import com.example.seif.seshatplayer.layout.LessonFragment;
 import com.example.seif.seshatplayer.layout.PhrasePickFragment;
 import com.example.seif.seshatplayer.model.Direction;
 import com.example.seif.seshatplayer.model.Word;
@@ -55,23 +53,23 @@ import java.util.Stack;
 public class MainActivity extends AppCompatActivity {
 
 
-    public static final String AnimationKey = "AK", WORDS_PREFS_NAME = "WordsPrefsFile", WordIndexKey = "i", WordKey = "w", PhraseKey = "p", LessonKey = "L";
+    public static final String  WORDS_PREFS_NAME = "WordsPrefsFile", WordIndexKey = "i", WordKey = "w", PhraseKey = "p", LessonKey = "L";
     public static final String SFKEY = "SF";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
+    public static String firstTimekey = "1stTime";
 
     SharedPreferences sharedPreferences_words = null;
     SharedPreferences.Editor sharedPreferences_words_editor = null;
     MediaPlayer mediaPlayer = null;
 
     private String WordsFilePath = "WORDS.txt", PhrasesFilePath = "PHRASES.txt", SF = "/SeShatSF/";
-    private String FileWordsAchieved = "Archive.txt";
+    private String FileWordsAchieved = "/Archive.txt";
 
-    private Map<Integer, Word[]>lessons;
-    private int  word_index = 0;
-    private int  lesson_index = 0;
+    private Map<Integer, Word[]> lessons;
+    private int word_index = 0;
+    private int lesson_index = 1;
 
     private String firstPhrase = "أنا إسمي ";
-    private String firstTimekey = "1stTime";
 
     public static Direction[] getDirections(String filepath) {
         Stack<Direction> directions = new Stack<>();
@@ -130,12 +128,11 @@ public class MainActivity extends AppCompatActivity {
         checkPermission_AndroidVersion();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        }
+    }
 
     private void startApp() {
         if (Boolean.valueOf(sharedPreferences_words.getString(firstTimekey, "true"))) {
-            lesson_index = 0;
-            setLessons(lesson_index);
+            lesson_index = 1;
             word_index = 0;
 
             SF = Environment.getExternalStorageDirectory() + SF;
@@ -150,9 +147,12 @@ public class MainActivity extends AppCompatActivity {
             SF = SF + directories[0] + "/";
             WordsFilePath = SF + WordsFilePath;
             PhrasesFilePath = SF + PhrasesFilePath;
-            new File(Environment.getExternalStorageDirectory(), FileWordsAchieved);
+
+            new File(Environment.getExternalStorageDirectory()+ FileWordsAchieved);
             Word phrase = new Word(firstPhrase + directories[0]);
-            OpenMainFragment(phrase);
+
+            setLessons();
+            OpenLessonFragment(phrase);
 
             SaveOnSharedPref(LessonKey, String.valueOf(lesson_index));
             SaveOnSharedPref(WordIndexKey, String.valueOf(word_index));
@@ -161,11 +161,10 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
 
-            lesson_index = Integer.parseInt(sharedPreferences_words.getString(LessonKey, "0"));
-            setLessons(lesson_index);
+            lesson_index = Integer.parseInt(sharedPreferences_words.getString(LessonKey, "1"));
 
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
-            SF = sharedPreferences_words.getString(SFKEY,SF);
+            SF = sharedPreferences_words.getString(SFKEY, SF);
             WordsFilePath = SF + WordsFilePath;
             PhrasesFilePath = SF + PhrasesFilePath;
 
@@ -173,18 +172,16 @@ public class MainActivity extends AppCompatActivity {
             Direction[][] word_directions = new Direction[1][];
             word_directions[0] = getDirections(SF + "س" + 2);
             word.setFV(word_directions);*/
-            //OpenMainFragment(word);
-            OpenMainFragment(lesson_index);
+            //OpenLessonFragment(word);
+            setLessons();
+            OpenLessonFragment(lesson_index);
         }
     }
 
 
-
-
-
     private Word form_word(String txt, String phrase) {
         try {
-            Word resultWord = new Word(txt, SF + txt + ".png", SF + txt + ".mp3", phrase);
+            Word resultWord = new Word(txt, SF + txt + ".png", SF + txt, phrase);
             resultWord.setFV(prepareWordGuidedVectors(txt));
             return resultWord;
         } catch (Exception e) {
@@ -195,26 +192,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Direction[][] prepareWordGuidedVectors(String word) {
+        char charConnector = 'ـ';
         Direction[][] result_directions = new Direction[word.length()][];
         ArrayList<Character> differentchars = new ArrayList<>();
-        Character[] characters = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ', 'ا'};
-        differentchars.addAll(Arrays.asList(characters));
+        Character[] charactersWithoutEndConnector = {'أ', 'إ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ', 'ا', 'آ'};
+        differentchars.addAll(Arrays.asList(charactersWithoutEndConnector));
         for (int i = 0; i < word.length(); i++) {
+            Character character = word.charAt(i);
+
             if (i == 0) {
-                result_directions[i] = getDirections(SF + word.charAt(i) + 1 );
+                if (differentchars.contains(character)) {
+                    result_directions[i] = getDirections(SF + character);
+                } else {
+                    result_directions[i] = getDirections(SF + character + charConnector);
+                }
             } else if (i == word.length() - 1) {
                 if (differentchars.contains(word.charAt(i - 1))) {
-                    result_directions[i] = getDirections(SF + word.charAt(i) + 2 );
-
+                    result_directions[i] = getDirections(SF + character);
                 } else {
-                    result_directions[i] = getDirections(SF + word.charAt(i) + 0 );
+                    result_directions[i] = getDirections(SF + charConnector + character);
                 }
             } else {
-                if (differentchars.contains(word.charAt(i - 1))) {
-                    result_directions[i] = getDirections(SF + word.charAt(i) + 2 );
-
+                if (differentchars.contains(word.charAt(i - 1)) && differentchars.contains(character)) {
+                    result_directions[i] = getDirections(SF + character);
+                } else if (differentchars.contains(word.charAt(i - 1)) && !differentchars.contains(character)) {
+                    result_directions[i] = getDirections(SF + character + charConnector);
                 } else {
-                    result_directions[i] = getDirections(SF + word.charAt(i) + 3 );
+                    result_directions[i] = getDirections(SF + charConnector + character + charConnector);
                 }
             }
         }
@@ -222,23 +226,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*
-    ToFlag: if 0 = current, if -1 = prev;
+    ToFlag: if 0 = current, if -1 = prev , if 1 = next; flag to obtain the ToFlag cretira
+    else to navigate to ToFlag as lesson index
      */
-    public void updatelesson(int ToFlag,boolean flag) {
-        if(flag) {
+    public void updatelesson(int ToFlag, boolean flag) {
+        if (flag) {
             switch (ToFlag) {
                 case 0:
-                    OpenMainFragment(lesson_index);
+                    OpenLessonFragment(lesson_index);
                     break;
                 case -1:
-                    OpenMainFragment(--lesson_index);
+                    OpenLessonFragment(lesson_index-1);
                     break;
                 case 1:
-                    OpenMainFragment(++lesson_index);
+                    OpenLessonFragment(lesson_index+1);
                     break;
             }
-        }else{
-            OpenMainFragment(ToFlag);
+        } else {
+            lesson_index = ToFlag;
+            setLessons();
+            OpenLessonFragment(ToFlag);
         }
     }
 
@@ -260,7 +267,8 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.prepare();
             mediaPlayer.start();
         } catch (IllegalStateException | IOException e) {
-            e.printStackTrace();
+            Log.e("MainActivity","voiceoffer::e: " + e.toString());
+            Log.e("MainActivity","voiceoffer::DataPath2Bplayed: " +SF + DataPath2Bplayed);
         }
         mediaPlayer.setOnCompletionListener(mp -> mediaPlayer.stop());
     }
@@ -306,12 +314,12 @@ public class MainActivity extends AppCompatActivity {
             view.startAnimation(shake);
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
+       /* builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
             }
-        });
+        });*/
         final AlertDialog dialog = builder.create();
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
@@ -324,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
         }
         dialog.setView(dialogLayout);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
+        dialog.setCancelable(true);
         dialog.show();
     }
 
@@ -417,27 +425,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void OpenMainFragment(int i) {
+    private void OpenLessonFragment(int i) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        MainFragment mainFragment = new MainFragment();
+        LessonFragment lessonFragment = new LessonFragment();
         Bundle bundle = new Bundle();
-        Word[] lesson = lessons.get(lesson_index);
+        Word[] lesson = lessons.get(i);
+
+        Log.i("MainActivity","OpenLessonFragment: am here with i(lesson_index)= "+ i);
+        Log.i("MainActivity","OpenLessonFragment: & lesson.sz= "+ lesson.length);
+
         bundle.putParcelableArray(LessonKey, lesson);
-        mainFragment.setArguments(bundle);
-        fragmentTransaction.replace(R.id.fragment_replacement, mainFragment);
+        lessonFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
         fragmentTransaction.commit();
+        Log.i("MainActivity","OpenLessonFragment:: lesson_index"+ lesson_index);
+
     }
 
-    private void OpenMainFragment(Word word) {
+    public void OpenLessonFragment(Word word) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        MainFragment mainFragment = new MainFragment();
+        LessonFragment lessonFragment = new LessonFragment();
         Bundle bundle = new Bundle();
+
+        if (lesson_index == 1) {
+           // word = form_word(word.getText(), null);
+            bundle.putBoolean(firstTimekey, true);
+            bundle.putParcelableArray(LessonKey, lessons.get(1));
+        } else {
+            bundle.putBoolean(firstTimekey, false);
+            bundle.putParcelableArray(LessonKey, lessons.get(lesson_index));
+        }
+
         bundle.putParcelable(WordKey, word);
-        mainFragment.setArguments(bundle);
-        fragmentTransaction.replace(R.id.fragment_replacement, mainFragment);
+        lessonFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
         fragmentTransaction.commit();
+        Log.i("MainActivity","OpenLessonFragment:: lesson_index"+ lesson_index);
     }
 
     public void OpenPhraseFragment(String phrase, String word) {
@@ -457,7 +482,7 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         AnimationFragment animationFragment = new AnimationFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(AnimationKey, word);
+        bundle.putString(WordKey, word);
         animationFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, animationFragment);
         fragmentTransaction.commit();
@@ -502,34 +527,53 @@ public class MainActivity extends AppCompatActivity {
         return words;
     }
 
-    private   void setLessons(int lesson_index) {
+    private void setLessons() {
         lessons = new HashMap<>();
-        int lessonIndex = 1;
-
+        int lessonNum = lesson_index -1;
         try {
             FileReader wordsReader = new FileReader(WordsFilePath);
-            FileReader phrasesReader = new FileReader(PhrasesFilePath);
-
-            BufferedReader PhrasesBufferedReader = new BufferedReader(phrasesReader);
+            FileReader phraseReader = new FileReader(PhrasesFilePath);
             BufferedReader WordsBufferedReader = new BufferedReader(wordsReader);
+            BufferedReader PhrasesBufferedReader = new BufferedReader(phraseReader);
             String StringlessonCapacity = WordsBufferedReader.readLine();
-            while (StringlessonCapacity != null) {
-                int lessonNum = lessonIndex++;
-                int lessonCapacity = Integer.parseInt(StringlessonCapacity);
-                Word[] lessonWords = new Word[lessonCapacity];
+            if (StringlessonCapacity != null) {
 
-                for (int i = 0; i < lessonCapacity; i++) {
-                    String word_txt = WordsBufferedReader.readLine();
-                    String phrase = PhrasesBufferedReader.readLine();
-                    lessonWords[i] =   form_word(word_txt,phrase);
+                for (int j = 1; j <= lesson_index - 2; j++) {
+                    // skip till lesson_index-1
+                    if (StringlessonCapacity != null) {
+                        int lessonCapacity = Integer.parseInt(StringlessonCapacity);
+                        System.out.println("StringlessonCapacity: skipped" + StringlessonCapacity);
+
+                        for (int i = 0; i < lessonCapacity; i++) {
+                            String word_txt = WordsBufferedReader.readLine();
+                            String phrase = PhrasesBufferedReader.readLine();
+                        }
+                        StringlessonCapacity = WordsBufferedReader.readLine();
+                    }
                 }
-                lessons.put(lessonNum, lessonWords);
-                StringlessonCapacity = WordsBufferedReader.readLine();
+                for (int k = lessonNum; k <= lesson_index + 1; k++) {
+                    if (k != 0 && StringlessonCapacity != null) {
+
+                        int lessonCapacity = Integer.parseInt(StringlessonCapacity);
+                      //  System.out.println("StringlessonCapacity: " + StringlessonCapacity);
+
+                        Word[] lessonWords = new Word[lessonCapacity];
+                        for (int i = 0; i < lessonCapacity; i++) {
+                            String word_txt = WordsBufferedReader.readLine();
+                            String phrase = PhrasesBufferedReader.readLine();
+                            lessonWords[i] = form_word(word_txt, phrase);
+                        }
+                        lessons.put(lessonNum++, lessonWords);
+                        StringlessonCapacity = WordsBufferedReader.readLine();
+                    }
+                }
             }
-                wordsReader.close();
-                phrasesReader.close();
-            } catch(IOException e){
-                e.printStackTrace();
-            }
+
+            wordsReader.close();
+            // phrasesReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+
+}

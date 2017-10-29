@@ -123,4 +123,9 @@ public class Word  implements Parcelable {
 	public void SetAchieved(){
 		this.Achieved = true;
 	}
+
+	@Override
+	public String toString() {
+		return "Text: " + getText() ;
+	}
 }

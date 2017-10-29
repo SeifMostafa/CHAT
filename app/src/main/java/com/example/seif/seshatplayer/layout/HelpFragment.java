@@ -16,14 +16,16 @@ import android.widget.TextView;
 
 import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
+import com.example.seif.seshatplayer.model.Word;
 
 import java.util.ArrayList;
 
 
 public class HelpFragment extends Fragment {
 
-    ImageButton helpiBtn,PrevlessoniBtn,CurrentlessoniBtn,AchievedlessoniBtn,PrevlessoniBtn_help,CurrentlessoniBtn_help,AchievedlessoniBtn_help;
-    AlertDialog AchievedDialog ;
+    ImageButton helpiBtn, PrevlessoniBtn, CurrentlessoniBtn, AchievedlessoniBtn, PrevlessoniBtn_help, CurrentlessoniBtn_help, AchievedlessoniBtn_help;
+    AlertDialog AchievedDialog;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,53 +39,53 @@ public class HelpFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_help, container, false);
 
-        helpiBtn = (ImageButton) ((MainActivity)getActivity()).findViewById(R.id.imagebutton_moreInfo);
+        helpiBtn = (ImageButton) ((MainActivity) getActivity()).findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity)getActivity()).voiceoffer(helpiBtn,"helpfragmenthelpbtninstr.wav");
+                ((MainActivity) getActivity()).voiceoffer(helpiBtn, "helpfragmenthelpbtninstr.wav");
             }
         });
 
-        PrevlessoniBtn = (ImageButton)view.findViewById(R.id.imagebutton_prevlesson);
+        PrevlessoniBtn = (ImageButton) view.findViewById(R.id.imagebutton_prevlesson);
         PrevlessoniBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).updatelesson(-1);
-                }catch (Exception e){
+                    ((MainActivity) getActivity()).updatelesson(-1, false);
+                } catch (Exception e) {
                     e.printStackTrace();
-                    Log.e("PrevlessoniBtn",e.toString());
+                    Log.e("PrevlessoniBtn", e.toString());
                 }
             }
         });
-        CurrentlessoniBtn = (ImageButton)view.findViewById(R.id.imagebutton_currentlesson);
+        CurrentlessoniBtn = (ImageButton) view.findViewById(R.id.imagebutton_currentlesson);
         CurrentlessoniBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).updatelesson(0);
-                }catch (Exception e){
+                    ((MainActivity) getActivity()).updatelesson(0, true);
+                } catch (Exception e) {
                     e.printStackTrace();
-                    Log.e("CurrentlessoniBtn",e.toString());
+                    Log.e("CurrentlessoniBtn", e.toString());
                 }
             }
         });
-        AchievedlessoniBtn = (ImageButton)view.findViewById(R.id.imagebutton_achievedlessons);
+        AchievedlessoniBtn = (ImageButton) view.findViewById(R.id.imagebutton_achievedlessons);
         AchievedlessoniBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //ArrayList<String> data_donewords =  ((MainActivity) getActivity()).ReadArchiveWords();
-                ArrayList<String> data_donewords =  ((MainActivity) getActivity()).getWords();
+                ArrayList<String> data_donewords = ((MainActivity) getActivity()).ReadArchiveWords();
+                //  ArrayList<String> data_donewords =  ((MainActivity) getActivity()).getWords();
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 final AlertDialog dialog = builder.create();
                 LayoutInflater inflater = getActivity().getLayoutInflater();
-                View dialogLayout =  inflater.inflate(R.layout.layout_listview, null);
+                View dialogLayout = inflater.inflate(R.layout.layout_listview, null);
 
                 ListView listview_donewords = (ListView) dialogLayout.findViewById(R.id.listview);
-                ArchiveWordsListAdapter customAdapter = new ArchiveWordsListAdapter(getActivity(), R.layout.layout_word_listview_item, data_donewords);
-                listview_donewords .setAdapter(customAdapter);
+                AchievedWordsListAdapter customAdapter = new AchievedWordsListAdapter(getActivity(), R.layout.layout_word_listview_item, data_donewords);
+                listview_donewords.setAdapter(customAdapter);
 
                 dialog.setView(dialogLayout);
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -93,45 +95,45 @@ public class HelpFragment extends Fragment {
             }
         });
 
-        PrevlessoniBtn_help = (ImageButton)view.findViewById(R.id.imagebutton_prevlesson_help);
+        PrevlessoniBtn_help = (ImageButton) view.findViewById(R.id.imagebutton_prevlesson_help);
         PrevlessoniBtn_help.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
                     ((MainActivity) getActivity()).voiceoffer(PrevlessoniBtn_help, "backprevlesson.wav");
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                    Log.e("PrevlessoniBtn_help",e.toString());
+                    Log.e("PrevlessoniBtn_help", e.toString());
                 }
             }
         });
-        CurrentlessoniBtn_help = (ImageButton)view.findViewById(R.id.imagebutton_currentlesson_help);
+        CurrentlessoniBtn_help = (ImageButton) view.findViewById(R.id.imagebutton_currentlesson_help);
         CurrentlessoniBtn_help.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
                     ((MainActivity) getActivity()).voiceoffer(CurrentlessoniBtn_help, "backcurrentlesson.wav");
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                    Log.e("CurrentlessoniBtn_help",e.toString());
+                    Log.e("CurrentlessoniBtn_help", e.toString());
                 }
 
             }
         });
 
-        AchievedlessoniBtn_help = (ImageButton)view.findViewById(R.id.imagebutton_achievedlessons_help);
+        AchievedlessoniBtn_help = (ImageButton) view.findViewById(R.id.imagebutton_achievedlessons_help);
         AchievedlessoniBtn_help.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
                     ((MainActivity) getActivity()).voiceoffer(AchievedlessoniBtn_help, "urachievements.wav");
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                    Log.e("CurrentlessoniBtn_help",e.toString());
+                    Log.e("CurrentlessoniBtn_help", e.toString());
                 }
             }
         });
-    return view;
+        return view;
     }
 
     @Override
@@ -149,9 +151,9 @@ public class HelpFragment extends Fragment {
         super.onStop();
     }
 
-    public class ArchiveWordsListAdapter extends ArrayAdapter<String> {
+    public class AchievedWordsListAdapter extends ArrayAdapter<String> {
 
-        public ArchiveWordsListAdapter(Context context, int resource, ArrayList<String> items) {
+        public AchievedWordsListAdapter(Context context, int resource, ArrayList<String> items) {
             super(context, resource, items);
         }
 
@@ -170,45 +172,46 @@ public class HelpFragment extends Fragment {
 
             if (p != null) {
                 TextView textView_word = (TextView) v.findViewById(R.id.textView_word_item_txt);
-                ImageButton imageButton_sound_help = (ImageButton)v.findViewById(R.id.imageButton_word_item_soundhelp);
-                ImageButton imageButton_photo_help = (ImageButton)v.findViewById(R.id.imageButton_word_item_photohelp);
-                ImageButton imageButton_redo = (ImageButton)v.findViewById(R.id.imageButton_word_item_back_to);
+                ImageButton imageButton_sound_help = (ImageButton) v.findViewById(R.id.imageButton_word_item_soundhelp);
+                ImageButton imageButton_photo_help = (ImageButton) v.findViewById(R.id.imageButton_word_item_photohelp);
+                ImageButton imageButton_redo = (ImageButton) v.findViewById(R.id.imageButton_word_item_back_to);
                 textView_word.setText(p);
                 imageButton_photo_help.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Log.i("ArchiveListAdapter", getItem(position) +" imageButton_photo_help is clicked");
-                        try{
-                            ((MainActivity) getActivity()).helpbypic(imageButton_photo_help,getItem(position) );
-                        }catch(Exception e){
+                        Log.i("ArchiveListAdapter", getItem(position) + " imageButton_photo_help is clicked");
+                        try {
+                            ((MainActivity) getActivity()).helpbypic(imageButton_photo_help, getItem(position));
+                        } catch (Exception e) {
                             e.printStackTrace();
-                            Log.e("imageButton_photo_help",e.toString());
+                            Log.e("imageButton_photo_help", e.toString());
                         }
                     }
                 });
                 imageButton_sound_help.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Log.i("ArchiveListAdapter", getItem(position) +" imageButton_sound_help is clicked");
-                        try{
-                            ((MainActivity) getActivity()).voiceoffer(imageButton_sound_help,getItem(position) );
-                        }catch(Exception e){
+                        Log.i("ArchiveListAdapter", getItem(position) + " imageButton_sound_help is clicked");
+                        try {
+                            ((MainActivity) getActivity()).voiceoffer(imageButton_sound_help, getItem(position));
+                        } catch (Exception e) {
                             e.printStackTrace();
-                            Log.e("imageButton_sound_help",e.toString());
+                            Log.e("imageButton_sound_help", e.toString());
                         }
                     }
                 });
                 imageButton_redo.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Log.i("ArchiveListAdapter",getItem(position)+" imageButton_redo is clicked");
-                        try{
+                        Log.i("ArchiveListAdapter", getItem(position) + " imageButton_redo is clicked");
+                        try {
                             AchievedDialog.dismiss();
                             AchievedDialog.cancel();
-                            ((MainActivity) getActivity()).updatelesson(getItem(position));
-                        }catch(Exception e){
+                            //
+                            ((MainActivity) getActivity()).OpenLessonFragment(new Word(getItem(position)));
+                        } catch (Exception e) {
                             e.printStackTrace();
-                            Log.e("imageButton_redo",e.toString());
+                            Log.e("imageButton_redo", e.toString());
                         }
                     }
                 });
@@ -216,5 +219,4 @@ public class HelpFragment extends Fragment {
             return v;
         }
     }
-
 }

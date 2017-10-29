@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-public class DrawView extends TextView {
+public class WordView extends TextView {
     private static final float POINT_WIDTH = 2;
     Context context;
 
@@ -41,26 +41,26 @@ public class DrawView extends TextView {
     private GestureDetector mGestureDetector;
 
 
-    public DrawView(Context context) throws IOException {
+    public WordView(Context context) throws IOException {
         super(context);
         this.context = context;
         init();
     }
 
-    public DrawView(Context context, @Nullable AttributeSet attrs) {
+    public WordView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
         init();
     }
 
-    public DrawView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public WordView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context = context;
 
         init();
     }
 
-    public DrawView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public WordView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         this.context = context;
 
@@ -234,7 +234,7 @@ public class DrawView extends TextView {
         if (dx <= mFingerFat) XDirection = Direction.SAME;
         return new Direction[]{XDirection, YDirection};
     }
-    public void SetGuidedVector(Direction[]directions){
-        mGestureDetector = new GestureDetector(directions);
+    public void SetGuidedVector(Direction[][] directions){
+        mGestureDetector = new GestureDetector(directions[0]);
     }
 }

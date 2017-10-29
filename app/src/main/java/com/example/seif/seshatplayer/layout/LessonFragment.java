@@ -14,7 +14,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.example.seif.seshatplayer.DrawView;
+import com.example.seif.seshatplayer.WordView;
 import com.example.seif.seshatplayer.MainActivity;
 import com.example.seif.seshatplayer.R;
 import com.example.seif.seshatplayer.model.Word;
@@ -26,40 +26,45 @@ import static java.lang.Thread.sleep;
 
 
 
-public class MainFragment extends Fragment {
+public class LessonFragment extends Fragment {
 
-    public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1500;
+    public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1000;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
-    DrawView drawView_MainText = null;
+    WordView wordView_MainText = null;
+
     private Word[] words;
     private Word word = null;
+
     private int CurrentWordsArrayIndex = 0;
     private boolean Pronounced = false;
     private int PronouncedCounter = 0;
+
     Thread Thread_WordTrip = null;
-    private boolean justWord = false;
 
     private int DEFAULT_LOOP_COUNTER = 4;
     private int DEFAULT_TYPEFACE_LEVELS = 4;
     private int word_loop =1;
-    private int localWordIndx =0;
+    private Boolean firstTime = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             this.words = (Word[]) getArguments().getParcelableArray(MainActivity.LessonKey);
+            this.word = (Word) getArguments().getParcelable(MainActivity.WordKey);
+            this.firstTime = (Boolean) getArguments().getBoolean(MainActivity.firstTimekey);
 
-            if (this.words != null) {
+            if (this.word == null && words != null) {
                 this.word = words[0];
-                Log.i("onCreate", "from MainFragment" + "words not null");
-
-            } else {
-                this.word = (Word) getArguments().getParcelable(MainActivity.WordKey);
-                justWord = true;
+                Log.i("onCreate", "from LessonFragment" + "word == null");
             }
         }
-        Log.i("onCreate", "from MainFragment");
+
+        Log.i("onCreate", "from LessonFragment");
+        Log.i("LessonFragment", "1st time: "+firstTime );
+        Log.i("LessonFragment", "word:" + word);
+        Log.i("LessonFragment", "words: " + words.length + ": " + words.toString());
+
     }
 
     @Override
@@ -68,12 +73,11 @@ public class MainFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
-        drawView_MainText = (DrawView) view.findViewById(R.id.textView_maintext);
-        drawView_MainText.setVisibility(View.VISIBLE);
+        wordView_MainText = (WordView) view.findViewById(R.id.textView_maintext);
+        wordView_MainText.setVisibility(View.VISIBLE);
 
         if (!word.getFV().equals(null)) {
-
-            drawView_MainText.SetGuidedVector(word.getFV()[0]);
+            wordView_MainText.SetGuidedVector(word.getFV());
         }
 
 
@@ -108,9 +112,9 @@ public class MainFragment extends Fragment {
 
                 word = words[--CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                drawView_MainText.SetGuidedVector(word.getFV()[0]);
+                wordView_MainText.SetGuidedVector(word.getFV());
                 setPreviBtnVisibilty();
-              //  CreateWordTripThread().start();
+                CreateWordTripThread().start();
 
             }
         });
@@ -125,9 +129,9 @@ public class MainFragment extends Fragment {
 
                 word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-                drawView_MainText.SetGuidedVector(word.getFV()[0]);
+                wordView_MainText.SetGuidedVector(word.getFV());
                 setNextiBtnVisibility();
-                //CreateWordTripThread().start();
+                CreateWordTripThread().start();
             }
         });
 
@@ -136,18 +140,18 @@ public class MainFragment extends Fragment {
         PlaySoundiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-              /*  try {
+               try {
                     ((MainActivity) getActivity()).voiceoffer(PlaySoundiBtn, word.getText());
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("PlaySoundiBtn", e.toString());
-                }*/
-                if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
+                }
+                /*if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
 
                 word = words[++CurrentWordsArrayIndex];
                 custTextView.setText(word.getText());
-               drawView_MainText.SetGuidedVector(word.getFV()[0]);
-                setNextiBtnVisibility();
+               wordView_MainText.SetGuidedVector(word.getFV());
+                setNextiBtnVisibility();*/
                 //CreateWordTripThread().start();
 
             }
@@ -166,32 +170,28 @@ public class MainFragment extends Fragment {
         });
         return view;
     }
+
     @Override
     public void onResume() {
         super.onResume();
 
-        if (!Pronounced) {
-            final String s = this.word.getText();
-            //CreateWordTripThread().start(); //start the thread
-        }
-
-        if (justWord) {
-
+        if (firstTime) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-
                         sleep(2000);
-                        //((MainActivity) getActivity()).voiceoffer(null, MainActivity.firstPhraseAudioPath);
+                        ((MainActivity) getActivity()).voiceoffer(null, getResources().getString( R.string.myname));
                         sleep(1100);
                         if(word.getText().length()>1){
-//                            ((MainActivity) getActivity()).voiceoffer(null, word.getText().split(" ")[2]);
+                            ((MainActivity) getActivity()).voiceoffer(null, word.getText().split(" ")[2]);
                         }else{
-                        //    ((MainActivity) getActivity()).voiceoffer(null, word.getText());
+                        ((MainActivity) getActivity()).voiceoffer(null, word.getText());
                         }
                         sleep(1900);
-                        //((MainActivity) getActivity()).updatelesson(0);
+                        word = words[CurrentWordsArrayIndex++];
+                            CreateWordTripThread().start(); //start the thread
+                        wordView_MainText.SetGuidedVector(word.getFV());
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.e("PlaySoundiBtn", e.toString());
@@ -232,7 +232,7 @@ public class MainFragment extends Fragment {
                         try {
                             ((MainActivity) getActivity()).voiceoffer(null, word.getText());
                             sleep(3000);
-                            ((MainActivity) getActivity()).voiceoffer(drawView_MainText, "speakinstruction.wav");
+                            ((MainActivity) getActivity()).voiceoffer(wordView_MainText, "speakinstruction.wav");
                             sleep(3000);
                             voicerec(null);
                         } catch (Exception e) {
@@ -241,14 +241,12 @@ public class MainFragment extends Fragment {
                     }
                 });
             }
-
             @Override
             public void interrupt() {
                 super.interrupt();
                 ((MainActivity) getActivity()).StopMediaPlayer();
                 onDetach();
             }
-
         };
         return Thread_WordTrip;
     }
@@ -285,8 +283,7 @@ public class MainFragment extends Fragment {
         } else {
             // change word
             word_loop = 1;
-            localWordIndx++;
-            //
+            CurrentWordsArrayIndex++;
         }
         return tf;
     }
@@ -315,7 +312,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        Log.i("MainFragment", "onStop");
+        Log.i("LessonFragment", "onStop");
         if (Thread_WordTrip != null) {
             Thread_WordTrip.interrupt();
         }
@@ -324,7 +321,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.i("MainFragment", "onDetach");
+        Log.i("LessonFragment", "onDetach");
     }
 
     @Override
