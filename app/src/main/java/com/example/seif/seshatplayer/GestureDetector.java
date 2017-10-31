@@ -14,13 +14,13 @@ public class GestureDetector {
 
     double successPercentage = 0;
     private ArrayList<Direction> mUserGuidedVector;
-    private Direction[] gesture;
+    private Direction[][] gesture;
 
-    public GestureDetector(Direction[] Gesture) {
+    public GestureDetector(Direction[][] Gesture) {
         //this.gesture = clearedRedundancyList(Gesture);
         this.gesture = Gesture;
         if (this.gesture.length < 2) Log.e("GestureDetector", "Hasn't gesture to detect!");
-        for (Direction direction : gesture) Log.i("GestureDetector", "Direction " + direction);
+       // for (Direction direction : gesture) Log.i("GestureDetector", "Direction " + direction);
        // this.priority = Priority;
        //  mUserGuidedVector = new ArrayList<>();
     }
@@ -33,44 +33,48 @@ public class GestureDetector {
 
         if (mUserGuidedVector.size() >= gesture.length) {
             for (int i = 0; i < gesture.length - 1; ) {
-                Direction d_X = mUserGuidedVector.get(i);
-                Direction d_Y = mUserGuidedVector.get(i + 1);
-                Direction ORG_d_X = gesture[i];
-                Direction ORG_d_Y = gesture[i + 1];
+                for (int j = 0; j < gesture[i].length; j++) {
 
-                Log.i("GestureDetector", "CompareGuidedVector" + "XD:  " + ORG_d_X);
-                Log.i("GestureDetector", "CompareGuidedVector" + "UXD:  " + d_X);
-                Log.i("GestureDetector", "CompareGuidedVector" + "YD:  " + ORG_d_Y);
-                Log.i("GestureDetector", "CompareGuidedVector" + "UYD:" + d_Y);
 
-                try {
-                    if (ORG_d_X == Direction.NOMATTER || ORG_d_Y == Direction.NOMATTER) {
-                        if (ORG_d_X == Direction.NOMATTER && ORG_d_Y != Direction.NOMATTER) {
-                            if (d_Y != ORG_d_Y) {
+                    Direction d_X = mUserGuidedVector.get(i);
+                    Direction d_Y = mUserGuidedVector.get(i + 1);
+                    Direction ORG_d_X = gesture[i][j];
+                    Direction ORG_d_Y = gesture[i][j + 1];
+
+                    Log.i("GestureDetector", "CompareGuidedVector" + "XD:  " + ORG_d_X);
+                    Log.i("GestureDetector", "CompareGuidedVector" + "UXD:  " + d_X);
+                    Log.i("GestureDetector", "CompareGuidedVector" + "YD:  " + ORG_d_Y);
+                    Log.i("GestureDetector", "CompareGuidedVector" + "UYD:" + d_Y);
+
+                    try {
+                        if (ORG_d_X == Direction.NOMATTER || ORG_d_Y == Direction.NOMATTER) {
+                            if (ORG_d_X == Direction.NOMATTER && ORG_d_Y != Direction.NOMATTER) {
+                                if (d_Y != ORG_d_Y) {
+                                    if (!approximateCheck(ORG_d_X, ORG_d_Y, i)) {
+                                        successPercentage -= (progressStep);
+                                        isDetected = false;
+                                    }
+                                }
+                            } else if (ORG_d_X != Direction.NOMATTER && ORG_d_Y == Direction.NOMATTER) {
+                                if (d_X != ORG_d_X) {
+                                    if (!approximateCheck(ORG_d_X, ORG_d_Y, i)) {
+                                        successPercentage -= (progressStep);
+                                        isDetected = false;
+                                    }
+                                }
+                            }
+                        } else {
+                            if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
                                 if (!approximateCheck(ORG_d_X, ORG_d_Y, i)) {
-                                    successPercentage-=(progressStep);
-                                     isDetected =false;
-                                }
-                            }
-                        } else if (ORG_d_X != Direction.NOMATTER && ORG_d_Y == Direction.NOMATTER) {
-                            if (d_X != ORG_d_X) {
-                                if (!approximateCheck(ORG_d_X, ORG_d_Y, i)){
-                                    successPercentage-=(progressStep);
-                                    isDetected =false;
+                                    successPercentage -= (progressStep);
+                                    isDetected = false;
                                 }
                             }
                         }
-                    } else {
-                        if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
-                            if (!approximateCheck(ORG_d_X, ORG_d_Y, i)){
-                                successPercentage-=(progressStep);
-                                isDetected =false;
-                            }
-                        }
+                        i += 2;
+                    } catch (Exception e) {
+                        Log.e("GestureDetector", "CompareGuidedVector" + e.toString());
                     }
-                    i += 2;
-                } catch (Exception e) {
-                    Log.e("GestureDetector", "CompareGuidedVector" + e.toString());
                 }
             }
             mUserGuidedVector.clear();

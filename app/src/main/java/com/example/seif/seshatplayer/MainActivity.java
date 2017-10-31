@@ -40,7 +40,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,8 +52,8 @@ import java.util.Stack;
 public class MainActivity extends AppCompatActivity {
 
 
-    public static final String  WORDS_PREFS_NAME = "WordsPrefsFile", WordIndexKey = "i", WordKey = "w", PhraseKey = "p", LessonKey = "L";
-    public static final String SFKEY = "SF";
+    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordIndexKey = "i", WordKey = "w", PhraseKey = "p", LessonKey = "L";
+    public static final String SFKEY = "0";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
     public static String firstTimekey = "1stTime";
 
@@ -63,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     MediaPlayer mediaPlayer = null;
 
     private String WordsFilePath = "WORDS.txt", PhrasesFilePath = "PHRASES.txt", SF = "/SeShatSF/";
-    private String FileWordsAchieved = "/Archive.txt";
+    private String FileWordsAchieved = "Archive.txt";
 
     private Map<Integer, Word[]> lessons;
     private int word_index = 0;
@@ -136,23 +135,19 @@ public class MainActivity extends AppCompatActivity {
             word_index = 0;
 
             SF = Environment.getExternalStorageDirectory() + SF;
-            File file = new File(SF);
-            String[] directories = file.list(new FilenameFilter() {
-                @Override
-                public boolean accept(File current, String name) {
-                    return new File(current, name).isDirectory();
-                }
-            });
 
-            SF = SF + directories[0] + "/";
             WordsFilePath = SF + WordsFilePath;
             PhrasesFilePath = SF + PhrasesFilePath;
 
-            new File(Environment.getExternalStorageDirectory()+ FileWordsAchieved);
-            Word phrase = new Word(firstPhrase + directories[0]);
+            new File(Environment.getExternalStorageDirectory() + FileWordsAchieved);
+            // Word phrase = new Word(firstPhrase + directories[0]);
 
             setLessons();
-            OpenLessonFragment(phrase);
+
+            for (Word word : lessons.get(lesson_index)) {
+                Log.i("MainActivity", "word: " + word.getText());
+            }
+            // OpenLessonFragment(phrase);
 
             SaveOnSharedPref(LessonKey, String.valueOf(lesson_index));
             SaveOnSharedPref(WordIndexKey, String.valueOf(word_index));
@@ -236,10 +231,10 @@ public class MainActivity extends AppCompatActivity {
                     OpenLessonFragment(lesson_index);
                     break;
                 case -1:
-                    OpenLessonFragment(lesson_index-1);
+                    OpenLessonFragment(lesson_index - 1);
                     break;
                 case 1:
-                    OpenLessonFragment(lesson_index+1);
+                    OpenLessonFragment(lesson_index + 1);
                     break;
             }
         } else {
@@ -267,8 +262,8 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.prepare();
             mediaPlayer.start();
         } catch (IllegalStateException | IOException e) {
-            Log.e("MainActivity","voiceoffer::e: " + e.toString());
-            Log.e("MainActivity","voiceoffer::DataPath2Bplayed: " +SF + DataPath2Bplayed);
+            Log.e("MainActivity", "voiceoffer::e: " + e.toString());
+            Log.e("MainActivity", "voiceoffer::DataPath2Bplayed: " + SF + DataPath2Bplayed);
         }
         mediaPlayer.setOnCompletionListener(mp -> mediaPlayer.stop());
     }
@@ -432,14 +427,14 @@ public class MainActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
         Word[] lesson = lessons.get(i);
 
-        Log.i("MainActivity","OpenLessonFragment: am here with i(lesson_index)= "+ i);
-        Log.i("MainActivity","OpenLessonFragment: & lesson.sz= "+ lesson.length);
+        Log.i("MainActivity", "OpenLessonFragment: am here with i(lesson_index)= " + i);
+        Log.i("MainActivity", "OpenLessonFragment: & lesson.sz= " + lesson.length);
 
         bundle.putParcelableArray(LessonKey, lesson);
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
         fragmentTransaction.commit();
-        Log.i("MainActivity","OpenLessonFragment:: lesson_index"+ lesson_index);
+        Log.i("MainActivity", "OpenLessonFragment:: lesson_index" + lesson_index);
 
     }
 
@@ -450,7 +445,7 @@ public class MainActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
 
         if (lesson_index == 1) {
-           // word = form_word(word.getText(), null);
+            // word = form_word(word.getText(), null);
             bundle.putBoolean(firstTimekey, true);
             bundle.putParcelableArray(LessonKey, lessons.get(1));
         } else {
@@ -462,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
         fragmentTransaction.commit();
-        Log.i("MainActivity","OpenLessonFragment:: lesson_index"+ lesson_index);
+        Log.i("MainActivity", "OpenLessonFragment:: lesson_index" + lesson_index);
     }
 
     public void OpenPhraseFragment(String phrase, String word) {
@@ -529,7 +524,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setLessons() {
         lessons = new HashMap<>();
-        int lessonNum = lesson_index -1;
+        int lessonNum = lesson_index - 1;
         try {
             FileReader wordsReader = new FileReader(WordsFilePath);
             FileReader phraseReader = new FileReader(PhrasesFilePath);
@@ -555,17 +550,23 @@ public class MainActivity extends AppCompatActivity {
                     if (k != 0 && StringlessonCapacity != null) {
 
                         int lessonCapacity = Integer.parseInt(StringlessonCapacity);
-                      //  System.out.println("StringlessonCapacity: " + StringlessonCapacity);
+                        //  System.out.println("StringlessonCapacity: " + StringlessonCapacity);
 
                         Word[] lessonWords = new Word[lessonCapacity];
                         for (int i = 0; i < lessonCapacity; i++) {
                             String word_txt = WordsBufferedReader.readLine();
                             String phrase = PhrasesBufferedReader.readLine();
                             lessonWords[i] = form_word(word_txt, phrase);
+                           // Log.i("setLessons: ","lessonWords[i]: " + i + " "+lessonWords[i]);
+
                         }
-                        lessons.put(lessonNum++, lessonWords);
+                        lessons.put(k, lessonWords);
                         StringlessonCapacity = WordsBufferedReader.readLine();
+
+
                     }
+
+
                 }
             }
 

@@ -26,7 +26,6 @@ public class WordView extends TextView {
     Context context;
 
     ArrayList<Direction> mUserGuidedVectors;
-    int wordCharsChecked = 0;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private Path mPath;
@@ -36,7 +35,6 @@ public class WordView extends TextView {
     private Path circlePath;
     private float mX, mY, mFingerFat;
     private Point lastPoint;
-    private float textviewSZ;
     private ArrayList<Point> mTouchedPoints;
     private GestureDetector mGestureDetector;
 
@@ -88,7 +86,6 @@ public class WordView extends TextView {
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(14);
-        textviewSZ = this.getTextSize();
         mUserGuidedVectors = new ArrayList<>();
     }
 
@@ -235,6 +232,6 @@ public class WordView extends TextView {
         return new Direction[]{XDirection, YDirection};
     }
     public void SetGuidedVector(Direction[][] directions){
-        mGestureDetector = new GestureDetector(directions[0]);
+        mGestureDetector = new GestureDetector(directions);
     }
 }
