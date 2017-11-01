@@ -4,8 +4,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="activity_actionbar_margin">24dp</dimen>
     <dimen name="activity_double_actionbar_margin">48dp</dimen>
-    <dimen name="activity_word_textsize">128sp</dimen>
+    <dimen name="activity_word_textsize">96sp</dimen>
     <dimen name="activity_word_textsize_listitem">36sp</dimen>
-    <integer name="activity_word_textsize">64</integer>
-        <bool name="isTablet">true</bool>
+        <bool name="isTablet">false</bool>
 </resources>

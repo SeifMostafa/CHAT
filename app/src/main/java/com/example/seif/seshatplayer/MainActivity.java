@@ -10,9 +10,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -47,6 +49,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.concurrent.ExecutionException;
+
+import static java.lang.Thread.sleep;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -140,20 +145,30 @@ public class MainActivity extends AppCompatActivity {
             PhrasesFilePath = SF + PhrasesFilePath;
 
             new File(Environment.getExternalStorageDirectory() + FileWordsAchieved);
-            // Word phrase = new Word(firstPhrase + directories[0]);
 
             setLessons();
-
-            for (Word word : lessons.get(lesson_index)) {
-                Log.i("MainActivity", "word: " + word.getText());
-            }
-            // OpenLessonFragment(phrase);
+            Word phrase = new Word(firstPhrase + lessons.get(lesson_index)[0].getText());
+            OpenLessonFragment(phrase);
 
             SaveOnSharedPref(LessonKey, String.valueOf(lesson_index));
             SaveOnSharedPref(WordIndexKey, String.valueOf(word_index));
             SaveOnSharedPref(SFKEY, SF);
             SaveOnSharedPref(firstTimekey, String.valueOf(false));
-
+            try {
+                voiceoffer(null, getResources().getString(R.string.myname));
+                sleep(1000);
+                voiceoffer(null, lessons.get(lesson_index)[0].getText());
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable(){
+                    @Override
+                    public void run(){
+                        // do something
+                        updatelesson(0,true);
+                    }
+                }, 1500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } else {
 
             lesson_index = Integer.parseInt(sharedPreferences_words.getString(LessonKey, "1"));
@@ -163,11 +178,6 @@ public class MainActivity extends AppCompatActivity {
             WordsFilePath = SF + WordsFilePath;
             PhrasesFilePath = SF + PhrasesFilePath;
 
-           /* Word word = new Word("س");
-            Direction[][] word_directions = new Direction[1][];
-            word_directions[0] = getDirections(SF + "س" + 2);
-            word.setFV(word_directions);*/
-            //OpenLessonFragment(word);
             setLessons();
             OpenLessonFragment(lesson_index);
         }
@@ -445,7 +455,7 @@ public class MainActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
 
         if (lesson_index == 1) {
-            // word = form_word(word.getText(), null);
+             word = form_word(word.getText(), null);
             bundle.putBoolean(firstTimekey, true);
             bundle.putParcelableArray(LessonKey, lessons.get(1));
         } else {
@@ -562,11 +572,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         lessons.put(k, lessonWords);
                         StringlessonCapacity = WordsBufferedReader.readLine();
-
-
                     }
-
-
                 }
             }
 
@@ -576,5 +582,4 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
 }

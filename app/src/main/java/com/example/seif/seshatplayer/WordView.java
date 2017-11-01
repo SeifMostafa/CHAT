@@ -13,7 +13,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.seif.seshatplayer.model.Direction;
 
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 public class WordView extends TextView {
     private static final float POINT_WIDTH = 2;
     Context context;
-
     ArrayList<Direction> mUserGuidedVectors;
     private Bitmap mBitmap;
     private Canvas mCanvas;
@@ -77,7 +75,7 @@ public class WordView extends TextView {
         circlePaint.setColor(Color.BLUE);
         circlePaint.setStyle(Paint.Style.STROKE);
         circlePaint.setStrokeJoin(Paint.Join.MITER);
-        circlePaint.setStrokeWidth(16f);
+        circlePaint.setStrokeWidth(8f);
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
@@ -85,7 +83,7 @@ public class WordView extends TextView {
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPaint.setStrokeWidth(14);
+        mPaint.setStrokeWidth(8);
         mUserGuidedVectors = new ArrayList<>();
     }
 
@@ -154,13 +152,16 @@ public class WordView extends TextView {
                 Direction YDirection = directions[1];
                 if (XDirection != null && YDirection != null) {
                     if (mUserGuidedVectors.size() > 0) {
-                        if (mUserGuidedVectors.get(mUserGuidedVectors.size() - 2) != XDirection || mUserGuidedVectors.get(mUserGuidedVectors.size() - 1) != YDirection) {
+                        if ((mUserGuidedVectors.get(mUserGuidedVectors.size() - 2) != XDirection || mUserGuidedVectors.get(mUserGuidedVectors.size() - 1) != YDirection) &&
+                                (XDirection != Direction.SAME || YDirection != Direction.SAME)) {
                             mUserGuidedVectors.add(XDirection);
                             mUserGuidedVectors.add(YDirection);
                         }
                     } else {
-                        mUserGuidedVectors.add(XDirection);
-                        mUserGuidedVectors.add(YDirection);
+                        if ((XDirection != Direction.SAME || YDirection != Direction.SAME)) {
+                            mUserGuidedVectors.add(XDirection);
+                            mUserGuidedVectors.add(YDirection);
+                        }
                     }
                 }
             }
@@ -173,21 +174,38 @@ public class WordView extends TextView {
             }
         }
 
-        boolean checkResult = mGestureDetector.check(mUserGuidedVectors);
-        double percentage = mGestureDetector.getSuccessPercentage();
+        try {
 
-        Log.i("CustTextView: ","touch_up: check result= "+ checkResult);
+            for (Direction direction : mUserGuidedVectors) {
+                Log.i("mUserGuidedVectors", "" + direction);
+            }
+            boolean checkResult = mGestureDetector.check(mUserGuidedVectors);
+            boolean completed = mGestureDetector.getCompletedFlag();
 
-        if(checkResult || percentage > 70){
-            // next
-             reset();
-            Toast.makeText(context,"Congrats",Toast.LENGTH_LONG).show();
-        }else{
-            reset();
-            Toast.makeText(context,"FAILED",Toast.LENGTH_LONG).show();
+            Log.i("CustTextView: ", "touch_up: check result= " + checkResult);
+            if (completed) {
+
+                // next word
+                // new mGestureDetector
+                Log.i("WordView", "completed");
+            } else {
+                if (checkResult) {
+
+                    // complete ur chars
+                    Log.i("WordView", "checkResult");
+
+                } else {
+                    // reset
+                    Log.i("WordView", "reset");
+                    mUserGuidedVectors.clear();
+                    reset();
+
+                }
+            }
+        } catch (Exception e) {
+            Log.i("WordView: ", "error: " + e.toString());
         }
-        Toast.makeText(context,"Percentage " + mGestureDetector.getSuccessPercentage()  ,Toast.LENGTH_LONG).show();
-
+        //Toast.makeText(context,"Percentage " + mGestureDetector.getSuccessPercentage()  ,Toast.LENGTH_LONG).show();
         lastPoint = new Point(mTouchedPoints.get(mTouchedPoints.size() - 1));
     }
 
@@ -231,7 +249,13 @@ public class WordView extends TextView {
         if (dx <= mFingerFat) XDirection = Direction.SAME;
         return new Direction[]{XDirection, YDirection};
     }
-    public void SetGuidedVector(Direction[][] directions){
+
+    public void setGuidedVector(Direction[][] directions) {
         mGestureDetector = new GestureDetector(directions);
     }
+
+    /*public void setText(String word){
+        this.setText(word);
+    }*/
+
 }
