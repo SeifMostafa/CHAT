@@ -1,9 +1,15 @@
 <resources>
     <string name="app_name">SeShatPlayer</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="text">ورد</string>
     <string name="phrase_text">ود الورد</string>
     <string name="myname">myname</string>
+    <string name="backcurrentlesson">backcurrentlesson</string>
+    <string name="backprevlesson">backprevlesson</string>
+    <string name="helpfragmenthelpbtninstr">helpfragmenthelpbtninstr</string>
+    <string name="pickwordinstr">pickwordinstr</string>
+    <string name="speakinstruction">speakinstruction</string>
+    <string name="tryAgain">tryAgain</string>
+    <string name="urachievements">urachievements</string>
 </resources>

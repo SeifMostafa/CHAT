@@ -64,7 +64,7 @@ public class PhrasePickFragment extends Fragment {
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity)getActivity()).voiceoffer(helpiBtn,"pickwordinstr.wav");
+                ((MainActivity)getActivity()).voiceoffer(helpiBtn,((MainActivity)getActivity()).getString(R.string.pickwordinstr));
             }
         });
 

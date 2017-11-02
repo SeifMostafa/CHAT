@@ -43,7 +43,7 @@ public class HelpFragment extends Fragment {
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) getActivity()).voiceoffer(helpiBtn, "helpfragmenthelpbtninstr.wav");
+                ((MainActivity) getActivity()).voiceoffer(helpiBtn, ((MainActivity)getActivity()).getString(R.string.helpfragmenthelpbtninstr));
             }
         });
 
@@ -100,7 +100,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).voiceoffer(PrevlessoniBtn_help, "backprevlesson.wav");
+                    ((MainActivity) getActivity()).voiceoffer(PrevlessoniBtn_help, ((MainActivity)getActivity()).getString(R.string.backprevlesson));
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("PrevlessoniBtn_help", e.toString());
@@ -112,7 +112,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).voiceoffer(CurrentlessoniBtn_help, "backcurrentlesson.wav");
+                    ((MainActivity) getActivity()).voiceoffer(CurrentlessoniBtn_help, ((MainActivity)getActivity()).getString(R.string.backcurrentlesson));
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("CurrentlessoniBtn_help", e.toString());
@@ -126,7 +126,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).voiceoffer(AchievedlessoniBtn_help, "urachievements.wav");
+                    ((MainActivity) getActivity()).voiceoffer(AchievedlessoniBtn_help, ((MainActivity)getActivity()).getString(R.string.urachievements));
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("CurrentlessoniBtn_help", e.toString());

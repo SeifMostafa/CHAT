@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
+import com.example.seif.seshatplayer.layout.LessonFragment;
 import com.example.seif.seshatplayer.model.Direction;
 
 import java.io.IOException;
@@ -119,7 +120,6 @@ public class WordView extends TextView {
         mY = y;
         mFingerFat = ff;
         mPath.addCircle(mX, mY, POINT_WIDTH, Path.Direction.CW);
-     //   Log.i("CustTextView", "touch_start: FingerFat: " + ff);
         mTouchedPoints = new ArrayList<>();
         mTouchedPoints.add(new Point((int) x, (int) y));
     }
@@ -191,9 +191,17 @@ public class WordView extends TextView {
             if (completed) {
                 mSuccessfullyWrittenChars=0;
                 reset();
+
                 // next word
                 // new mGestureDetector
+                UpdateWord updateWord = new LessonFragment();
+                Typeface typeface = updateWord.updateWordLoop();
+
+                //this.setTypeface();
+                mGestureDetector = new GestureDetector(gesture[mSuccessfullyWrittenChars]);
+
                 Log.i("WordView", "completed");
+
             } else {
                 if (checkResult) {
                     mSuccessfullyWrittenChars++;
@@ -207,7 +215,7 @@ public class WordView extends TextView {
                         mSuccessfullyWrittenChars=0;
                         mGestureDetector = new GestureDetector(gesture[mSuccessfullyWrittenChars]);
                         Log.i("WordView", "reset");
-                        // mUserGuidedVectors.clear();
+                        //((MainActivity)context).voiceoffer(null,((MainActivity)context).getString(R.string.tryAgain));
                         reset();
                     }
                 }
@@ -265,4 +273,6 @@ public class WordView extends TextView {
         gesture = directions;
         Log.i("WordView","setGuidedVector: " + directions.length);
     }
+
+
 }
