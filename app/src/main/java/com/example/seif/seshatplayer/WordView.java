@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 
 public class WordView extends TextView {
-    private static final float POINT_WIDTH = 2;
+    private static float POINT_WIDTH =0;
     Context context;
     ArrayList<Direction> mUserGuidedVectors;
     private Bitmap mBitmap;
@@ -84,6 +84,7 @@ public class WordView extends TextView {
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(8);
+        POINT_WIDTH = 1f;
         mUserGuidedVectors = new ArrayList<>();
     }
 
@@ -176,8 +177,8 @@ public class WordView extends TextView {
 
         try {
 
-            for (Direction direction : mUserGuidedVectors) {
-                Log.i("mUserGuidedVectors", "" + direction);
+            for (int i=0;i<mUserGuidedVectors.size();i++) {
+                Log.i("mUserGuidedVectors", " " + mUserGuidedVectors.get(i));
             }
             boolean checkResult = mGestureDetector.check(mUserGuidedVectors);
             boolean completed = mGestureDetector.getCompletedFlag();
@@ -252,6 +253,7 @@ public class WordView extends TextView {
 
     public void setGuidedVector(Direction[][] directions) {
         mGestureDetector = new GestureDetector(directions);
+        Log.i("WordView","setGuidedVector: " + directions.length);
     }
 
     /*public void setText(String word){

@@ -127,7 +127,7 @@ public class LessonFragment extends Fragment {
                 wordView_MainText.setGuidedVector(word.getFV());
                 wordView_MainText.setText(word.getText());
                 setNextiBtnVisibility();
-                CreateWordTripThread().start();
+               CreateWordTripThread().start();
             }
         });
 
@@ -149,7 +149,7 @@ public class LessonFragment extends Fragment {
                     wordView_MainText.setText(word.getText());
                     wordView_MainText.setGuidedVector(word.getFV());
                     setNextiBtnVisibility();
-                    //CreateWordTripThread().start();
+                    CreateWordTripThread().start();
                 } else {
                     ((MainActivity) getActivity()).updatelesson(1, true);
                 }
@@ -167,13 +167,15 @@ public class LessonFragment extends Fragment {
                 }
             }
         });
+        setNextiBtnVisibility();
+        setPreviBtnVisibilty();
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (!firstTime && !Pronounced) CreateWordTripThread().start(); //start the thread
+       // if (!firstTime && !Pronounced) CreateWordTripThread().start(); //start the thread
 
     }
 

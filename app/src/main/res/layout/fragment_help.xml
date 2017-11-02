@@ -22,13 +22,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_prevlesson"
-                android:background="@color/colorWhity"
-                android:src="@drawable/prevlesson"/>
+
+                android:src="@drawable/prevlesson"
+                android:elevation="10dp"
+                android:translationZ="10dp"
+                />
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_prevlesson_help"
-                android:background="@android:color/transparent"
+                android:elevation="10dp"
+                android:translationZ="10dp"
                 android:src="@drawable/sound"/>
         </LinearLayout>
 
@@ -42,13 +46,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_currentlesson"
-                android:background="@android:color/transparent"
+                android:elevation="10dp"
+                android:translationZ="10dp"
                 android:src="@drawable/reset"/>
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_currentlesson_help"
-                android:background="@android:color/transparent"
+                android:elevation="10dp"
+                android:translationZ="10dp"
                 android:src="@drawable/sound"/>
         </LinearLayout>
 
@@ -62,13 +68,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_achievedlessons"
-                android:background="@color/colorWhity"
+                android:elevation="10dp"
+                android:translationZ="10dp"
                 android:src="@drawable/achieved"/>
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_achievedlessons_help"
-                android:background="@android:color/transparent"
+                android:elevation="10dp"
+                android:translationZ="10dp"
                 android:src="@drawable/sound"/>
         </LinearLayout>
     </LinearLayout>

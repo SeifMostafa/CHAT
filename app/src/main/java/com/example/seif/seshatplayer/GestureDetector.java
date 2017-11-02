@@ -17,17 +17,18 @@ public class GestureDetector {
 
     private Direction[][] gesture;
     private Map<Integer,Integer> charDirectionsLength;
+    private int mTotalGV=0;
     private boolean completedFlag = false;
+    private ArrayList<Direction>mUserGuidedVector;
+
 
     public GestureDetector(Direction[][] Gesture) {
-        //this.gesture = clearedRedundancyList(Gesture);
         this.gesture = Gesture;
         charDirectionsLength = new HashMap<>();
         if (this.gesture.length < 2) Log.e("GestureDetector", "Hasn't gesture to detect!");
-        int mDirectionsLength = 0;
         for(int i=0; i<gesture.length;i++){
-            mDirectionsLength +=gesture[i].length;
-            charDirectionsLength.put(i,mDirectionsLength);
+            mTotalGV +=gesture[i].length;
+            charDirectionsLength.put(i,mTotalGV);
         }
     }
 
@@ -38,15 +39,15 @@ public class GestureDetector {
         return completedFlag;
     }
 
-    private boolean compareCharDirections(List<Direction>toTest,Direction[]org){
+    private boolean compareCharDirections(int mUserGVindex,Direction[]org){
         boolean isDetected = true;
         double mCharSuccessPercentage = 100;
         double mCharProgressStep = 100.0 / ((double) org.length / 2.0);
 
-        for (int j = 0; j < org.length-1; ) {
+        for (int j=0 ; j < org.length-1; ) {
 
-            Direction d_X = toTest.get(j);
-            Direction d_Y = toTest.get(j + 1);
+            Direction d_X = mUserGuidedVector.get(mUserGVindex);
+            Direction d_Y = mUserGuidedVector.get(mUserGVindex + 1);
             Direction ORG_d_X = org[j];
             Direction ORG_d_Y = org[j + 1];
 
@@ -59,25 +60,32 @@ public class GestureDetector {
                 if (ORG_d_X == Direction.NOMATTER || ORG_d_Y == Direction.NOMATTER) {
                     if (ORG_d_X == Direction.NOMATTER && ORG_d_Y != Direction.NOMATTER) {
                         if (d_Y != ORG_d_Y) {
+                            if(!approximateCheck(ORG_d_X,ORG_d_Y,mUserGVindex)) {
 
                                 mCharSuccessPercentage -= (mCharProgressStep);
                                 isDetected = false;
+                            }
                         }
                     } else if (ORG_d_X != Direction.NOMATTER && ORG_d_Y == Direction.NOMATTER) {
                         if (d_X != ORG_d_X) {
+                            if(!approximateCheck(ORG_d_X,ORG_d_Y,mUserGVindex)) {
 
                                 mCharSuccessPercentage -= (mCharProgressStep);
                                 isDetected = false;
+                            }
                         }
                     }
                 } else {
                     if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
+                        if(!approximateCheck(ORG_d_X,ORG_d_Y,mUserGVindex)) {
 
                             mCharSuccessPercentage -= (mCharProgressStep);
                             isDetected = false;
+                        }
                     }
                 }
                 j += 2;
+                mUserGVindex+=2;
             } catch (Exception e) {
                 Log.e("GestureDetector", "CompareGuidedVector" + e.toString());
             }
@@ -87,19 +95,24 @@ public class GestureDetector {
         }else return false;
     }
     public boolean check(ArrayList<Direction> mUserGV) {
+        mUserGuidedVector = mUserGV;
+   //     mUserGuidedVector = clearedRedundancyList(mUserGuidedVector);
         int mLocalCharsSuccessConuter = 0;
-        List<Direction> mSubsetFrommUserGV_list = null;
         Direction[] currentCharDirections = null;
         do{
             // make subset from mUserGV ==> char directions.
-            int directions_from_mUserGVIndex=0,directions_to_mUserGVIndex;
-            directions_to_mUserGVIndex= charDirectionsLength.get(mLocalCharsSuccessConuter);
-            if(mLocalCharsSuccessConuter > 0) directions_from_mUserGVIndex =  charDirectionsLength.get(mLocalCharsSuccessConuter-1);
+          /*
+            directions_to_mUserGVIndex = charDirectionsLength.get(mLocalCharsSuccessConuter);
 
-            mSubsetFrommUserGV_list =  mUserGV.subList(directions_from_mUserGVIndex,directions_to_mUserGVIndex);
-            currentCharDirections= gesture[mLocalCharsSuccessConuter];
-            if(mSubsetFrommUserGV_list.size()>=currentCharDirections.length){
-                boolean isDetected = compareCharDirections(mSubsetFrommUserGV_list,currentCharDirections);
+            mSubsetFrommUserGV_list =  mUserGV.subList(directions_from_mUserGVIndex,directions_to_mUserGVIndex);*/
+            currentCharDirections = gesture[mLocalCharsSuccessConuter];
+
+            if(mUserGuidedVector.size() >= currentCharDirections.length){
+
+                int directions_from_mUserGVIndex=0;
+
+                if(mLocalCharsSuccessConuter > 0) directions_from_mUserGVIndex =  charDirectionsLength.get(mLocalCharsSuccessConuter-1);
+                boolean isDetected = compareCharDirections(directions_from_mUserGVIndex,currentCharDirections);
                 if(isDetected){
 
                     mLocalCharsSuccessConuter++;
@@ -111,13 +124,13 @@ public class GestureDetector {
             raiseCompletedFlag();
             return true;
         }else{
-            if(mSubsetFrommUserGV_list.size()>=currentCharDirections.length){
+            if(mUserGuidedVector.size()>=mTotalGV){
                 return false;
             }else return true;
         }
     }
 
-    /*private boolean approximateCheck(Direction XDirection, Direction YDirection, int index) {
+    private boolean approximateCheck(Direction XDirection, Direction YDirection, int index) {
         boolean isDetected = false;
         if (index + 3 <= mUserGuidedVector.size()) {
             Log.i("GestureDetector:: ","approximateCheck:: am here!");
@@ -148,7 +161,7 @@ public class GestureDetector {
             }
         }
         return isDetected;
-    }*/
+    }
 
 
 

@@ -19,7 +19,8 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
         android:src="@drawable/moreinfo"
-        android:background="@android:color/transparent"
         android:paddingTop="@dimen/activity_actionbar_margin"
+        android:elevation="10dp"
+        android:translationZ="10dp"
          />
 </RelativeLayout>

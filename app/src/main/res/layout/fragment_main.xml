@@ -52,7 +52,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/imagebutton_soundhelp"
         android:src="@drawable/sound"
-        android:background="@color/colorWhity"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginRight="@dimen/activity_double_actionbar_margin"
@@ -67,13 +66,13 @@
         android:layout_height="wrap_content"
         android:id="@+id/imagebutton_photohelp"
         android:src="@drawable/photo"
-        android:background="@color/colorWhity"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginBottom="@dimen/activity_double_actionbar_margin"
         android:layout_marginLeft="@dimen/activity_double_actionbar_margin"
         android:elevation="10dp"
         android:translationZ="10dp"
+
         tools:ignore="ContentDescription,RtlHardcoded"
         android:layout_marginStart="@dimen/activity_double_actionbar_margin" />
 
