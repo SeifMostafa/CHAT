@@ -20,7 +20,7 @@
         android:layout_alignParentTop="true"
         android:src="@drawable/moreinfo"
         android:paddingTop="@dimen/activity_actionbar_margin"
-        android:elevation="10dp"
-        android:translationZ="10dp"
+        android:elevation="@dimen/btn_shadow"
+        android:translationZ="@dimen/btn_z"
          />
 </RelativeLayout>

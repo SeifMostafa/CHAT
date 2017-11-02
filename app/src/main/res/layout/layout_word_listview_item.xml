@@ -8,13 +8,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/photo"
-        android:id="@+id/imageButton_word_item_photohelp" />
+        android:id="@+id/imageButton_word_item_photohelp"
+        android:elevation="@dimen/btn_shadow"
+        android:translationZ="@dimen/btn_z"/>
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/sound"
         android:id="@+id/imageButton_word_item_soundhelp"
+        android:elevation="@dimen/btn_shadow"
+        android:translationZ="@dimen/btn_z"
         />
 
     <TextView
@@ -30,5 +34,7 @@
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/reset"
         android:id="@+id/imageButton_word_item_back_to"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:elevation="@dimen/btn_shadow"
+        android:translationZ="@dimen/btn_z"/>
 </LinearLayout>

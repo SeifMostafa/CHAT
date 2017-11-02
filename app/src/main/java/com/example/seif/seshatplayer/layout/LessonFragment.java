@@ -142,17 +142,6 @@ public class LessonFragment extends Fragment {
                     e.printStackTrace();
                     Log.e("PlaySoundiBtn", e.toString());
                 }
-                if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
-                if (CurrentWordsArrayIndex < words.length) {
-
-                    word = words[++CurrentWordsArrayIndex];
-                    wordView_MainText.setText(word.getText());
-                    wordView_MainText.setGuidedVector(word.getFV());
-                    setNextiBtnVisibility();
-                    CreateWordTripThread().start();
-                } else {
-                    ((MainActivity) getActivity()).updatelesson(1, true);
-                }
             }
         });
         DisplayImageiBtn = (ImageButton) view.findViewById(R.id.imagebutton_photohelp);

@@ -24,15 +24,15 @@
                 android:id="@+id/imagebutton_prevlesson"
 
                 android:src="@drawable/prevlesson"
-                android:elevation="10dp"
-                android:translationZ="10dp"
+                android:elevation="@dimen/btn_shadow"
+                android:translationZ="@dimen/btn_z"
                 />
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_prevlesson_help"
-                android:elevation="10dp"
-                android:translationZ="10dp"
+                android:elevation="@dimen/btn_shadow"
+                android:translationZ="@dimen/btn_z"
                 android:src="@drawable/sound"/>
         </LinearLayout>
 
@@ -46,15 +46,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_currentlesson"
-                android:elevation="10dp"
-                android:translationZ="10dp"
+                android:elevation="@dimen/btn_shadow"
+                android:translationZ="@dimen/btn_z"
                 android:src="@drawable/reset"/>
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_currentlesson_help"
-                android:elevation="10dp"
-                android:translationZ="10dp"
+                android:elevation="@dimen/btn_shadow"
+                android:translationZ="@dimen/btn_z"
                 android:src="@drawable/sound"/>
         </LinearLayout>
 
@@ -68,15 +68,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_achievedlessons"
-                android:elevation="10dp"
-                android:translationZ="10dp"
+                android:elevation="@dimen/btn_shadow"
+                android:translationZ="@dimen/btn_z"
                 android:src="@drawable/achieved"/>
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_achievedlessons_help"
-                android:elevation="10dp"
-                android:translationZ="10dp"
+                android:elevation="@dimen/btn_shadow"
+                android:translationZ="@dimen/btn_z"
                 android:src="@drawable/sound"/>
         </LinearLayout>
     </LinearLayout>
