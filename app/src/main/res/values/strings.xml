@@ -11,5 +11,7 @@
     <string name="pickwordinstr">pickwordinstr</string>
     <string name="speakinstruction">speakinstruction</string>
     <string name="tryAgain">tryAgain</string>
+    <string name="congrats">congrats</string>
+
     <string name="urachievements">urachievements</string>
 </resources>

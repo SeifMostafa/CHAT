@@ -14,8 +14,9 @@ public class TypeWriter extends TextView {
     private int mIndex;
     private int idx;
 
-    private long mDelay = 400; //Default 500ms delay
+    private long mDelay = 400;
     private Handler mHandler = new Handler();
+
     private Runnable characterAdder = new Runnable() {
         @Override
         public void run() {

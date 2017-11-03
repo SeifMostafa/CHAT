@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 public class GestureDetector {
 
-    public boolean resetRequested = false;
-    boolean skipinit = false;
+   // public boolean resetRequested = false;
+   // boolean skipinit = false;
     double successPercentage = 0;
     private ArrayList<Direction> mUserGuidedVector;
     private Direction[] gesture;
@@ -29,7 +29,7 @@ public class GestureDetector {
 
     public boolean check(ArrayList<Direction>mUserGV) {
         successPercentage =0;
-        double progressStep = 100.0 / (double)gesture.length ;
+        double progressStep = (100.0 / (double)gesture.length );
         this.mUserGuidedVector = mUserGV;
         boolean isDetected = false;
         if (mUserGuidedVector.size() >= gesture.length) {
@@ -67,8 +67,8 @@ public class GestureDetector {
                 }
             }
             isDetected = true;
-            resetRequested = true;
-            mUserGuidedVector.clear();
+           // resetRequested = true;
+            //mUserGuidedVector.clear();
         } else {
             Log.i("GestureDetector", "check" + "shortage in touched points data");
         }

@@ -1,6 +1,7 @@
 package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import static android.app.Activity.RESULT_OK;
 
 
-public class LessonFragment extends Fragment implements UpdateWord{
+public class LessonFragment extends Fragment implements UpdateWord {
 
     public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1000;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
@@ -37,8 +38,8 @@ public class LessonFragment extends Fragment implements UpdateWord{
     private int PronouncedCounter = 0;
     private int DEFAULT_LOOP_COUNTER = 4;
     private int DEFAULT_TYPEFACE_LEVELS = 4;
-    private int word_loop = 0;
     private Boolean firstTime = false;
+    private Context mContext;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,8 +59,8 @@ public class LessonFragment extends Fragment implements UpdateWord{
         Log.i("LessonFragment", "1st time: " + firstTime);
         Log.i("LessonFragment", "word:" + word);
         Log.i("LessonFragment", "words: " + words.length + ": " + words.toString());
-
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -158,7 +159,7 @@ public class LessonFragment extends Fragment implements UpdateWord{
     @Override
     public void onResume() {
         super.onResume();
-       // if (!firstTime && !Pronounced) CreateWordTripThread().start(); //start the thread
+        // if (!firstTime && !Pronounced) CreateWordTripThread().start(); //start the thread
 
     }
 
@@ -194,7 +195,7 @@ public class LessonFragment extends Fragment implements UpdateWord{
                         try {
                             ((MainActivity) getActivity()).voiceoffer(null, word.getText());
                             sleep(1500);
-                            ((MainActivity) getActivity()).voiceoffer(wordView_MainText, ((MainActivity)getActivity()).getString(R.string.speakinstruction));
+                            ((MainActivity) getActivity()).voiceoffer(wordView_MainText, ((MainActivity) getActivity()).getString(R.string.speakinstruction));
                             sleep(2500);
                             voicerec(null);
                         } catch (Exception e) {
@@ -229,43 +230,42 @@ public class LessonFragment extends Fragment implements UpdateWord{
 
     }
 
-    public Typeface updateWordLoop() {
-        Typeface tf = null;
-
+    @Override
+    public Typeface updateWordLoop(Typeface typeface,int word_loop) {
+        Typeface tf ;
         if (word_loop < (DEFAULT_LOOP_COUNTER * DEFAULT_TYPEFACE_LEVELS)) {
             if (word_loop % DEFAULT_LOOP_COUNTER == 0) {
                 // change font
                 if (word_loop > 0 && word_loop == DEFAULT_LOOP_COUNTER) {
-                    tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lvl1.ttf");
+                    tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl2.ttf");
                 } else if (word_loop > DEFAULT_LOOP_COUNTER && word_loop == DEFAULT_LOOP_COUNTER * 2) {
-                    tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lvl2.ttf");
-                } else if (word_loop > DEFAULT_LOOP_COUNTER * 2 && word_loop == DEFAULT_LOOP_COUNTER * 3) {
-                    tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lvl3.ttf");
-                }else{
-                    this.wordView_MainText.setText("");
+                    tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl3.ttf");
+                }  else {
+                    return null;
                 }
-            }else{
-                tf = this.wordView_MainText.getTypeface();
+            } else {
+                tf = typeface;
             }
 
-            if(tf==null){
-                Log.i("TYPEFACE","null");
-            }else Log.i("TYPEFACE","!null");
-            word_loop++;
         } else {
             // change word
-            word_loop = 1;
-            tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lvl1.ttf");
+            Log.i("LessonFragment: ","UpdateWordLoop: changeword");
+            word_loop = 0;
+            tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl1.ttf");
 
-            if(CurrentWordsArrayIndex+1>words.length){
-                ((MainActivity)getActivity()).updatelesson(1,true);
-            }else{
+            if (CurrentWordsArrayIndex + 1 > words.length) {
+                ((MainActivity) mContext).updatelesson(1, true);
+            } else {
                 CurrentWordsArrayIndex++;
                 nextWordCall();
-
             }
         }
         return tf;
+    }
+
+    @Override
+    public void setmContext(Context context) {
+        mContext = context;
     }
 
     @Override
@@ -312,12 +312,13 @@ public class LessonFragment extends Fragment implements UpdateWord{
         super.onPause();
     }
 
-    private void nextWordCall(){
+    private void nextWordCall() {
         if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
 
         word = words[++CurrentWordsArrayIndex];
         wordView_MainText.setGuidedVector(word.getFV());
         wordView_MainText.setText(word.getText());
+        wordView_MainText.invalidate();
         setNextiBtnVisibility();
         CreateWordTripThread().start();
     }

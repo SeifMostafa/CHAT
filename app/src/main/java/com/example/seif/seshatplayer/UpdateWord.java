@@ -1,5 +1,6 @@
 package com.example.seif.seshatplayer;
 
+import android.content.Context;
 import android.graphics.Typeface;
 
 /**
@@ -7,5 +8,6 @@ import android.graphics.Typeface;
  */
 
 public interface UpdateWord  {
-    Typeface updateWordLoop();
+    Typeface updateWordLoop(Typeface typeface,int word_loop);
+    void setmContext(Context context);
 }
