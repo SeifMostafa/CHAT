@@ -8,5 +8,6 @@
     <dimen name="activity_word_textsize_listitem">36sp</dimen>
     <dimen name="btn_shadow">5dp</dimen>
     <dimen name="btn_z">5dp</dimen>
-        <bool name="isTablet">true</bool>
+    <dimen name="activity_phrase_textsize">140sp</dimen>
+    <bool name="isTablet">true</bool>
 </resources>

@@ -6,22 +6,26 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.example.seif.seshatplayer.model.Word;
+
 import java.io.IOException;
 
 public class TypeWriter extends TextView {
+    public Word word;
+    public Context mContext;
     Context context;
     private CharSequence mText;
     private int mIndex;
     private int idx;
-
-    private long mDelay = 400;
+    private long mDelay = 600;
     private Handler mHandler = new Handler();
+    private Handler moveHandler = new Handler();
 
     private Runnable characterAdder = new Runnable() {
         @Override
         public void run() {
             try {
-                Thread.sleep(600);
+                Thread.sleep(400);
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -30,16 +34,17 @@ public class TypeWriter extends TextView {
             setText(txt);
             if (mIndex <= mText.length()) {
                 mHandler.postDelayed(characterAdder, mDelay);
-                ((MainActivity) context).voiceoffer(null, String.valueOf(mText.charAt(idx)));
+                ((MainActivity) context).voiceoffer(null, String.valueOf(mText.charAt(idx)) + ".wav");
                 Log.i("TypeWriter::characterAdder Runnable " + idx, mText.charAt(idx) + "");
                 idx++;
             } else {
 
                 ((MainActivity) context).voiceoffer(null, mText.toString());
+
+                Log.i("TypeWriter: ", "finished");
             }
         }
     };
-
 
     public TypeWriter(Context context) throws IOException {
         super(context);
@@ -49,6 +54,10 @@ public class TypeWriter extends TextView {
     public TypeWriter(Context context, AttributeSet attrs) throws IOException {
         super(context, attrs);
         this.context = context;
+    }
+
+    void setContext(Context context) {
+        this.mContext = context;
     }
 
     public void animateText(CharSequence text) {
@@ -65,4 +74,7 @@ public class TypeWriter extends TextView {
         mDelay = millis;
     }
 
+    public void setWord(Word w) {
+        this.word = w;
+    }
 }

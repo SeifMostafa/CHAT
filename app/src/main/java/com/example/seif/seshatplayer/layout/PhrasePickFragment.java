@@ -20,9 +20,10 @@ import java.text.BreakIterator;
 import java.util.Locale;
 
 public class PhrasePickFragment extends Fragment {
-    private String word = null,phrase = null;
     TextView textView_phrase,textView_picked;
     ImageButton helpiBtn;
+    private String word = null, phrase = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,12 +60,11 @@ public class PhrasePickFragment extends Fragment {
         textView_phrase.setVisibility(View.VISIBLE);
 
 
-
-        helpiBtn = (ImageButton) ((MainActivity)getActivity()).findViewById(R.id.imagebutton_moreInfo);
+        helpiBtn = (ImageButton) getActivity().findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity)getActivity()).voiceoffer(helpiBtn,((MainActivity)getActivity()).getString(R.string.pickwordinstr));
+                ((MainActivity) getActivity()).voiceoffer(helpiBtn, getActivity().getString(R.string.pickwordinstr));
             }
         });
 
@@ -72,18 +72,22 @@ public class PhrasePickFragment extends Fragment {
     }
 
 
-    private ClickableSpan getClickableSpan(final String word) {
+    private ClickableSpan getClickableSpan(final String word_picked) {
         return new ClickableSpan() {
-            final String mWord;
-            {
-                mWord = word;
-            }
+            final String mWord = word_picked;
+
+            /* {
+                 mWord = word;
+             }*/
             @Override
             public void onClick(View widget) {
                 Log.d("tapped on:", mWord);
-                textView_picked.setText(mWord);
-                if(mWord.equals(word)){
+
+
+                if (mWord.equals(word)) {
                     // congrats .. return
+                    Log.i("PhrasePickFragment", "congrats " + word);
+                    textView_picked.setText(word);
                 }
             }
             public void updateDrawState(TextPaint ds) {

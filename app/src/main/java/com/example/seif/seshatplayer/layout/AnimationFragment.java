@@ -3,6 +3,7 @@ package com.example.seif.seshatplayer.layout;
 import android.app.Fragment;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +23,9 @@ public class AnimationFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            this.word = new Word(getArguments().getParcelable(MainActivity.WordKey));
+            this.word = getArguments().getParcelable(MainActivity.WordKey);
+            if (word != null) Log.i("AnimationFragment", "Word != null");
+            else Log.i("AnimationFragment", "Word = null");
         }
     }
 
@@ -37,6 +40,9 @@ public class AnimationFragment extends Fragment {
         custTextView.setVisibility(View.VISIBLE);
         custTextView.setCharacterDelay(400);
         custTextView.animateText(word.getText());
+
+        custTextView.setWord(word);
+
 
 
         return view;

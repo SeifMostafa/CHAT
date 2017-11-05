@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.concurrent.locks.Lock;
 
 import static java.lang.Thread.sleep;
 
@@ -58,11 +59,12 @@ public class MainActivity extends AppCompatActivity {
     public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordIndexKey = "i", WordKey = "w", PhraseKey = "p", LessonKey = "L";
     public static final String SFKEY = "0";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
+    public static Lock mLockPhraselessonFragments;
     public static String firstTimekey = "1stTime";
 
     SharedPreferences sharedPreferences_words = null;
     SharedPreferences.Editor sharedPreferences_words_editor = null;
-    MediaPlayer mediaPlayer = null;
+    MediaPlayer mediaPlayer;
 
     private String WordsFilePath = "WORDS.txt", PhrasesFilePath = "PHRASES.txt", SF = "/SeShatSF/";
     private String FileWordsAchieved = "Archive.txt";
@@ -72,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private int lesson_index = 1;
 
     private String firstPhrase = "أنا إسمي ";
+    private Handler mHandler = new Handler();
+
 
     public static Direction[] getDirections(String filepath) {
         Stack<Direction> directions = new Stack<>();
@@ -119,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
     /*
       * read file into string and the end = \n and return this string
       */
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
 
             setLessons();
             Word phrase = new Word(firstPhrase + lessons.get(lesson_index)[0].getText());
-            OpenLessonFragment(phrase);
+            openLessonFragment(phrase);
 
             SaveOnSharedPref(LessonKey, String.valueOf(lesson_index));
             SaveOnSharedPref(WordIndexKey, String.valueOf(word_index));
@@ -177,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
             PhrasesFilePath = SF + PhrasesFilePath;
 
             setLessons();
-            OpenLessonFragment(lesson_index);
+            openLessonFragment(lesson_index);
         }
     }
 
@@ -236,19 +239,19 @@ public class MainActivity extends AppCompatActivity {
         if (flag) {
             switch (ToFlag) {
                 case 0:
-                    OpenLessonFragment(lesson_index);
+                    openLessonFragment(lesson_index);
                     break;
                 case -1:
-                    OpenLessonFragment(lesson_index - 1);
+                    openLessonFragment(lesson_index - 1);
                     break;
                 case 1:
-                    OpenLessonFragment(lesson_index + 1);
+                    openLessonFragment(lesson_index + 1);
                     break;
             }
         } else {
             lesson_index = ToFlag;
             setLessons();
-            OpenLessonFragment(ToFlag);
+            openLessonFragment(ToFlag);
         }
     }
 
@@ -317,12 +320,6 @@ public class MainActivity extends AppCompatActivity {
             view.startAnimation(shake);
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-       /* builder.setPositiveButton("شكرا", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });*/
         final AlertDialog dialog = builder.create();
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
@@ -427,26 +424,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void openLessonFragment(int i) {
 
-    private void OpenLessonFragment(int i) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         LessonFragment lessonFragment = new LessonFragment();
         Bundle bundle = new Bundle();
         Word[] lesson = lessons.get(i);
 
-        Log.i("MainActivity", "OpenLessonFragment: am here with i(lesson_index)= " + i);
-        Log.i("MainActivity", "OpenLessonFragment: & lesson.sz= " + lesson.length);
+        Log.i("MainActivity", "openLessonFragment: am here with i(lesson_index)= " + i);
+        Log.i("MainActivity", "openLessonFragment: & lesson.sz= " + lesson.length);
 
         bundle.putParcelableArray(LessonKey, lesson);
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
         fragmentTransaction.commit();
-        Log.i("MainActivity", "OpenLessonFragment:: lesson_index" + lesson_index);
+        Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
 
     }
 
-    public void OpenLessonFragment(Word word) {
+    public void openLessonFragment(Word word) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         LessonFragment lessonFragment = new LessonFragment();
@@ -465,10 +462,10 @@ public class MainActivity extends AppCompatActivity {
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
         fragmentTransaction.commit();
-        Log.i("MainActivity", "OpenLessonFragment:: lesson_index" + lesson_index);
+        Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
     }
 
-    public void OpenPhraseFragment(String phrase, String word) {
+    public void openPhraseFragment(String phrase, String word) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         PhrasePickFragment phrasePickFragment = new PhrasePickFragment();
@@ -480,12 +477,13 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    public void OpenAnimationFragment(String word) {
+    public void openAnimationFragment(Word word) {
+
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         AnimationFragment animationFragment = new AnimationFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(WordKey, word);
+        bundle.putParcelable(WordKey, word);
         animationFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, animationFragment);
         fragmentTransaction.commit();
@@ -565,8 +563,6 @@ public class MainActivity extends AppCompatActivity {
                             String word_txt = WordsBufferedReader.readLine();
                             String phrase = PhrasesBufferedReader.readLine();
                             lessonWords[i] = form_word(word_txt, phrase);
-                           // Log.i("setLessons: ","lessonWords[i]: " + i + " "+lessonWords[i]);
-
                         }
                         lessons.put(k, lessonWords);
                         StringlessonCapacity = WordsBufferedReader.readLine();

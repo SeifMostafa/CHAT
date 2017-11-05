@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,26 +29,28 @@ import static android.app.Activity.RESULT_OK;
 public class LessonFragment extends Fragment implements UpdateWord {
 
     public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1000;
+    public static int DEFAULT_LOOP_COUNTER = 4;
+    public static int DEFAULT_TYPEFACE_LEVELS = 4;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
     WordView wordView_MainText = null;
     Thread Thread_WordTrip = null;
+    LessonFragment instance;
     private Word[] words;
     private Word word = null;
     private int CurrentWordsArrayIndex = 0;
     private boolean Pronounced = false;
     private int PronouncedCounter = 0;
-    private int DEFAULT_LOOP_COUNTER = 4;
-    private int DEFAULT_TYPEFACE_LEVELS = 4;
     private Boolean firstTime = false;
     private Context mContext;
+    private Handler mhandler = new Handler();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             this.words = (Word[]) getArguments().getParcelableArray(MainActivity.LessonKey);
-            this.word = (Word) getArguments().getParcelable(MainActivity.WordKey);
-            this.firstTime = (Boolean) getArguments().getBoolean(MainActivity.firstTimekey);
+            this.word = getArguments().getParcelable(MainActivity.WordKey);
+            this.firstTime = getArguments().getBoolean(MainActivity.firstTimekey);
 
             if (this.word == null && words != null) {
                 this.word = words[0];
@@ -59,6 +62,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         Log.i("LessonFragment", "1st time: " + firstTime);
         Log.i("LessonFragment", "word:" + word);
         Log.i("LessonFragment", "words: " + words.length + ": " + words.toString());
+        instance = this;
     }
 
 
@@ -70,6 +74,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
 
         wordView_MainText = (WordView) view.findViewById(R.id.textView_maintext);
         wordView_MainText.setText(word.getText());
+        wordView_MainText.setmLessonFragment(this);
+
 
         if (word.getFV() != null) {
             wordView_MainText.setGuidedVector(word.getFV());
@@ -79,7 +85,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
             wordView_MainText.setText(word.getText());
         }
 
-        helpiBtn = (ImageButton) ((MainActivity) getActivity()).findViewById(R.id.imagebutton_moreInfo);
+
+        helpiBtn = (ImageButton) getActivity().findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -139,6 +146,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 }
             }
         });
+
         DisplayImageiBtn = (ImageButton) view.findViewById(R.id.imagebutton_photohelp);
         DisplayImageiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,8 +167,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
     @Override
     public void onResume() {
         super.onResume();
-        // if (!firstTime && !Pronounced) CreateWordTripThread().start(); //start the thread
-
+        if (!firstTime && !Pronounced) CreateWordTripThread().start(); //start the thread
     }
 
     private void setNextiBtnVisibility() {
@@ -189,13 +196,13 @@ public class LessonFragment extends Fragment implements UpdateWord {
                     sleep(WAIT2SayInstructions);
                 } catch (InterruptedException e) {
                 }
-                ((MainActivity) getActivity()).runOnUiThread(new Runnable() {
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            ((MainActivity) getActivity()).voiceoffer(null, word.getText());
+                            ((MainActivity) getActivity()).voiceoffer(null, instance.word.getText());
                             sleep(1500);
-                            ((MainActivity) getActivity()).voiceoffer(wordView_MainText, ((MainActivity) getActivity()).getString(R.string.speakinstruction));
+                            ((MainActivity) getActivity()).voiceoffer(wordView_MainText, getActivity().getString(R.string.speakinstruction));
                             sleep(2500);
                             voicerec(null);
                         } catch (Exception e) {
@@ -217,7 +224,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
 
     private void voicerec(View view) {
         if (view != null) {
-            Animation shake = AnimationUtils.loadAnimation(((MainActivity) getActivity()), R.anim.shake);
+            Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.shake);
             view.startAnimation(shake);
         }
         Intent voicerecogize = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -231,8 +238,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
     }
 
     @Override
-    public Typeface updateWordLoop(Typeface typeface,int word_loop) {
-        Typeface tf ;
+    public Typeface updateWordLoop(Typeface typeface, int word_loop) {
+        Typeface tf;
         if (word_loop < (DEFAULT_LOOP_COUNTER * DEFAULT_TYPEFACE_LEVELS)) {
             if (word_loop % DEFAULT_LOOP_COUNTER == 0) {
                 // change font
@@ -240,7 +247,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
                     tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl2.ttf");
                 } else if (word_loop > DEFAULT_LOOP_COUNTER && word_loop == DEFAULT_LOOP_COUNTER * 2) {
                     tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl3.ttf");
-                }  else {
+                } else {
                     return null;
                 }
             } else {
@@ -248,16 +255,38 @@ public class LessonFragment extends Fragment implements UpdateWord {
             }
 
         } else {
+
+            ((MainActivity) mContext).openAnimationFragment(instance.word);
+
+
+            mhandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ((MainActivity) mContext).openPhraseFragment(instance.word.getPhrase(), instance.word.getText());
+
+                }
+            }, 4000);
+
+
             // change word
-            Log.i("LessonFragment: ","UpdateWordLoop: changeword");
-            word_loop = 0;
+            Log.i("LessonFragment: ", "UpdateWordLoop: changeword");
             tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl1.ttf");
 
-            if (CurrentWordsArrayIndex + 1 > words.length) {
+            if (instance.CurrentWordsArrayIndex + 1 > instance.words.length) {
+                Log.i("LessonFragment: ", "UpdateLesson: ");
+
                 ((MainActivity) mContext).updatelesson(1, true);
             } else {
-                CurrentWordsArrayIndex++;
                 nextWordCall();
+
+                mhandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        instance.wordView_MainText.invalidate();
+                        ((MainActivity) mContext).openLessonFragment(instance.word);
+
+                    }
+                }, 11000);
             }
         }
         return tf;
@@ -267,6 +296,12 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public void setmContext(Context context) {
         mContext = context;
     }
+
+    @Override
+    public void setLessonFragment(LessonFragment fragment) {
+        instance = fragment;
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -313,13 +348,21 @@ public class LessonFragment extends Fragment implements UpdateWord {
     }
 
     private void nextWordCall() {
-        if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
+        if (instance.Thread_WordTrip != null) instance.Thread_WordTrip.interrupt();
 
-        word = words[++CurrentWordsArrayIndex];
-        wordView_MainText.setGuidedVector(word.getFV());
-        wordView_MainText.setText(word.getText());
-        wordView_MainText.invalidate();
-        setNextiBtnVisibility();
-        CreateWordTripThread().start();
+        instance.word = instance.words[++instance.CurrentWordsArrayIndex];
+
+        instance.wordView_MainText.setGuidedVector(instance.word.getFV());
+        instance.wordView_MainText.setText(instance.word.getText());
+        instance.setNextiBtnVisibility();
+        instance.wordView_MainText.word_loop = 0;
+        instance.wordView_MainText.init();
+        // instance.wordView_MainText.invalidate();
+
+
+        instance.CreateWordTripThread().start();
+
     }
+
+
 }

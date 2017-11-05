@@ -39,11 +39,11 @@ public class HelpFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_help, container, false);
 
-        helpiBtn = (ImageButton) ((MainActivity) getActivity()).findViewById(R.id.imagebutton_moreInfo);
+        helpiBtn = (ImageButton) getActivity().findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) getActivity()).voiceoffer(helpiBtn, ((MainActivity)getActivity()).getString(R.string.helpfragmenthelpbtninstr));
+                ((MainActivity) getActivity()).voiceoffer(helpiBtn, getActivity().getString(R.string.helpfragmenthelpbtninstr));
             }
         });
 
@@ -100,7 +100,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).voiceoffer(PrevlessoniBtn_help, ((MainActivity)getActivity()).getString(R.string.backprevlesson));
+                    ((MainActivity) getActivity()).voiceoffer(PrevlessoniBtn_help, getActivity().getString(R.string.backprevlesson));
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("PrevlessoniBtn_help", e.toString());
@@ -112,7 +112,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).voiceoffer(CurrentlessoniBtn_help, ((MainActivity)getActivity()).getString(R.string.backcurrentlesson));
+                    ((MainActivity) getActivity()).voiceoffer(CurrentlessoniBtn_help, getActivity().getString(R.string.backcurrentlesson));
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("CurrentlessoniBtn_help", e.toString());
@@ -126,7 +126,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).voiceoffer(AchievedlessoniBtn_help, ((MainActivity)getActivity()).getString(R.string.urachievements));
+                    ((MainActivity) getActivity()).voiceoffer(AchievedlessoniBtn_help, getActivity().getString(R.string.urachievements));
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("CurrentlessoniBtn_help", e.toString());
@@ -208,7 +208,7 @@ public class HelpFragment extends Fragment {
                             AchievedDialog.dismiss();
                             AchievedDialog.cancel();
                             //
-                            ((MainActivity) getActivity()).OpenLessonFragment(new Word(getItem(position)));
+                            ((MainActivity) getActivity()).openLessonFragment(new Word(getItem(position)));
                         } catch (Exception e) {
                             e.printStackTrace();
                             Log.e("imageButton_redo", e.toString());
