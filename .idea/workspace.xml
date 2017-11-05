@@ -11,25 +11,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5bf74d18-9cc4-4eab-abf3-1212411f41a5" name="Default" comment="Edit on LessonFragment in loop of word &#10;Removing Lock &#10; Media not Solved&#10; PickPhrase has issues&#10;">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileHashes.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileHashes.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileSnapshots.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileSnapshots.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.lock" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock" afterPath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock" afterPath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/MainActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/MainActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/TypeWriter.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/TypeWriter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/UpdateWord.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/UpdateWord.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/WordView.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/WordView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/AnimationFragment.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/AnimationFragment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/HelpFragment.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/HelpFragment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/LessonFragment.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/LessonFragment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/PhrasePickFragment.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/PhrasePickFragment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_phrase_pick.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_phrase_pick.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/values-sw600dp/dimens.xml" afterPath="$PROJECT_DIR$/app/src/main/res/values-sw600dp/dimens.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/values/dimens.xml" afterPath="$PROJECT_DIR$/app/src/main/res/values/dimens.xml" />
     </list>
     <ignored path="SeShatPlayer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -90,10 +72,9 @@
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/PhrasePickFragment.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="263">
-              <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
+              <caret line="85" column="0" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
               <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#2879#2942#0" expanded="true" />
+                <element signature="e#2749#2796#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -103,8 +84,9 @@
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/LessonFragment.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="68">
-              <caret line="286" column="39" selection-start-line="286" selection-start-column="39" selection-end-line="286" selection-end-column="39" />
+              <caret line="283" column="39" selection-start-line="283" selection-start-column="39" selection-end-line="283" selection-end-column="39" />
               <folding>
+                <element signature="imports" expanded="false" />
                 <element signature="method#onActivityResult#0;class#LessonFragment#0" expanded="false" />
                 <element signature="method#onStop#0;class#LessonFragment#0" expanded="false" />
                 <element signature="method#onDetach#0;class#LessonFragment#0" expanded="false" />
@@ -154,6 +136,9 @@
         <entry key="$PROJECT_DIR$" value="unfinishedClear" />
       </map>
     </option>
+    <push-targets>
+      <push-target-info repo="$PROJECT_DIR$" source="player" target-remote="org" target-branch="player" />
+    </push-targets>
   </component>
   <component name="GradleLocalSettings">
     <option name="myGradleHomes">
@@ -2060,7 +2045,6 @@
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_help.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/layout_word_listview_item.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/HelpFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/values-sw600dp/styles.xml" />
         <option value="$PROJECT_DIR$/captures/com.example.seif.seshatplayer_2017.11.02_23.19.txt" />
         <option value="$PROJECT_DIR$/app/src/main/res/values-sw600dp/strings.xml" />
@@ -2077,6 +2061,7 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/PhrasePickFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/LessonFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/MainActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/HelpFragment.java" />
       </list>
     </option>
   </component>
@@ -2582,7 +2567,14 @@
       <option name="project" value="LOCAL" />
       <updated>1508408669451</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Edit on LessonFragment in loop of word &#10;Removing Lock &#10; Media not Solved&#10; PickPhrase has issues&#10;">
+      <created>1509901964739</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1509901964739</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -2632,9 +2624,13 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <MESSAGE value="old version but updated" />
     <MESSAGE value="Edit on LessonFragment in loop of word &#10;Removing Lock &#10; Media not Solved&#10; PickPhrase has issues&#10;" />
     <option name="LAST_COMMIT_MESSAGE" value="Edit on LessonFragment in loop of word &#10;Removing Lock &#10; Media not Solved&#10; PickPhrase has issues&#10;" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -2931,8 +2927,8 @@
         <state relative-caret-position="195">
           <caret line="19" column="53" selection-start-line="19" selection-start-column="53" selection-end-line="19" selection-end-column="53" />
           <folding>
-            <element signature="e#633#666#0" expanded="false" />
-            <element signature="e#1088#1119#0" expanded="false" />
+            <element signature="e#668#701#0" expanded="false" />
+            <element signature="e#1124#1155#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -3001,8 +2997,9 @@
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/LessonFragment.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
-          <caret line="286" column="39" selection-start-line="286" selection-start-column="39" selection-end-line="286" selection-end-column="39" />
+          <caret line="283" column="39" selection-start-line="283" selection-start-column="39" selection-end-line="283" selection-end-column="39" />
           <folding>
+            <element signature="imports" expanded="false" />
             <element signature="method#onActivityResult#0;class#LessonFragment#0" expanded="false" />
             <element signature="method#onStop#0;class#LessonFragment#0" expanded="false" />
             <element signature="method#onDetach#0;class#LessonFragment#0" expanded="false" />
@@ -3024,10 +3021,9 @@
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/layout/PhrasePickFragment.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="263">
-          <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
+          <caret line="85" column="0" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2879#2942#0" expanded="true" />
+            <element signature="e#2749#2796#0" expanded="true" />
           </folding>
         </state>
       </provider>
