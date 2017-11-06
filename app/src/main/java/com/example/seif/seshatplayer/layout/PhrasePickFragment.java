@@ -1,6 +1,7 @@
 package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.TextPaint;
@@ -23,7 +24,7 @@ public class PhrasePickFragment extends Fragment {
     TextView textView_phrase,textView_picked;
     ImageButton helpiBtn;
     private String word = null, phrase = null;
-
+    public static String PhrasePickFragment_TAG = "PhrasePickFragment";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,9 +40,14 @@ public class PhrasePickFragment extends Fragment {
         View view =  inflater.inflate(R.layout.fragment_phrase_pick, container, false);
         textView_phrase = (TextView) view.findViewById(R.id.textView_phrase);
         textView_picked = (TextView) view.findViewById(R.id.textView_picked);
+
+        textView_phrase.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf"));
+        textView_picked.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf"));
+
         textView_picked.setText("");
         textView_phrase.setMovementMethod(LinkMovementMethod.getInstance());
         textView_phrase.setText(phrase, TextView.BufferType.SPANNABLE);
+
         Spannable spans = (Spannable) textView_phrase.getText();
         Locale loc = new Locale("ar");
         BreakIterator iterator = BreakIterator.getWordInstance(loc);
@@ -72,22 +78,16 @@ public class PhrasePickFragment extends Fragment {
     }
 
 
-    private ClickableSpan getClickableSpan(final String word_picked) {
+    private ClickableSpan getClickableSpan(final String w) {
         return new ClickableSpan() {
-            final String mWord = word_picked;
-
-            /* {
-                 mWord = word;
-             }*/
             @Override
             public void onClick(View widget) {
-                Log.d("tapped on:", mWord);
-
-
-                if (mWord.equals(word)) {
+                textView_picked.setText(w);
+                if (w.equals(word)) {
                     // congrats .. return
                     Log.i("PhrasePickFragment", "congrats " + word);
-                    textView_picked.setText(word);
+                    ((MainActivity)getActivity()).backToLessonFfromPhraseFusingBacStack();
+                    onDetach();
                 }
             }
             public void updateDrawState(TextPaint ds) {
@@ -97,4 +97,8 @@ public class PhrasePickFragment extends Fragment {
         };
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
 }

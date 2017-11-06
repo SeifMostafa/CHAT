@@ -19,7 +19,6 @@ public class TypeWriter extends TextView {
     private int idx;
     private long mDelay = 600;
     private Handler mHandler = new Handler();
-    private Handler moveHandler = new Handler();
 
     private Runnable characterAdder = new Runnable() {
         @Override

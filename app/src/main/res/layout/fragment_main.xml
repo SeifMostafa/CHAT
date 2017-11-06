@@ -13,6 +13,7 @@
         android:textAlignment="center"
         android:text="@string/text"
         android:textSize="@dimen/activity_word_textsize"
+        android:background="@color/colorWhity"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

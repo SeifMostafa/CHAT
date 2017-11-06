@@ -50,6 +50,7 @@ import java.util.Scanner;
 import java.util.Stack;
 import java.util.concurrent.locks.Lock;
 
+import static com.example.seif.seshatplayer.layout.LessonFragment.LessonFragment_TAG;
 import static java.lang.Thread.sleep;
 
 
@@ -160,11 +161,11 @@ public class MainActivity extends AppCompatActivity {
                 sleep(1000);
                 voiceoffer(null, lessons.get(lesson_index)[0].getText());
                 Handler handler = new Handler();
-                handler.postDelayed(new Runnable(){
+                handler.postDelayed(new Runnable() {
                     @Override
-                    public void run(){
+                    public void run() {
                         // do something
-                        updatelesson(0,true);
+                        updatelesson(0, true);
                     }
                 }, 1500);
             } catch (InterruptedException e) {
@@ -262,16 +263,26 @@ public class MainActivity extends AppCompatActivity {
             view.startAnimation(shake);
         }
         if (mediaPlayer != null) {
+
             if (mediaPlayer.isLooping() || mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
-                mediaPlayer.release();
             }
+            mediaPlayer.release();
         }
         try {
+
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(SF + DataPath2Bplayed);
             mediaPlayer.prepare();
             mediaPlayer.start();
+
+          /*  mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                public void onPrepared(MediaPlayer mp) {
+                    mp.start();
+
+                }
+            });*/
+
         } catch (IllegalStateException | IOException e) {
             Log.e("MainActivity", "voiceoffer::e: " + e.toString());
             Log.e("MainActivity", "voiceoffer::DataPath2Bplayed: " + SF + DataPath2Bplayed);
@@ -436,11 +447,13 @@ public class MainActivity extends AppCompatActivity {
         Log.i("MainActivity", "openLessonFragment: & lesson.sz= " + lesson.length);
 
         bundle.putParcelableArray(LessonKey, lesson);
+
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
+     //   fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
-        Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
 
+        Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
     }
 
     public void openLessonFragment(Word word) {
@@ -450,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
 
         if (lesson_index == 1) {
-             word = form_word(word.getText(), null);
+            word = form_word(word.getText(), null);
             bundle.putBoolean(firstTimekey, true);
             bundle.putParcelableArray(LessonKey, lessons.get(1));
         } else {
@@ -461,8 +474,18 @@ public class MainActivity extends AppCompatActivity {
         bundle.putParcelable(WordKey, word);
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
+       // fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
         Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
+    }
+
+    public void backToLessonFfromPhraseFusingBacStack() {
+
+      /*  getSupportFragmentManager().beginTransaction().
+                remove(getSupportFragmentManager().findFragmentById(R.id.fragment_replacement)).commit();
+*/
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.popBackStack();
     }
 
     public void openPhraseFragment(String phrase, String word) {
@@ -474,6 +497,7 @@ public class MainActivity extends AppCompatActivity {
         bundle.putString(WordKey, word);
         phrasePickFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, phrasePickFragment);
+        //  fragmentTransaction.addToBackStack(PhrasePickFragment_TAG);
         fragmentTransaction.commit();
     }
 
@@ -486,6 +510,7 @@ public class MainActivity extends AppCompatActivity {
         bundle.putParcelable(WordKey, word);
         animationFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, animationFragment);
+         fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
     }
 
@@ -495,7 +520,9 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         HelpFragment helpFragment = new HelpFragment();
         fragmentTransaction.replace(R.id.fragment_replacement, helpFragment);
+       // fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
+
     }
 
     public void AssignWordAsFinished(String Word) {

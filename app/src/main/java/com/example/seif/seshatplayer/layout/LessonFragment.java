@@ -29,12 +29,14 @@ import static android.app.Activity.RESULT_OK;
 public class LessonFragment extends Fragment implements UpdateWord {
 
     public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1000;
-    public static int DEFAULT_LOOP_COUNTER = 4;
-    public static int DEFAULT_TYPEFACE_LEVELS = 4;
+    public static int DEFAULT_LOOP_COUNTER = 2;
+    public static int DEFAULT_TYPEFACE_LEVELS = 2;
+    public static String LessonFragment_TAG = "LessonFragment";
+
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
     WordView wordView_MainText = null;
     Thread Thread_WordTrip = null;
-    LessonFragment instance;
+
     private Word[] words;
     private Word word = null;
     private int CurrentWordsArrayIndex = 0;
@@ -43,6 +45,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
     private Boolean firstTime = false;
     private Context mContext;
     private Handler mhandler = new Handler();
+
+    LessonFragment instance;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -118,7 +122,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 wordView_MainText.setText(word.getText());
 
                 setPreviBtnVisibilty();
-                CreateWordTripThread().start();
+              //  CreateWordTripThread().start();
 
             }
         });
@@ -164,10 +168,11 @@ public class LessonFragment extends Fragment implements UpdateWord {
         return view;
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
-        if (!firstTime && !Pronounced) CreateWordTripThread().start(); //start the thread
+    //    if (!firstTime && !Pronounced) CreateWordTripThread().start(); //start the thread
     }
 
     private void setNextiBtnVisibility() {
@@ -196,6 +201,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
                     sleep(WAIT2SayInstructions);
                 } catch (InterruptedException e) {
                 }
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -255,10 +261,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
             }
 
         } else {
-
+                //AssignWordAsFinished(word.getText());
             ((MainActivity) mContext).openAnimationFragment(instance.word);
-
-
             mhandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -267,29 +271,44 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 }
             }, 4000);
 
-
             // change word
             Log.i("LessonFragment: ", "UpdateWordLoop: changeword");
             tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl1.ttf");
 
             if (instance.CurrentWordsArrayIndex + 1 > instance.words.length) {
                 Log.i("LessonFragment: ", "UpdateLesson: ");
-
                 ((MainActivity) mContext).updatelesson(1, true);
             } else {
-                nextWordCall();
-
-                mhandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        instance.wordView_MainText.invalidate();
-                        ((MainActivity) mContext).openLessonFragment(instance.word);
-
-                    }
-                }, 11000);
+               // instance.nextWordCall();
             }
         }
         return tf;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        try{
+            setPreviBtnVisibilty();
+            setNextiBtnVisibility();
+            Log.e("LessonFragment","onSaveInstanceState: AM HERE");
+
+        }catch (Exception e) {
+            Log.e("LessonFragment","onSaveInstanceState: can't set visibilities!");
+        }
+        try{
+
+            Log.e("LessonFragment","onSaveInstanceState: AM HERE");
+
+           /* instance.wordView_MainText.word_loop = 0;
+            instance.wordView_MainText.init();
+            // instance.wordView_MainText.invalidate();
+            instance.CreateWordTripThread().start();*/
+        }catch (Exception e){
+            Log.e("LessonFragment","onSaveInstanceState: can't set data!");
+
+        }
+
     }
 
     @Override
@@ -355,12 +374,11 @@ public class LessonFragment extends Fragment implements UpdateWord {
         instance.wordView_MainText.setGuidedVector(instance.word.getFV());
         instance.wordView_MainText.setText(instance.word.getText());
         instance.setNextiBtnVisibility();
+        instance.setPreviBtnVisibilty();
         instance.wordView_MainText.word_loop = 0;
         instance.wordView_MainText.init();
         // instance.wordView_MainText.invalidate();
-
-
-        instance.CreateWordTripThread().start();
+      //  instance.CreateWordTripThread().start();
 
     }
 

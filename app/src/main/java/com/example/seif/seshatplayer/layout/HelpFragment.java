@@ -25,7 +25,7 @@ public class HelpFragment extends Fragment {
 
     ImageButton helpiBtn, PrevlessoniBtn, CurrentlessoniBtn, AchievedlessoniBtn, PrevlessoniBtn_help, CurrentlessoniBtn_help, AchievedlessoniBtn_help;
     AlertDialog AchievedDialog;
-
+    public static String HelpFragment_TAG ="HelpFragment";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
