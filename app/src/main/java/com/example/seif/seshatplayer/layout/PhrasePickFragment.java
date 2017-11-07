@@ -1,7 +1,6 @@
 package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.TextPaint;
@@ -21,10 +20,11 @@ import java.text.BreakIterator;
 import java.util.Locale;
 
 public class PhrasePickFragment extends Fragment {
+    public static String PhrasePickFragment_TAG = "PhrasePickFragment";
     TextView textView_phrase,textView_picked;
     ImageButton helpiBtn;
     private String word = null, phrase = null;
-    public static String PhrasePickFragment_TAG = "PhrasePickFragment";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,8 +41,8 @@ public class PhrasePickFragment extends Fragment {
         textView_phrase = (TextView) view.findViewById(R.id.textView_phrase);
         textView_picked = (TextView) view.findViewById(R.id.textView_picked);
 
-        textView_phrase.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf"));
-        textView_picked.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf"));
+        //textView_phrase.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf"));
+        //textView_picked.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf"));
 
         textView_picked.setText("");
         textView_phrase.setMovementMethod(LinkMovementMethod.getInstance());
@@ -77,17 +77,23 @@ public class PhrasePickFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("PhrasePickFragment", "onResume");
+    }
 
     private ClickableSpan getClickableSpan(final String w) {
         return new ClickableSpan() {
             @Override
             public void onClick(View widget) {
+
                 textView_picked.setText(w);
-                if (w.equals(word)) {
+                Log.i("PhrasePickFragment", "ClickableSpan " + w + " " + word);
+                if (w.equals(word) || word.contains(w)) {
                     // congrats .. return
                     Log.i("PhrasePickFragment", "congrats " + word);
-                    ((MainActivity)getActivity()).backToLessonFfromPhraseFusingBacStack();
-                    onDetach();
+                    ((MainActivity) getActivity()).backToLessonFragment();
                 }
             }
             public void updateDrawState(TextPaint ds) {
@@ -95,10 +101,5 @@ public class PhrasePickFragment extends Fragment {
                 ds.setUnderlineText(false);
             }
         };
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 }

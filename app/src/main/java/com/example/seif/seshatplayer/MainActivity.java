@@ -449,8 +449,8 @@ public class MainActivity extends AppCompatActivity {
         bundle.putParcelableArray(LessonKey, lesson);
 
         lessonFragment.setArguments(bundle);
-        fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
-     //   fragmentTransaction.addToBackStack(LessonFragment_TAG);
+        fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment, LessonFragment_TAG);
+        fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
 
         Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
@@ -473,19 +473,27 @@ public class MainActivity extends AppCompatActivity {
 
         bundle.putParcelable(WordKey, word);
         lessonFragment.setArguments(bundle);
-        fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment);
-       // fragmentTransaction.addToBackStack(LessonFragment_TAG);
+        fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment, LessonFragment_TAG);
+        fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
         Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
     }
 
-    public void backToLessonFfromPhraseFusingBacStack() {
+    public void backToLessonFragment() {
+        Log.i("MainActivity", "backToLessonFragment :: am here!");
 
-      /*  getSupportFragmentManager().beginTransaction().
-                remove(getSupportFragmentManager().findFragmentById(R.id.fragment_replacement)).commit();
-*/
         FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.popBackStack();
+        LessonFragment lessonFragment = (LessonFragment) fragmentManager.findFragmentByTag(LessonFragment_TAG);
+        if (lessonFragment != null) {
+            Log.i("MainActivity", "backToLessonFragment != null");
+
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment, LessonFragment_TAG);
+            fragmentTransaction.addToBackStack(LessonFragment_TAG);
+            fragmentTransaction.commit();
+        } else {
+            Log.i("MainActivity", "lessonFragment = null");
+        }
     }
 
     public void openPhraseFragment(String phrase, String word) {
@@ -501,6 +509,13 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+   /* public void removeLessonFragment(){
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        LessonFragment lessonFragment = new LessonFragment();
+        fragmentTransaction.remove(lessonFragment).commit();
+    }*/
+
     public void openAnimationFragment(Word word) {
 
         FragmentManager fragmentManager = getFragmentManager();
@@ -510,7 +525,7 @@ public class MainActivity extends AppCompatActivity {
         bundle.putParcelable(WordKey, word);
         animationFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, animationFragment);
-         fragmentTransaction.addToBackStack(LessonFragment_TAG);
+        // fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
     }
 
@@ -525,7 +540,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void AssignWordAsFinished(String Word) {
+    public void assignWordAsFinished(String Word) {
         try {
             FileWriter writer = new FileWriter(FileWordsAchieved, true);
             BufferedWriter bufferedWriter = new BufferedWriter(writer);

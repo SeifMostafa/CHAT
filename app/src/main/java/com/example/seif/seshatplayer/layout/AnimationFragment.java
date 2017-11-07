@@ -15,9 +15,9 @@ import com.example.seif.seshatplayer.model.Word;
 
 
 public class AnimationFragment extends Fragment {
+    public static String AnimationFragment_TAG = "LessonFragment";
     Word word;
     TypeWriter custTextView;
-    public static String AnimationFragment_TAG = "LessonFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,8 +44,7 @@ public class AnimationFragment extends Fragment {
 
         custTextView.setWord(word);
 
-
-
         return view;
     }
+
 }

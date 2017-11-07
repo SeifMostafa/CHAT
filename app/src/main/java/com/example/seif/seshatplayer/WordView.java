@@ -141,7 +141,7 @@ public class WordView extends TextView {
         }
     }
 
-    private void touch_up() {
+    private void touch_up(MotionEvent event) {
 
         mPath.lineTo(mX, mY);
         circlePath.reset();
@@ -199,19 +199,19 @@ public class WordView extends TextView {
                 updateWord.setmContext(context);
                 updateWord.setLessonFragment(this.mLessonFragment);
 
-                Typeface newTypeface = updateWord.updateWordLoop(this.getTypeface(),++word_loop);
-                Log.i("LessonFragment","updateWordLoop: word_loop "+word_loop );
+                Typeface newTypeface = updateWord.updateWordLoop(this.getTypeface(), ++word_loop);
+                Log.i("LessonFragment", "updateWordLoop: word_loop " + word_loop);
 
                 if (newTypeface != null) {
                     this.setTypeface(newTypeface);
                     invalidate();
                 } else {
-
-                    this.setTextColor(Color.TRANSPARENT);
-                    this.invalidate();
-                    Log.e("WordView", "from touch_up: " + " NewTypeface==null");
+                    if (word_loop != 0) {
+                        this.setTextColor(Color.TRANSPARENT);
+                        this.invalidate();
+                        Log.e("WordView", "from touch_up: " + " NewTypeface==null");
+                    }
                 }
-
                 mGestureDetector = new GestureDetector(gesture[mSuccessfullyWrittenChars]);
                 mUserGuidedVectors.clear();
             } else {
@@ -257,7 +257,7 @@ public class WordView extends TextView {
                 break;
 
             case MotionEvent.ACTION_UP:
-                touch_up();
+                touch_up(event);
                 invalidate();
                 break;
         }
