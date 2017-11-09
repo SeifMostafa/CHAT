@@ -516,13 +516,13 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.remove(lessonFragment).commit();
     }*/
 
-    public void openAnimationFragment(Word word) {
+    public void openAnimationFragment(String word) {
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         AnimationFragment animationFragment = new AnimationFragment();
         Bundle bundle = new Bundle();
-        bundle.putParcelable(WordKey, word);
+        bundle.putString(WordKey, word);
         animationFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, animationFragment);
         // fragmentTransaction.addToBackStack(LessonFragment_TAG);

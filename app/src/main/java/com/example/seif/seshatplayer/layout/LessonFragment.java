@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,31 +31,29 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public static int DEFAULT_LOOP_COUNTER = 4;
     public static int DEFAULT_TYPEFACE_LEVELS = 4;
     public static String LessonFragment_TAG = "LessonFragment";
-
-
+    public static boolean isAnimated = false;
+    public static boolean isPicked = false;
+    private Boolean isPronunced = false;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
     WordView wordView_MainText = null;
-    Thread Thread_WordTrip = null;
+    Thread Thread_WordJourney = null;
     LessonFragment instance;
     private Word[] words;
     private Word word = null;
     private int CurrentWordsArrayIndex = 0;
-    private boolean Pronounced = false;
     private Boolean firstTime = false;
     private Context mContext;
-    private Handler mhandler = new Handler();
-    private boolean fromBackStack = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.words = (Word[]) getArguments().getParcelableArray(MainActivity.LessonKey);
-            this.word = getArguments().getParcelable(MainActivity.WordKey);
-            this.firstTime = getArguments().getBoolean(MainActivity.firstTimekey);
+            words = (Word[]) getArguments().getParcelableArray(MainActivity.LessonKey);
+            word = getArguments().getParcelable(MainActivity.WordKey);
+            firstTime = getArguments().getBoolean(MainActivity.firstTimekey);
 
-            if (this.word == null && words != null) {
-                this.word = words[0];
+            if (word == null && words != null) {
+                word = words[0];
                 Log.i("onCreate", "from LessonFragment" + "word == null");
             }
         }
@@ -66,6 +63,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
         Log.i("LessonFragment", "word:" + word);
         Log.i("LessonFragment", "words: " + words.length + ": " + words.toString());
         instance = this;
+        mContext = getActivity();
+
     }
 
 
@@ -95,16 +94,18 @@ public class LessonFragment extends Fragment implements UpdateWord {
             public void onClick(View view) {
                 Log.i("helpiBtn", "is clicked!");
                 try {
-                    if (Thread_WordTrip != null) {
-                        if (Thread_WordTrip.isAlive()) {
-                            Thread_WordTrip.interrupt();
-                            Log.i("helpiBtn", "is clicked!" + "Thread_WordTrip.is alive");
+                    if (Thread_WordJourney != null) {
+                        if (Thread_WordJourney.isAlive()) {
+                            Thread_WordJourney.interrupt();
+                            Log.i("helpiBtn", "is clicked!" + "Thread_WordJourney.is alive");
                         }
                     }
+
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }
                 ((MainActivity) getActivity()).OpenHelpFragment();
+                isAnimated = false;
             }
         });
 
@@ -113,15 +114,11 @@ public class LessonFragment extends Fragment implements UpdateWord {
             @Override
             public void onClick(View view) {
                 // request prev word
-                if (Thread_WordTrip != null) Thread_WordTrip.interrupt();
 
-                word = words[--CurrentWordsArrayIndex];
-                wordView_MainText.setGuidedVector(word.getFV());
-                wordView_MainText.setText(word.getText());
-
+                prevWordCall();
                 setPreviBtnVisibilty();
                 setNextiBtnVisibility();
-                CreateWordTripThread().start();
+
 
             }
         });
@@ -135,7 +132,6 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 nextWordCall();
                 setPreviBtnVisibilty();
                 setNextiBtnVisibility();
-                CreateWordTripThread().start();
 
             }
         });
@@ -166,8 +162,11 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 }
             }
         });
+
         setNextiBtnVisibility();
         setPreviBtnVisibilty();
+
+
         return view;
     }
 
@@ -176,22 +175,20 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public void onResume() {
         super.onResume();
 
-
-        if (!firstTime && !Pronounced) {
-            CreateWordTripThread().start(); //start the thread
-        }
-
-        if (instance.fromBackStack) {
+        if (!firstTime && !instance.isAnimated) {
+            ((MainActivity) getActivity()).openAnimationFragment(word.getText());
+            instance.isAnimated = true;
+        } else if (!firstTime && instance.isPronunced && !instance.isPicked) {
+            ((MainActivity) getActivity()).openPhraseFragment(word.getPhrase(), word.getText());
+        } else if (!firstTime && instance.isPicked  && instance.isPronunced) {
             if (instance.CurrentWordsArrayIndex + 1 == instance.words.length) {
                 Log.i("LessonFragment: ", "UpdateLesson: ");
-
-                ((MainActivity) mContext).updatelesson(1, true);
+                ((MainActivity) instance.mContext).updatelesson(1, true);
             } else {
                 instance.nextWordCall();
-                setPreviBtnVisibilty();
-                setNextiBtnVisibility();
+                instance.setPreviBtnVisibilty();
+                instance.setNextiBtnVisibility();
             }
-            instance.fromBackStack = false;
         }
     }
 
@@ -211,9 +208,10 @@ public class LessonFragment extends Fragment implements UpdateWord {
         }
     }
 
-    private Thread CreateWordTripThread() {
 
-        Thread_WordTrip = new Thread() {
+    private Thread Thread_WordJourney_voice_speech() {
+
+        Thread_WordJourney = new Thread() {
             @Override
             public void run() {
                 try {
@@ -221,15 +219,15 @@ public class LessonFragment extends Fragment implements UpdateWord {
                     sleep(WAIT2SayInstructions);
                 } catch (InterruptedException e) {
                 }
-                getActivity().runOnUiThread(new Runnable() {
+                ((MainActivity) mContext).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            ((MainActivity) getActivity()).voiceoffer(null, word.getText());
+                            ((MainActivity) mContext).voiceoffer(null, instance.word.getText());
                             sleep(1500);
-                            ((MainActivity) getActivity()).voiceoffer(wordView_MainText, getActivity().getString(R.string.speakinstruction));
+                            ((MainActivity) mContext).voiceoffer(instance.wordView_MainText, ((MainActivity) mContext).getString(R.string.speakinstruction));
                             sleep(2500);
-                            voicerec(null);
+                            instance.voicerec(null);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -244,7 +242,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 onDetach();
             }
         };
-        return Thread_WordTrip;
+        return Thread_WordJourney;
     }
 
     private void voicerec(View view) {
@@ -259,7 +257,6 @@ public class LessonFragment extends Fragment implements UpdateWord {
         voicerecogize.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
         voicerecogize.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, false);
         startActivityForResult(voicerecogize, RESULT_SPEECH);
-
     }
 
     @Override
@@ -281,25 +278,12 @@ public class LessonFragment extends Fragment implements UpdateWord {
         } else {
             // change word
             ((MainActivity) mContext).assignWordAsFinished(instance.word.getText());
-            ((MainActivity) mContext).openAnimationFragment(instance.word);
-            int time2waitbeforeOpenningPickPhraseFragment = (
-                    instance.word.getText().length() + 2) * 1000;
-            //Log.i("LessonFragment","Time " +time2waitbeforeOpenningPickPhraseFragment );
-            mhandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    ((MainActivity) mContext).openPhraseFragment(
-                            instance.word.getPhrase(), instance.word.getText());
-                }
-            }, time2waitbeforeOpenningPickPhraseFragment);
-
+            instance.Thread_WordJourney_voice_speech().start();
             Log.i("LessonFragment: ", "UpdateWordLoop: changeword");
-            instance.fromBackStack = true;
-            tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl1.ttf");
+            tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lvl1.ttf");
         }
         return tf;
     }
-
 
     @Override
     public void setmContext(Context context) {
@@ -328,9 +312,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
 
                     if (SpeechRec_results.get(0).equals(this.word.getText())) {
                         Log.i("onActivityResult", SpeechRec_results.get(0));
-                        Pronounced = true;
+                        isPronunced = true;
                     }
-
                 }
             } else {
                 Log.i("onActivityResult", "Data == null");
@@ -342,8 +325,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public void onStop() {
         super.onStop();
         Log.i("LessonFragment", "onStop");
-        if (Thread_WordTrip != null) {
-            Thread_WordTrip.interrupt();
+        if (Thread_WordJourney != null) {
+            Thread_WordJourney.interrupt();
         }
     }
 
@@ -359,9 +342,27 @@ public class LessonFragment extends Fragment implements UpdateWord {
     }
 
     private void nextWordCall() {
-        if (instance.Thread_WordTrip != null) instance.Thread_WordTrip.interrupt();
+        instance = this;
+        if (instance.Thread_WordJourney != null) instance.Thread_WordJourney.interrupt();
         instance.word = instance.words[++instance.CurrentWordsArrayIndex];
-        instance.Pronounced = false;
+        ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
+        instance.isAnimated = true;
+        instance.isPicked = false;
+        instance.isPronunced =false;
+        instance.wordView_MainText.setGuidedVector(instance.word.getFV());
+        instance.wordView_MainText.setText(
+                instance.word.getText());
+        instance.wordView_MainText.invalidate();
+    }
+
+    private void prevWordCall() {
+        if (instance.Thread_WordJourney != null) instance.Thread_WordJourney.interrupt();
+        instance.word = instance.words[--instance.CurrentWordsArrayIndex];
+        ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
+        instance.isAnimated = true;
+        instance.isPicked = false;
+        instance.isPronunced =false;
+
         instance.wordView_MainText.setGuidedVector(instance.word.getFV());
         instance.wordView_MainText.setText(
                 instance.word.getText());

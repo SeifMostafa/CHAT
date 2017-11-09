@@ -5,10 +5,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.*;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class Word  implements Parcelable {
 	private String Text, ImageFilePath=null, SpeechFilePath=null, Phrase=null;
 	private Direction[][] guidedVectors=null;
+	private Map<Integer,Direction[][]>gvVersions;
 	private boolean Achieved = false;
 
 	protected Word(Parcel in) {

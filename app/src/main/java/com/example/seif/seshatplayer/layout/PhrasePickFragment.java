@@ -41,8 +41,6 @@ public class PhrasePickFragment extends Fragment {
         textView_phrase = (TextView) view.findViewById(R.id.textView_phrase);
         textView_picked = (TextView) view.findViewById(R.id.textView_picked);
 
-        //textView_phrase.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf"));
-        //textView_picked.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf"));
 
         textView_picked.setText("");
         textView_phrase.setMovementMethod(LinkMovementMethod.getInstance());
@@ -93,6 +91,7 @@ public class PhrasePickFragment extends Fragment {
                 if (w.equals(word) || word.contains(w)) {
                     // congrats .. return
                     Log.i("PhrasePickFragment", "congrats " + word);
+                    LessonFragment.isPicked = true;
                     ((MainActivity) getActivity()).backToLessonFragment();
                 }
             }

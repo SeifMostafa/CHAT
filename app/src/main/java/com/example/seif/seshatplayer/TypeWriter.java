@@ -11,7 +11,7 @@ import com.example.seif.seshatplayer.model.Word;
 import java.io.IOException;
 
 public class TypeWriter extends TextView {
-    public Word word;
+    public String word;
     public Context mContext;
     Context context;
     private CharSequence mText;
@@ -73,7 +73,7 @@ public class TypeWriter extends TextView {
         mDelay = millis;
     }
 
-    public void setWord(Word w) {
+    public void setWord(String w) {
         this.word = w;
     }
 }
