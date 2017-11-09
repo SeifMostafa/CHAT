@@ -27,6 +27,7 @@
         android:layout_height="wrap_content"
         android:textSize="@dimen/activity_word_textsize_listitem"
         android:id="@+id/textView_word_item_txt"
+        android:textAlignment="center"
         android:layout_weight="1" />
 
     <ImageButton

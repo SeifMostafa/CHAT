@@ -75,8 +75,7 @@ public class HelpFragment extends Fragment {
         AchievedlessoniBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<String> data_donewords = ((MainActivity) getActivity()).ReadArchiveWords();
-                //  ArrayList<String> data_donewords =  ((MainActivity) getActivity()).getWords();
+                ArrayList<String> data_donewords = ((MainActivity) getActivity()).readArchiveWords();
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 final AlertDialog dialog = builder.create();

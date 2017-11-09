@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     MediaPlayer mediaPlayer;
 
     private String WordsFilePath = "WORDS.txt", PhrasesFilePath = "PHRASES.txt", SF = "/SeShatSF/";
-    private String FileWordsAchieved = "Archive.txt";
+    private String FileWordsAchieved = "archive.txt";
 
     private Map<Integer, Word[]> lessons;
     private int word_index = 0;
@@ -145,8 +145,8 @@ public class MainActivity extends AppCompatActivity {
 
             WordsFilePath = SF + WordsFilePath;
             PhrasesFilePath = SF + PhrasesFilePath;
-
-            new File(Environment.getExternalStorageDirectory() + FileWordsAchieved);
+            FileWordsAchieved = SF + FileWordsAchieved;
+            new File(FileWordsAchieved);
 
             setLessons();
             Word phrase = new Word(firstPhrase + lessons.get(lesson_index)[0].getText());
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             SF = sharedPreferences_words.getString(SFKEY, SF);
             WordsFilePath = SF + WordsFilePath;
             PhrasesFilePath = SF + PhrasesFilePath;
-
+            FileWordsAchieved = SF + FileWordsAchieved;
             setLessons();
             openLessonFragment(lesson_index);
         }
@@ -546,13 +546,13 @@ public class MainActivity extends AppCompatActivity {
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
             bufferedWriter.write(Word + "\n");
             bufferedWriter.close();
-
+            Log.i("MainActivity","assignWordAsFinished: " + Word);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public ArrayList<String> ReadArchiveWords() {
+    public ArrayList<String> readArchiveWords() {
         ArrayList<String> words = new ArrayList<>();
         try {
             FileReader reader = new FileReader(FileWordsAchieved);
@@ -561,6 +561,7 @@ public class MainActivity extends AppCompatActivity {
             String line;
 
             while ((line = bufferedReader.readLine()) != null) {
+                Log.i("MainActivity","readArchiveWords: " + line);
                 words.add(line);
             }
             reader.close();

@@ -278,14 +278,13 @@ public class LessonFragment extends Fragment implements UpdateWord {
             } else {
                 tf = typeface;
             }
-
         } else {
             // change word
-            ((MainActivity) mContext).assignWordAsFinished(word.getText());
+            ((MainActivity) mContext).assignWordAsFinished(instance.word.getText());
             ((MainActivity) mContext).openAnimationFragment(instance.word);
             int time2waitbeforeOpenningPickPhraseFragment = (
                     instance.word.getText().length() + 2) * 1000;
-
+            //Log.i("LessonFragment","Time " +time2waitbeforeOpenningPickPhraseFragment );
             mhandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
