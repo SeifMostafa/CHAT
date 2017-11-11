@@ -78,21 +78,28 @@ public class MainActivity extends AppCompatActivity {
     private Handler mHandler = new Handler();
 
 
-    public static Direction[] getDirections(String filepath) {
+    public static Direction[] getDirections(String filepath, int version) {
         Stack<Direction> directions = new Stack<>();
         File file = new File(filepath);
+
         try {
+            int foundedversions = 0;
             Scanner scan = new Scanner(file);
             while (scan.hasNextLine()) {
                 String line = null;
                 line = scan.nextLine();
                 switch (line.charAt(0)) {
-                  /*  case 'I':
-                        directions.push(Direction.INIT);
+                    case 'I':
+                        foundedversions++;
                         break;
                     case 'E':
-                        directions.push(Direction.END);
-                        break;*/
+                        if (foundedversions > version) {
+                            Direction[] result = new Direction[directions.size()];
+                            return directions.toArray(result);
+                        } else {
+                            directions.clear();
+                        }
+                        break;
                     case 'L':
                         directions.push(Direction.LEFT);
                         break;
@@ -120,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
         Direction[] result = new Direction[directions.size()];
         return directions.toArray(result);
     }
+
 
     /*
       * read file into string and the end = \n and return this string
@@ -189,7 +197,16 @@ public class MainActivity extends AppCompatActivity {
     private Word form_word(String txt, String phrase) {
         try {
             Word resultWord = new Word(txt, SF + txt + ".png", SF + txt, phrase);
-            resultWord.setFV(prepareWordGuidedVectors(txt));
+            int version = 0;
+            Direction[][] gvVersion = prepareWordGuidedVectors(txt, version);
+            do {
+                Log.i("MainActivity", "form_word: gvVersion.sz: " + gvVersion[0].length);
+                resultWord.setFV(gvVersion);
+                version++;
+                Log.i("MainActivity", "form_word: version: " + version);
+
+                gvVersion = prepareWordGuidedVectors(txt, version);
+            } while (gvVersion[0].length > 0);
             return resultWord;
         } catch (Exception e) {
             Log.e("form_wordE:", e.toString());
@@ -198,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Direction[][] prepareWordGuidedVectors(String word) {
+    private Direction[][] prepareWordGuidedVectors(String word, int version) {
         char charConnector = 'ـ';
         Direction[][] result_directions = new Direction[word.length()][];
         ArrayList<Character> differentchars = new ArrayList<>();
@@ -209,28 +226,29 @@ public class MainActivity extends AppCompatActivity {
 
             if (i == 0) {
                 if (differentchars.contains(character)) {
-                    result_directions[i] = getDirections(SF + character);
+                    result_directions[i] = getDirections(SF + character, version);
                 } else {
-                    result_directions[i] = getDirections(SF + character + charConnector);
+                    result_directions[i] = getDirections(SF + character + charConnector, version);
                 }
             } else if (i == word.length() - 1) {
                 if (differentchars.contains(word.charAt(i - 1))) {
-                    result_directions[i] = getDirections(SF + character);
+                    result_directions[i] = getDirections(SF + character, version);
                 } else {
-                    result_directions[i] = getDirections(SF + charConnector + character);
+                    result_directions[i] = getDirections(SF + charConnector + character, version);
                 }
             } else {
                 if (differentchars.contains(word.charAt(i - 1)) && differentchars.contains(character)) {
-                    result_directions[i] = getDirections(SF + character);
+                    result_directions[i] = getDirections(SF + character, version);
                 } else if (differentchars.contains(word.charAt(i - 1)) && !differentchars.contains(character)) {
-                    result_directions[i] = getDirections(SF + character + charConnector);
+                    result_directions[i] = getDirections(SF + character + charConnector, version);
                 } else {
-                    result_directions[i] = getDirections(SF + charConnector + character + charConnector);
+                    result_directions[i] = getDirections(SF + charConnector + character + charConnector, version);
                 }
             }
         }
         return result_directions;
     }
+
 
     /*
     ToFlag: if 0 = current, if -1 = prev , if 1 = next; flag to obtain the ToFlag cretira
@@ -535,20 +553,22 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         HelpFragment helpFragment = new HelpFragment();
         fragmentTransaction.replace(R.id.fragment_replacement, helpFragment);
-       // fragmentTransaction.addToBackStack(LessonFragment_TAG);
+        // fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
 
     }
 
     public void assignWordAsFinished(String Word) {
-        try {
-            FileWriter writer = new FileWriter(FileWordsAchieved, true);
-            BufferedWriter bufferedWriter = new BufferedWriter(writer);
-            bufferedWriter.write(Word + "\n");
-            bufferedWriter.close();
-            Log.i("MainActivity","assignWordAsFinished: " + Word);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!readArchiveWords().contains(Word)) {
+            try {
+                FileWriter writer = new FileWriter(FileWordsAchieved, true);
+                BufferedWriter bufferedWriter = new BufferedWriter(writer);
+                bufferedWriter.write(Word + "\n");
+                bufferedWriter.close();
+                Log.i("MainActivity", "assignWordAsFinished: " + Word);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -561,7 +581,7 @@ public class MainActivity extends AppCompatActivity {
             String line;
 
             while ((line = bufferedReader.readLine()) != null) {
-                Log.i("MainActivity","readArchiveWords: " + line);
+                Log.i("MainActivity", "readArchiveWords: " + line);
                 words.add(line);
             }
             reader.close();

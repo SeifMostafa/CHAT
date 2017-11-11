@@ -16,6 +16,7 @@ public class GestureDetector {
     private ArrayList<Direction> mUserGuidedVector;
     private Direction[] gesture;
 
+
     public GestureDetector(Direction[] Gesture) {
         this.gesture = Gesture;
         if (this.gesture.length < 2) Log.e("GestureDetector", "Hasn't gesture to detect!");
@@ -36,10 +37,10 @@ public class GestureDetector {
                 Direction ORG_d_X = gesture[i];
                 Direction ORG_d_Y = gesture[i + 1];
 
-               /* Log.i("GestureDetector", "CompareGuidedVector" + "XD:  " + ORG_d_X);
+               Log.i("GestureDetector", "CompareGuidedVector" + "XD:  " + ORG_d_X);
                 Log.i("GestureDetector", "CompareGuidedVector" + "UXD:  " + d_X);
                 Log.i("GestureDetector", "CompareGuidedVector" + "YD:  " + ORG_d_Y);
-                Log.i("GestureDetector", "CompareGuidedVector" + "UYD:" + d_Y);*/
+                Log.i("GestureDetector", "CompareGuidedVector" + "UYD:" + d_Y);
 
                 try {
                     if (ORG_d_X == Direction.NOMATTER || ORG_d_Y == Direction.NOMATTER) {

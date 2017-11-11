@@ -1,16 +1,14 @@
 package com.example.seif.seshatplayer.model;
 
-import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.*;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Word  implements Parcelable {
 	private String Text, ImageFilePath=null, SpeechFilePath=null, Phrase=null;
-	private Direction[][] guidedVectors=null;
+
 	private Map<Integer,Direction[][]>gvVersions;
 	private boolean Achieved = false;
 
@@ -38,23 +36,18 @@ public class Word  implements Parcelable {
 	public Word(String text) {
 		super();
 		Text = text;
+		gvVersions = new HashMap<>();
 	}
 
-	public Word(String text, String imageFilePath, String speechFilePath, String phrase,
-				Direction[][] GuidedVectors) {
-		super();
-		Text = text;
-		ImageFilePath = imageFilePath;
-		SpeechFilePath = speechFilePath;
-		Phrase = phrase;
-		guidedVectors = GuidedVectors;
-	}
+
 	public Word(String text, String imageFilePath, String speechFilePath, String phrase) {
 		super();
 		Text = text;
 		ImageFilePath = imageFilePath;
 		SpeechFilePath = speechFilePath;
 		Phrase = phrase;
+		gvVersions = new HashMap<>();
+
 	}
 
 	public String getText() {
@@ -91,12 +84,14 @@ public class Word  implements Parcelable {
 		return chars;
 	}
 
-	public Direction[][] getFV() {
-		return guidedVectors;
+	public Map<Integer,Direction[][]> getFV() {
+		return gvVersions;
 	}
 
 	public void setFV(Direction[][] GuidedVectors) {
-		guidedVectors = GuidedVectors;
+		if(gvVersions==null)gvVersions = new HashMap<>();
+
+		gvVersions.put(gvVersions.size(),GuidedVectors);
 	}
 
 	public String getPhrase() {
@@ -107,18 +102,7 @@ public class Word  implements Parcelable {
 		Phrase = phrase;
 	}
 
-	@Override
-	public int describeContents() {
-		return 0;
-	}
 
-	@Override
-	public void writeToParcel(Parcel parcel, int i) {
-		parcel.writeString(Text);
-		parcel.writeString(ImageFilePath);
-		parcel.writeString(SpeechFilePath);
-		parcel.writeString(Phrase);
-	}
 
 	public boolean isAchieved() {
 		return Achieved;
@@ -130,5 +114,15 @@ public class Word  implements Parcelable {
 	@Override
 	public String toString() {
 		return "Text: " + getText() ;
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel parcel, int i) {
+
 	}
 }

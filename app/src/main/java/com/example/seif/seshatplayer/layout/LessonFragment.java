@@ -34,6 +34,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public static boolean isAnimated = false;
     public static boolean isPicked = false;
     private Boolean isPronunced = false;
+    private Boolean isWritten = false;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
     WordView wordView_MainText = null;
     Thread Thread_WordJourney = null;
@@ -178,9 +179,10 @@ public class LessonFragment extends Fragment implements UpdateWord {
         if (!firstTime && !instance.isAnimated) {
             ((MainActivity) getActivity()).openAnimationFragment(word.getText());
             instance.isAnimated = true;
-        } else if (!firstTime && instance.isPronunced && !instance.isPicked) {
+        } else if (!firstTime && instance.isWritten &&/* instance.isPronunced &&*/ !instance.isPicked) {
             ((MainActivity) getActivity()).openPhraseFragment(word.getPhrase(), word.getText());
-        } else if (!firstTime && instance.isPicked  && instance.isPronunced) {
+
+        } else if (!firstTime && instance.isPicked  /*&& instance.isPronunced*/) {
             if (instance.CurrentWordsArrayIndex + 1 == instance.words.length) {
                 Log.i("LessonFragment: ", "UpdateLesson: ");
                 ((MainActivity) instance.mContext).updatelesson(1, true);
@@ -227,7 +229,9 @@ public class LessonFragment extends Fragment implements UpdateWord {
                             sleep(1500);
                             ((MainActivity) mContext).voiceoffer(instance.wordView_MainText, ((MainActivity) mContext).getString(R.string.speakinstruction));
                             sleep(2500);
-                            instance.voicerec(null);
+                          //  instance.voicerec(null);
+                            ((MainActivity) getActivity()).openPhraseFragment(word.getPhrase(), word.getText());
+
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -245,7 +249,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         return Thread_WordJourney;
     }
 
-    private void voicerec(View view) {
+/*    private void voicerec(View view) {
         if (view != null) {
             Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.shake);
             view.startAnimation(shake);
@@ -257,7 +261,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         voicerecogize.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
         voicerecogize.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, false);
         startActivityForResult(voicerecogize, RESULT_SPEECH);
-    }
+    }*/
 
     @Override
     public Typeface updateWordLoop(Typeface typeface, int word_loop) {
@@ -277,6 +281,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
             }
         } else {
             // change word
+            isWritten=true;
             ((MainActivity) mContext).assignWordAsFinished(instance.word.getText());
             instance.Thread_WordJourney_voice_speech().start();
             Log.i("LessonFragment: ", "UpdateWordLoop: changeword");
@@ -298,7 +303,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public Word getWord() {
         return word;
     }
-
+/*
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -319,7 +324,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 Log.i("onActivityResult", "Data == null");
             }
         }
-    }
+    }*/
 
     @Override
     public void onStop() {
@@ -346,9 +351,12 @@ public class LessonFragment extends Fragment implements UpdateWord {
         if (instance.Thread_WordJourney != null) instance.Thread_WordJourney.interrupt();
         instance.word = instance.words[++instance.CurrentWordsArrayIndex];
         ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
-        instance.isAnimated = true;
+
+          instance.isAnimated = true;
         instance.isPicked = false;
+        instance.isWritten =false;
         instance.isPronunced =false;
+
         instance.wordView_MainText.setGuidedVector(instance.word.getFV());
         instance.wordView_MainText.setText(
                 instance.word.getText());

@@ -19,6 +19,7 @@ import com.example.seif.seshatplayer.model.Direction;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 
 public class WordView extends TextView {
@@ -39,7 +40,7 @@ public class WordView extends TextView {
     private ArrayList<Point> mTouchedPoints;
     private GestureDetector mGestureDetector;
     private int mSuccessfullyWrittenChars = 0;
-    private Direction[][] gesture;
+    private Map<Integer, Direction[][]> gesture;
 
 
     public WordView(Context context) throws IOException {
@@ -181,62 +182,94 @@ public class WordView extends TextView {
         }
 
         try {
-
-
+            /// check ///
             boolean checkResult = mGestureDetector.check(mUserGuidedVectors);
             double mCharSuccessPercentage = mGestureDetector.getSuccessPercentage();
 
             Log.i("CustTextView: ", "touch_up: check result= " + checkResult);
 
-            if (mSuccessfullyWrittenChars + 1 == gesture.length && checkResult) {
-                mSuccessfullyWrittenChars = 0;
-                reset();
-                ((MainActivity) context).voiceoffer(null, context.getString(R.string.congrats));
-
-                Log.i("WordView", "completed");
-
-                UpdateWord updateWord = new LessonFragment();
-                updateWord.setmContext(context);
-                updateWord.setLessonFragment(this.mLessonFragment);
-
-                Typeface newTypeface = updateWord.updateWordLoop(this.getTypeface(), ++word_loop);
-                Log.i("LessonFragment", "updateWordLoop: word_loop " + word_loop);
-
-                if (newTypeface != null) {
-                    this.setTypeface(newTypeface);
-                    invalidate();
-                } else {
-                    if (word_loop != 0) {
-                        this.setTextColor(Color.TRANSPARENT);
-                        this.invalidate();
-                        Log.e("WordView", "from touch_up: " + " NewTypeface==null");
-                    }
-                }
-                mGestureDetector = new GestureDetector(gesture[mSuccessfullyWrittenChars]);
-                mUserGuidedVectors.clear();
+            if (mSuccessfullyWrittenChars + 1 == gesture.get(0).length && checkResult) {
+                successWord();
             } else {
-
                 if (checkResult) {
-                    mSuccessfullyWrittenChars++;
-                    mGestureDetector = new GestureDetector(gesture[mSuccessfullyWrittenChars]);
-                    mUserGuidedVectors.clear();
-
-                    // complete ur chars
-                    Log.i("WordView", "checkResult");
-                } else if (mCharSuccessPercentage < 70 && mUserGuidedVectors.size() > gesture[mSuccessfullyWrittenChars].length) {
-
-                    mSuccessfullyWrittenChars = 0;
-                    mGestureDetector = new GestureDetector(gesture[mSuccessfullyWrittenChars]);
-                    Log.i("WordView", "reset");
-                    ((MainActivity) context).voiceoffer(null, context.getString(R.string.tryAgain));
-                    reset();
-                    mUserGuidedVectors.clear();
+                    successChar();
+                } else if (mCharSuccessPercentage < 70 && mUserGuidedVectors.size() > gesture.get(0)[mSuccessfullyWrittenChars].length) {
+                    if (!tryOtherVersions()) {
+                        mSuccessfullyWrittenChars = 0;
+                        mGestureDetector = new GestureDetector(gesture.get(0)[mSuccessfullyWrittenChars]);
+                        Log.i("WordView", "reset");
+                        ((MainActivity) context).voiceoffer(null, context.getString(R.string.tryAgain));
+                        reset();
+                        mUserGuidedVectors.clear();
+                    }
                 }
             }
         } catch (Exception e) {
             Log.i("WordView: ", "error: " + e.toString());
         }
         lastPoint = new Point(mTouchedPoints.get(mTouchedPoints.size() - 1));
+    }
+
+    private void successWord() {
+        mSuccessfullyWrittenChars = 0;
+
+        reset();
+
+        ((MainActivity) context).voiceoffer(null, context.getString(R.string.congrats));
+
+        Log.i("WordView", "completed");
+
+        UpdateWord updateWord = new LessonFragment();
+        updateWord.setmContext(context);
+        updateWord.setLessonFragment(this.mLessonFragment);
+
+        Typeface newTypeface = updateWord.updateWordLoop(this.getTypeface(), ++word_loop);
+        Log.i("LessonFragment", "updateWordLoop: word_loop " + word_loop);
+
+        if (newTypeface != null) {
+            this.setTypeface(newTypeface);
+            invalidate();
+        } else {
+            if (word_loop != 0) {
+                this.setTextColor(Color.TRANSPARENT);
+                this.invalidate();
+                Log.e("WordView", "from touch_up: " + " NewTypeface==null");
+            }
+        }
+        mGestureDetector = new GestureDetector(gesture.get(0)[mSuccessfullyWrittenChars]);
+        mUserGuidedVectors.clear();
+    }
+
+    private void successChar() {
+        mSuccessfullyWrittenChars++;
+        mGestureDetector = new GestureDetector(gesture.get(0)[mSuccessfullyWrittenChars]);
+        mUserGuidedVectors.clear();
+
+        // complete ur chars
+        Log.i("WordView", "checkResult: complete ur chars");
+    }
+
+    private boolean tryOtherVersions() {
+        int trials = 1;  // already checked for 1st time
+        Log.i("WordView","tryOtherVersions,gs.sz: " +
+                "" + gesture.size());
+        Log.i("WordView","tryOtherVersions,succsschars: "+ mSuccessfullyWrittenChars);
+        while (trials < gesture.size()) {
+            GestureDetector gestureDetector_otherVersions =
+                    new GestureDetector(gesture.get(trials)[mSuccessfullyWrittenChars
+                            ]);
+            if (gestureDetector_otherVersions.check(mUserGuidedVectors) ||
+                    gestureDetector_otherVersions.getSuccessPercentage() > 70) {
+                if (mSuccessfullyWrittenChars + 1 == gesture.get(0).length) {
+                    successWord();
+                } else {
+                    successChar();
+                }
+                return true;
+            }
+            trials++;
+        }
+        return false;
     }
 
     @Override
@@ -280,10 +313,10 @@ public class WordView extends TextView {
         return new Direction[]{XDirection, YDirection};
     }
 
-    public void setGuidedVector(Direction[][] directions) {
-        mGestureDetector = new GestureDetector(directions[0]);
-        gesture = directions;
-        Log.i("WordView", "setGuidedVector: " + directions.length);
+    public void setGuidedVector(Map<Integer, Direction[][]> gvVersions) {
+        mGestureDetector = new GestureDetector(gvVersions.get(0)[0]);
+        gesture = gvVersions;
+        Log.i("WordView", "setGuidedVector: Vs" + gesture.size() + "sz#word(chars): " + gesture.get(0).length);
     }
 
     public void setmLessonFragment(LessonFragment mLessonFragment) {
