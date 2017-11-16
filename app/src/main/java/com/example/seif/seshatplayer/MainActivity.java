@@ -200,13 +200,12 @@ public class MainActivity extends AppCompatActivity {
             int version = 0;
             Direction[][] gvVersion = prepareWordGuidedVectors(txt, version);
             do {
-                Log.i("MainActivity", "form_word: gvVersion.sz: " + gvVersion[0].length);
+              //  Log.i("MainActivity", "form_word: gvVersion.sz: " + gvVersion[0].length);
                 resultWord.setFV(gvVersion);
                 version++;
-                Log.i("MainActivity", "form_word: version: " + version);
-
                 gvVersion = prepareWordGuidedVectors(txt, version);
             } while (gvVersion[0].length > 0);
+            Log.i("MainActivity", "form_word: version: " + version);
             return resultWord;
         } catch (Exception e) {
             Log.e("form_wordE:", e.toString());

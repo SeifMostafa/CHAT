@@ -23,6 +23,7 @@ import java.util.Map;
 
 
 public class WordView extends TextView {
+
     private static float POINT_WIDTH = 0;
     public int word_loop = 0;
     Context context;
@@ -39,7 +40,7 @@ public class WordView extends TextView {
     private Point lastPoint;
     private ArrayList<Point> mTouchedPoints;
     private GestureDetector mGestureDetector;
-    private int mSuccessfullyWrittenChars = 0;
+    private int charsPassed = 0;
     private Map<Integer, Direction[][]> gesture;
 
 
@@ -108,6 +109,7 @@ public class WordView extends TextView {
         mBitmap = Bitmap.createBitmap(this.mBitmap.getWidth(), this.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
         invalidate();
+        mUserGuidedVectors.clear();
     }
 
     @Override
@@ -137,147 +139,126 @@ public class WordView extends TextView {
             mX = x;
             mY = y;
             circlePath.reset();
-            circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
+            circlePath.addCircle(mX, mY, 20, Path.Direction.CW);
             mTouchedPoints.add(new Point((int) x, (int) y));
         }
     }
 
-    private void touch_up(MotionEvent event) {
+    private ArrayList<Direction> appendPoints(ArrayList<Point> touchedPoints, ArrayList<Direction> outputUserGV) {
+        if (touchedPoints.size() >= 2) {
+            for (int i = 0; i < touchedPoints.size() - 1; i++) {
+                Point point1 = touchedPoints.get(i);
+                Point point2 = touchedPoints.get(i + 1);
+                Direction[] directions = ComparePointsToCheckFV(point1, point2);
+                Direction XDirection = directions[0];
+                Direction YDirection = directions[1];
 
+                if (outputUserGV.size() > 0) {
+                    if ((outputUserGV.get(outputUserGV.size() - 2) != XDirection || outputUserGV.get(outputUserGV.size() - 1) != YDirection) &&
+                            (XDirection != Direction.SAME || YDirection != Direction.SAME)) {
+                        outputUserGV.add(XDirection);
+                        outputUserGV.add(YDirection);
+                    }
+                } else {
+                    if ((XDirection != Direction.SAME || YDirection != Direction.SAME)) {
+                        outputUserGV.add(XDirection);
+                        outputUserGV.add(YDirection);
+                    }
+                }
+            }
+            lastPoint = new Point(touchedPoints.get(touchedPoints.size() - 1));
+        } else {
+            // single point
+            if (outputUserGV.size() != 0) {
+                Direction[] directions = ComparePointsToCheckFV(lastPoint, touchedPoints.get(touchedPoints.size() - 1));
+                outputUserGV.add(directions[0]);
+                outputUserGV.add(directions[1]);
+            }
+        }
+        return outputUserGV;
+    }
+
+    /*
+        called every time user touch screen to draw something and up his/her finger
+     */
+    private void partialCheck(ArrayList<Direction> outputUserGV) {
+        Log.i("WordView","partialCheck:: charsPassed: "+ charsPassed+"outputUserGV.sz:"+outputUserGV.size()
+        +"gesture.v0.gest.charpassed.sz: "+ gesture.get(0)[charsPassed].length );
+        try {
+            boolean checkResult = mGestureDetector.check(outputUserGV);
+            Log.i("WordView", "partialCheck: checkResult= " + checkResult);
+            /* if 1st version isn't matched user's type..
+                    check other versions if matched user's type */
+            if (!checkResult) {
+                int trials = 1;  // already checked for 1st time
+                while (trials < gesture.size()) {
+
+                    GestureDetector GD_otherV = new GestureDetector(gesture.get(trials++)[charsPassed]);
+                 //  if(charsPassed+2==gesture.get(0).length) GD_otherV.setThreshold(50);
+                    if (GD_otherV.check(outputUserGV)) {
+                        Log.i("WordView", "tryOtherVersions:: trials:Success in trial: " + trials);
+                        checkResult = true;
+                        break;
+                    }
+                }
+            }
+            /* take action upon the checkResult: update word/update char */
+            if (charsPassed + 1 == gesture.get(0).length && checkResult) {
+                charsPassed = 0;
+                reset();
+                ((MainActivity) context).voiceoffer(null, context.getString(R.string.congrats));
+                Log.i("WordView", "completed");
+                UpdateWord updateWord = new LessonFragment();
+                updateWord.setmContext(context);
+                updateWord.setLessonFragment(this.mLessonFragment);
+
+                Typeface newTypeface = updateWord.updateWordLoop(this.getTypeface(), ++word_loop);
+
+                if (newTypeface != null) {
+                    this.setTypeface(newTypeface);
+                    invalidate();
+                } else {
+                    if (word_loop != 0) {
+                        this.setTextColor(Color.TRANSPARENT);
+                        this.invalidate();
+                        Log.e("WordView", "from touch_up: " + "blank level");
+                    }
+                }
+            } else {
+                if (checkResult) {
+                    charsPassed++;
+                } else if (outputUserGV.size() > gesture.get(0)[charsPassed].length) {
+                    charsPassed = 0;
+                    ((MainActivity) context).voiceoffer(null, context.getString(R.string.tryAgain));
+                    reset();
+                }
+            }
+            mGestureDetector = new GestureDetector(gesture.get(0)[charsPassed]);
+        } catch (Exception e) {
+            Log.i("WordView: ", "error: " + e.toString());
+        }
+    }
+
+    private void touch_up(MotionEvent event) {
         mPath.lineTo(mX, mY);
         circlePath.reset();
         // commit the path to our offscreen
         mCanvas.drawPath(mPath, mPaint);
         // kill this so we don't double draw
         mPath.reset();
-        if (mTouchedPoints.size() >= 2) {
-            for (int i = 0; i < mTouchedPoints.size() - 1; i++) {
-                Point point1 = mTouchedPoints.get(i);
-                Point point2 = mTouchedPoints.get(i + 1);
-                Direction[] directions = ComparePointsToCheckFV(point1, point2);
-                Direction XDirection = directions[0];
-                Direction YDirection = directions[1];
-                if (XDirection != null && YDirection != null) {
-                    if (mUserGuidedVectors.size() > 0) {
-                        if ((mUserGuidedVectors.get(mUserGuidedVectors.size() - 2) != XDirection || mUserGuidedVectors.get(mUserGuidedVectors.size() - 1) != YDirection) &&
-                                (XDirection != Direction.SAME || YDirection != Direction.SAME)) {
-                            mUserGuidedVectors.add(XDirection);
-                            mUserGuidedVectors.add(YDirection);
-                        }
-                    } else {
-                        if ((XDirection != Direction.SAME || YDirection != Direction.SAME)) {
-                            mUserGuidedVectors.add(XDirection);
-                            mUserGuidedVectors.add(YDirection);
-                        }
-                    }
-                }
-            }
-        } else {
-            // single point
-            if (mUserGuidedVectors.size() != 0) {
-                Direction[] directions = ComparePointsToCheckFV(lastPoint, mTouchedPoints.get(mTouchedPoints.size() - 1));
-                mUserGuidedVectors.add(directions[0]);
-                mUserGuidedVectors.add(directions[1]);
-            }
-        }
 
-        try {
-            /// check ///
-            boolean checkResult = mGestureDetector.check(mUserGuidedVectors);
-            double mCharSuccessPercentage = mGestureDetector.getSuccessPercentage();
+        mUserGuidedVectors = appendPoints(mTouchedPoints, mUserGuidedVectors);
+        partialCheck(mUserGuidedVectors);
 
-            Log.i("CustTextView: ", "touch_up: check result= " + checkResult);
-
-            if (mSuccessfullyWrittenChars + 1 == gesture.get(0).length && checkResult) {
-                successWord();
-            } else {
-                if (checkResult) {
-                    successChar();
-                } else if (mCharSuccessPercentage < 70 && mUserGuidedVectors.size() > gesture.get(0)[mSuccessfullyWrittenChars].length) {
-                    if (!tryOtherVersions()) {
-                        mSuccessfullyWrittenChars = 0;
-                        mGestureDetector = new GestureDetector(gesture.get(0)[mSuccessfullyWrittenChars]);
-                        Log.i("WordView", "reset");
-                        ((MainActivity) context).voiceoffer(null, context.getString(R.string.tryAgain));
-                        reset();
-                        mUserGuidedVectors.clear();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.i("WordView: ", "error: " + e.toString());
-        }
-        lastPoint = new Point(mTouchedPoints.get(mTouchedPoints.size() - 1));
+        Log.i("WordView","touch_up:: word_loop: " + word_loop);
     }
 
-    private void successWord() {
-        mSuccessfullyWrittenChars = 0;
-
-        reset();
-
-        ((MainActivity) context).voiceoffer(null, context.getString(R.string.congrats));
-
-        Log.i("WordView", "completed");
-
-        UpdateWord updateWord = new LessonFragment();
-        updateWord.setmContext(context);
-        updateWord.setLessonFragment(this.mLessonFragment);
-
-        Typeface newTypeface = updateWord.updateWordLoop(this.getTypeface(), ++word_loop);
-        Log.i("LessonFragment", "updateWordLoop: word_loop " + word_loop);
-
-        if (newTypeface != null) {
-            this.setTypeface(newTypeface);
-            invalidate();
-        } else {
-            if (word_loop != 0) {
-                this.setTextColor(Color.TRANSPARENT);
-                this.invalidate();
-                Log.e("WordView", "from touch_up: " + " NewTypeface==null");
-            }
-        }
-        mGestureDetector = new GestureDetector(gesture.get(0)[mSuccessfullyWrittenChars]);
-        mUserGuidedVectors.clear();
-    }
-
-    private void successChar() {
-        mSuccessfullyWrittenChars++;
-        mGestureDetector = new GestureDetector(gesture.get(0)[mSuccessfullyWrittenChars]);
-        mUserGuidedVectors.clear();
-
-        // complete ur chars
-        Log.i("WordView", "checkResult: complete ur chars");
-    }
-
-    private boolean tryOtherVersions() {
-        int trials = 1;  // already checked for 1st time
-        Log.i("WordView","tryOtherVersions,gs.sz: " +
-                "" + gesture.size());
-        Log.i("WordView","tryOtherVersions,succsschars: "+ mSuccessfullyWrittenChars);
-        while (trials < gesture.size()) {
-            GestureDetector gestureDetector_otherVersions =
-                    new GestureDetector(gesture.get(trials)[mSuccessfullyWrittenChars
-                            ]);
-            if (gestureDetector_otherVersions.check(mUserGuidedVectors) ||
-                    gestureDetector_otherVersions.getSuccessPercentage() > 70) {
-                if (mSuccessfullyWrittenChars + 1 == gesture.get(0).length) {
-                    successWord();
-                } else {
-                    successChar();
-                }
-                return true;
-            }
-            trials++;
-        }
-        return false;
-    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
-        // float fingerfat = (event.getPressure() * 100);
-        float fingerfat = 20;
+        float fingerfat =20;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 touch_start(x, y, fingerfat);
@@ -314,9 +295,8 @@ public class WordView extends TextView {
     }
 
     public void setGuidedVector(Map<Integer, Direction[][]> gvVersions) {
-        mGestureDetector = new GestureDetector(gvVersions.get(0)[0]);
+        mGestureDetector = new GestureDetector(gvVersions.get(0)[0]); // first version .. first char
         gesture = gvVersions;
-        Log.i("WordView", "setGuidedVector: Vs" + gesture.size() + "sz#word(chars): " + gesture.get(0).length);
     }
 
     public void setmLessonFragment(LessonFragment mLessonFragment) {

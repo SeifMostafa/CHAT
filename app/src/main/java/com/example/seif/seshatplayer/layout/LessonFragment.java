@@ -2,16 +2,12 @@ package com.example.seif.seshatplayer.layout;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 
 import com.example.seif.seshatplayer.MainActivity;
@@ -19,10 +15,6 @@ import com.example.seif.seshatplayer.R;
 import com.example.seif.seshatplayer.UpdateWord;
 import com.example.seif.seshatplayer.WordView;
 import com.example.seif.seshatplayer.model.Word;
-
-import java.util.ArrayList;
-
-import static android.app.Activity.RESULT_OK;
 
 
 public class LessonFragment extends Fragment implements UpdateWord {
@@ -33,12 +25,12 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public static String LessonFragment_TAG = "LessonFragment";
     public static boolean isAnimated = false;
     public static boolean isPicked = false;
-    private Boolean isPronunced = false;
-    private Boolean isWritten = false;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
     WordView wordView_MainText = null;
     Thread Thread_WordJourney = null;
     LessonFragment instance;
+    private Boolean isPronunced = false;
+    private Boolean isWritten = false;
     private Word[] words;
     private Word word = null;
     private int CurrentWordsArrayIndex = 0;
@@ -59,10 +51,10 @@ public class LessonFragment extends Fragment implements UpdateWord {
             }
         }
 
-        Log.i("onCreate", "from LessonFragment");
+    /*    Log.i("onCreate", "from LessonFragment");
         Log.i("LessonFragment", "1st time: " + firstTime);
         Log.i("LessonFragment", "word:" + word);
-        Log.i("LessonFragment", "words: " + words.length + ": " + words.toString());
+        Log.i("LessonFragment", "words: " + words.length + ": " + words.toString());*/
         instance = this;
         mContext = getActivity();
 
@@ -229,7 +221,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
                             sleep(1500);
                             ((MainActivity) mContext).voiceoffer(instance.wordView_MainText, ((MainActivity) mContext).getString(R.string.speakinstruction));
                             sleep(2500);
-                          //  instance.voicerec(null);
+                            //  instance.voicerec(null);
                             ((MainActivity) getActivity()).openPhraseFragment(word.getPhrase(), word.getText());
 
                         } catch (Exception e) {
@@ -281,7 +273,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
             }
         } else {
             // change word
-            isWritten=true;
+            isWritten = true;
             ((MainActivity) mContext).assignWordAsFinished(instance.word.getText());
             instance.Thread_WordJourney_voice_speech().start();
             Log.i("LessonFragment: ", "UpdateWordLoop: changeword");
@@ -352,10 +344,10 @@ public class LessonFragment extends Fragment implements UpdateWord {
         instance.word = instance.words[++instance.CurrentWordsArrayIndex];
         ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
 
-          instance.isAnimated = true;
+        instance.isAnimated = true;
         instance.isPicked = false;
-        instance.isWritten =false;
-        instance.isPronunced =false;
+        instance.isWritten = false;
+        instance.isPronunced = false;
 
         instance.wordView_MainText.setGuidedVector(instance.word.getFV());
         instance.wordView_MainText.setText(
@@ -369,7 +361,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
         instance.isAnimated = true;
         instance.isPicked = false;
-        instance.isPronunced =false;
+        instance.isPronunced = false;
 
         instance.wordView_MainText.setGuidedVector(instance.word.getFV());
         instance.wordView_MainText.setText(
