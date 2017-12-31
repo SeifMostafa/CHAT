@@ -1,5 +1,6 @@
 package com.example.seif.seshatplayer;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -12,6 +13,8 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.seif.seshatplayer.layout.LessonFragment;
@@ -29,6 +32,10 @@ public class WordView extends TextView {
     Context context;
     LessonFragment mLessonFragment;
     ArrayList<Direction> mUserGuidedVectors;
+    UpdateWord updateWord;
+    ImageButton successBtn, fontBtn;
+    Typeface newTypeface = null;
+    int indx = 0;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private Path mPath;
@@ -42,12 +49,16 @@ public class WordView extends TextView {
     private GestureDetector mGestureDetector;
     private int charsPassed = 0;
     private Map<Integer, Direction[][]> gesture;
+    //private int trials = 0;
+    private int gestureSize = 0;
+    private int numOfFail = 0;
 
 
     public WordView(Context context) throws IOException {
         super(context);
         this.context = context;
         init();
+
     }
 
     public WordView(Context context, @Nullable AttributeSet attrs) {
@@ -71,8 +82,8 @@ public class WordView extends TextView {
     }
 
     public void init() {
-        Typeface tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
-        this.setTypeface(tf);
+        newTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
+        this.setTypeface(newTypeface);
         Log.i("init", "AM HERE!");
         mPath = new Path();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
@@ -94,8 +105,38 @@ public class WordView extends TextView {
         POINT_WIDTH = 1f;
         mUserGuidedVectors = new ArrayList<>();
         setTextColor(Color.BLACK);
+        updateWord = new LessonFragment();
+        successBtn = (ImageButton) ((MainActivity) context).findViewById(R.id.imagebutton_success);
+        fontBtn = (ImageButton) ((MainActivity) context).findViewById(R.id.imagebutton_skipFont);
+        fontBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                indx++;
+                fontCreator();
+            }
+        });
     }
 
+    private void fontCreator() {
+        setTextColor(Color.BLACK);
+        if (indx == 0) {
+            newTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
+            word_loop = 0;
+        } else if (indx == 1) {
+            newTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl2.ttf");
+            setTypeface(newTypeface);
+            word_loop = 4;
+        } else if (indx == 2) {
+            newTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl3.ttf");
+            setTypeface(newTypeface);
+            word_loop = 8;
+        } else if (indx == 3) {
+            setTextColor(Color.TRANSPARENT);
+            word_loop = 12;
+            this.indx = 0;
+
+        }
+    }
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -109,7 +150,9 @@ public class WordView extends TextView {
         mBitmap = Bitmap.createBitmap(this.mBitmap.getWidth(), this.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
         invalidate();
+        gestureSize = 0;
         mUserGuidedVectors.clear();
+        mTouchedPoints.clear();
     }
 
     @Override
@@ -118,17 +161,22 @@ public class WordView extends TextView {
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
         canvas.drawPath(mPath, mPaint);
         canvas.drawPath(circlePath, circlePaint);
+
     }
 
     private void touch_start(float x, float y, float ff) {
+
         mPath.reset();
         mPath.moveTo(x, y);
+
+
         mX = x;
         mY = y;
         mFingerFat = ff;
         mPath.addCircle(mX, mY, POINT_WIDTH, Path.Direction.CW);
         mTouchedPoints = new ArrayList<>();
         mTouchedPoints.add(new Point((int) x, (int) y));
+
     }
 
     private void touch_move(float x, float y) {
@@ -142,7 +190,9 @@ public class WordView extends TextView {
             circlePath.addCircle(mX, mY, 20, Path.Direction.CW);
             mTouchedPoints.add(new Point((int) x, (int) y));
         }
+
     }
+
 
     private ArrayList<Direction> appendPoints(ArrayList<Point> touchedPoints, ArrayList<Direction> outputUserGV) {
         if (touchedPoints.size() >= 2) {
@@ -164,6 +214,10 @@ public class WordView extends TextView {
                         outputUserGV.add(XDirection);
                         outputUserGV.add(YDirection);
                     }
+                   /* else if ((XDirection == Direction.SAME && YDirection == Direction.SAME)) {
+                        outputUserGV.add(XDirection);
+                        outputUserGV.add(YDirection);
+                    }*/
                 }
             }
             lastPoint = new Point(touchedPoints.get(touchedPoints.size() - 1));
@@ -175,26 +229,36 @@ public class WordView extends TextView {
                 outputUserGV.add(directions[1]);
             }
         }
+
         return outputUserGV;
     }
 
     /*
         called every time user touch screen to draw something and up his/her finger
      */
-    private void partialCheck(ArrayList<Direction> outputUserGV) {
-        Log.i("WordView","partialCheck:: charsPassed: "+ charsPassed+"outputUserGV.sz:"+outputUserGV.size()
-        +"gesture.v0.gest.charpassed.sz: "+ gesture.get(0)[charsPassed].length );
+    private void wholeCheck(ArrayList<Direction> outputUserGV) {
+
+        if (gestureSize == 0) {
+            for (int j = 0; j < gesture.get(0).length; j++) {
+                for (int l = 0; l < gesture.get(0)[j].length; l++) {
+                    gestureSize++;
+                }
+            }
+        }
         try {
+
             boolean checkResult = mGestureDetector.check(outputUserGV);
-            Log.i("WordView", "partialCheck: checkResult= " + checkResult);
-            /* if 1st version isn't matched user's type..
-                    check other versions if matched user's type */
+
+            /* take action upon the checkResult: update word/update char */
+            Log.i("WordView", " gestureSize/gesture.get(0).length =  " + gestureSize / gesture.get(0).length);
+            Log.i("WordView", " gestureSize-outputUserGV.size() =  " + (gestureSize - outputUserGV.size()));
+
             if (!checkResult) {
                 int trials = 1;  // already checked for 1st time
                 while (trials < gesture.size()) {
 
-                    GestureDetector GD_otherV = new GestureDetector(gesture.get(trials++)[charsPassed]);
-                 //  if(charsPassed+2==gesture.get(0).length) GD_otherV.setThreshold(50);
+                    GestureDetector GD_otherV = new GestureDetector(gesture.get(trials++));
+                    //  if(charsPassed+2==gesture.get(0).length) GD_otherV.setThreshold(50);
                     if (GD_otherV.check(outputUserGV)) {
                         Log.i("WordView", "tryOtherVersions:: trials:Success in trial: " + trials);
                         checkResult = true;
@@ -202,17 +266,16 @@ public class WordView extends TextView {
                     }
                 }
             }
-            /* take action upon the checkResult: update word/update char */
-            if (charsPassed + 1 == gesture.get(0).length && checkResult) {
-                charsPassed = 0;
+            if (gestureSize - outputUserGV.size() <= gestureSize / gesture.get(0).length && checkResult) {
+                gestureSize = 0;
                 reset();
                 ((MainActivity) context).voiceoffer(null, context.getString(R.string.congrats));
-                Log.i("WordView", "completed");
-                UpdateWord updateWord = new LessonFragment();
+                Log.i("WordView", " completed ");
+
                 updateWord.setmContext(context);
                 updateWord.setLessonFragment(this.mLessonFragment);
 
-                Typeface newTypeface = updateWord.updateWordLoop(this.getTypeface(), ++word_loop);
+                newTypeface = updateWord.updateWordLoop(this.getTypeface(), ++word_loop);
 
                 if (newTypeface != null) {
                     this.setTypeface(newTypeface);
@@ -221,25 +284,22 @@ public class WordView extends TextView {
                     if (word_loop != 0) {
                         this.setTextColor(Color.TRANSPARENT);
                         this.invalidate();
-                        Log.e("WordView", "from touch_up: " + "blank level");
+                        Log.i("WordView", " from touch_up: blank level");
                     }
                 }
             } else {
-                if (checkResult) {
-                    charsPassed++;
-                } else if (outputUserGV.size() > gesture.get(0)[charsPassed].length) {
-                    charsPassed = 0;
-                    ((MainActivity) context).voiceoffer(null, context.getString(R.string.tryAgain));
-                    reset();
-                }
+                Log.i("WordView", "Try Again");
+                ((MainActivity) context).voiceoffer(null, context.getString(R.string.tryAgain));
+                reset();
+                outputUserGV.clear();
             }
-            mGestureDetector = new GestureDetector(gesture.get(0)[charsPassed]);
+            mGestureDetector = new GestureDetector(gesture.get(0));
         } catch (Exception e) {
-            Log.i("WordView: ", "error: " + e.toString());
+            Log.e("WordView: ", "error: " + e.toString());
         }
     }
 
-    private void touch_up(MotionEvent event) {
+    private void touch_up() {
         mPath.lineTo(mX, mY);
         circlePath.reset();
         // commit the path to our offscreen
@@ -248,17 +308,44 @@ public class WordView extends TextView {
         mPath.reset();
 
         mUserGuidedVectors = appendPoints(mTouchedPoints, mUserGuidedVectors);
-        partialCheck(mUserGuidedVectors);
+        checkSize(mUserGuidedVectors);
 
-        Log.i("WordView","touch_up:: word_loop: " + word_loop);
+    }
+
+    private void checkSize(ArrayList<Direction> outputUserGV) {
+        if (gestureSize == 0) {
+            for (int j = 0; j < gesture.get(0).length; j++) {
+                for (int l = 0; l < gesture.get(0)[j].length; l++) {
+                    gestureSize++;
+                }
+            }
+        }
+
+        if (gestureSize - outputUserGV.size() <= gestureSize / gesture.get(0).length) {
+            successBtn.setVisibility(VISIBLE);
+
+            successBtn.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    successBtn.setVisibility(INVISIBLE);
+                    wholeCheck(mUserGuidedVectors);
+                }
+            });
+
+        }
+
+        mGestureDetector = new GestureDetector(gesture.get(0));
+
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
-        float fingerfat =20;
+        float fingerfat = 20;
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 touch_start(x, y, fingerfat);
@@ -271,7 +358,7 @@ public class WordView extends TextView {
                 break;
 
             case MotionEvent.ACTION_UP:
-                touch_up(event);
+                touch_up();
                 invalidate();
                 break;
         }
@@ -295,8 +382,17 @@ public class WordView extends TextView {
     }
 
     public void setGuidedVector(Map<Integer, Direction[][]> gvVersions) {
-        mGestureDetector = new GestureDetector(gvVersions.get(0)[0]); // first version .. first char
+        gestureSize = 0;
+
+        mGestureDetector = new GestureDetector(gvVersions.get(0)); // first version .. first char
         gesture = gvVersions;
+
+        for (int j = 0; j < gesture.get(0).length; j++) {
+            for (int l = 0; l < gesture.get(0)[j].length; l++) {
+                gestureSize++;
+            }
+        }
+
     }
 
     public void setmLessonFragment(LessonFragment mLessonFragment) {

@@ -7,6 +7,4 @@ package com.example.seif.seshatplayer;
 public class Utils {
 
 
-
-
 }

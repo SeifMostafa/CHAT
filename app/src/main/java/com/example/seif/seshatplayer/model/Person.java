@@ -3,117 +3,117 @@ package com.example.seif.seshatplayer.model;
 import java.util.ArrayList;
 
 public class Person {
-	private String name=null, address=null, job=null, gender=null, birthAddress=null, envLocation=null, orgHome=null;
-	ArrayList<String> whyLearn=null;
-	ArrayList<String> favNames=null;
-	private int age;
+    ArrayList<String> whyLearn = null;
+    ArrayList<String> favNames = null;
+    private String name = null, address = null, job = null, gender = null, birthAddress = null, envLocation = null, orgHome = null;
+    private int age;
 
-	public Person(String name, String address, int age) {
-		super();
-		this.name = name;
-		this.address = address;
-		this.age = age;
-	}
-	
-
-	public Person(String name, String address, String job, String gender, String birthAddress, String envLocation,
-			String orgHome, ArrayList<String> whyLearn, ArrayList<String> favNames, int age) {
-		super();
-		this.name = name;
-		this.address = address;
-		this.job = job;
-		this.gender = gender;
-		this.birthAddress = birthAddress;
-		this.envLocation = envLocation;
-		this.orgHome = orgHome;
-		this.whyLearn = whyLearn;
-		this.favNames = favNames;
-		this.age = age;
-	}
+    public Person(String name, String address, int age) {
+        super();
+        this.name = name;
+        this.address = address;
+        this.age = age;
+    }
 
 
-	public String getAddress() {
-		return address;
-	}
+    public Person(String name, String address, String job, String gender, String birthAddress, String envLocation,
+                  String orgHome, ArrayList<String> whyLearn, ArrayList<String> favNames, int age) {
+        super();
+        this.name = name;
+        this.address = address;
+        this.job = job;
+        this.gender = gender;
+        this.birthAddress = birthAddress;
+        this.envLocation = envLocation;
+        this.orgHome = orgHome;
+        this.whyLearn = whyLearn;
+        this.favNames = favNames;
+        this.age = age;
+    }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
 
-	public Person() {
-		super();
-	}
+    public Person() {
+        super();
+    }
 
-	public String getJob() {
-		return job;
-	}
+    public String getAddress() {
+        return address;
+    }
 
-	public void setJob(String job) {
-		this.job = job;
-	}
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-	public ArrayList<String> getFavNames() {
-		return favNames;
-	}
+    public String getJob() {
+        return job;
+    }
 
-	public void setFavNames(ArrayList<String> favNames2) {
-		this.favNames = favNames2;
-	}
+    public void setJob(String job) {
+        this.job = job;
+    }
 
-	public ArrayList<String> getWhyLearn() {
-		return whyLearn;
-	}
+    public ArrayList<String> getFavNames() {
+        return favNames;
+    }
 
-	public void setWhyLearn(ArrayList<String> whyMsgs) {
-		this.whyLearn = whyMsgs;
-	}
+    public void setFavNames(ArrayList<String> favNames2) {
+        this.favNames = favNames2;
+    }
 
-	public String getGender() {
-		return gender;
-	}
+    public ArrayList<String> getWhyLearn() {
+        return whyLearn;
+    }
 
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
+    public void setWhyLearn(ArrayList<String> whyMsgs) {
+        this.whyLearn = whyMsgs;
+    }
 
-	public String getBirthAddress() {
-		return birthAddress;
-	}
+    public String getGender() {
+        return gender;
+    }
 
-	public void setBirthAddress(String birthAddress) {
-		this.birthAddress = birthAddress;
-	}
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
-	public String getEnvLocation() {
-		return envLocation;
-	}
+    public String getBirthAddress() {
+        return birthAddress;
+    }
 
-	public void setEnvLocation(String envLocation) {
-		this.envLocation = envLocation;
-	}
+    public void setBirthAddress(String birthAddress) {
+        this.birthAddress = birthAddress;
+    }
 
-	public String getOrgHome() {
-		return orgHome;
-	}
+    public String getEnvLocation() {
+        return envLocation;
+    }
 
-	public void setOrgHome(String orgHome) {
-		this.orgHome = orgHome;
-	}
+    public void setEnvLocation(String envLocation) {
+        this.envLocation = envLocation;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getOrgHome() {
+        return orgHome;
+    }
 
-	public void setAge(int age) {
-		this.age = age;
-	}
+    public void setOrgHome(String orgHome) {
+        this.orgHome = orgHome;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public int getAge() {
-		return age;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
 
 }

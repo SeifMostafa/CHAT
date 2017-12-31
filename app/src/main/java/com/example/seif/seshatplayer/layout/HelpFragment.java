@@ -23,14 +23,18 @@ import java.util.ArrayList;
 
 public class HelpFragment extends Fragment {
 
+    public static String HelpFragment_TAG = "HelpFragment";
+    public Word[] lesson;
+    public int wordIndex;
     ImageButton helpiBtn, PrevlessoniBtn, CurrentlessoniBtn, AchievedlessoniBtn, PrevlessoniBtn_help, CurrentlessoniBtn_help, AchievedlessoniBtn_help;
     AlertDialog AchievedDialog;
-    public static String HelpFragment_TAG ="HelpFragment";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-
+            lesson = (Word[]) getArguments().getParcelableArray(MainActivity.LessonKey);
+            wordIndex = getArguments().getInt(MainActivity.WordIndexKey);
         }
     }
 
@@ -52,7 +56,8 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).updatelesson(-1, false);
+                    // ((MainActivity) getActivity()).updatelesson(-1, false);
+                    ((MainActivity) getActivity()).openLessonFragment(lesson[wordIndex - 1]);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("PrevlessoniBtn", e.toString());
@@ -64,7 +69,13 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ((MainActivity) getActivity()).updatelesson(0, true);
+                    //((MainActivity) getActivity()).updatelesson(0, true);
+                    //((MainActivity) getActivity()).openLessonFragment();
+                    LessonFragment.isPicked = false;
+                    ((MainActivity) getActivity()).SaveOnSharedPref(MainActivity.WordIndexKey, String.valueOf(wordIndex));
+                    ((MainActivity) getActivity()).openLessonFragment(1);
+
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("CurrentlessoniBtn", e.toString());
@@ -200,14 +211,16 @@ public class HelpFragment extends Fragment {
                     }
                 });
                 imageButton_redo.setOnClickListener(new View.OnClickListener() {
+
                     @Override
                     public void onClick(View view) {
                         Log.i("ArchiveListAdapter", getItem(position) + " imageButton_redo is clicked");
                         try {
                             AchievedDialog.dismiss();
                             AchievedDialog.cancel();
-                            //
-                            ((MainActivity) getActivity()).openLessonFragment(new Word(getItem(position)));
+                            ((MainActivity) getActivity()).openLessonFragment(lesson[position]);
+
+
                         } catch (Exception e) {
                             e.printStackTrace();
                             Log.e("imageButton_redo", e.toString());

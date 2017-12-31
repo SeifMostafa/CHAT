@@ -21,7 +21,7 @@ import java.util.Locale;
 
 public class PhrasePickFragment extends Fragment {
     public static String PhrasePickFragment_TAG = "PhrasePickFragment";
-    TextView textView_phrase,textView_picked;
+    TextView textView_phrase, textView_picked;
     ImageButton helpiBtn;
     private String word = null, phrase = null;
 
@@ -37,10 +37,9 @@ public class PhrasePickFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view =  inflater.inflate(R.layout.fragment_phrase_pick, container, false);
+        View view = inflater.inflate(R.layout.fragment_phrase_pick, container, false);
         textView_phrase = (TextView) view.findViewById(R.id.textView_phrase);
         textView_picked = (TextView) view.findViewById(R.id.textView_picked);
-
 
         textView_picked.setText("");
         textView_phrase.setMovementMethod(LinkMovementMethod.getInstance());
@@ -95,6 +94,7 @@ public class PhrasePickFragment extends Fragment {
                     ((MainActivity) getActivity()).backToLessonFragment();
                 }
             }
+
             public void updateDrawState(TextPaint ds) {
                 super.updateDrawState(ds);
                 ds.setUnderlineText(false);

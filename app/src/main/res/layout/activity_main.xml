@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,18 +8,44 @@
     <FrameLayout
         android:id="@+id/fragment_replacement"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent">
+
+    </FrameLayout>
 
     <ImageButton
         android:id="@+id/imagebutton_moreInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_centerHorizontal="true"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/moreinfo"
-        android:paddingTop="@dimen/activity_actionbar_margin"
+        android:layout_centerInParent="true"
         android:elevation="@dimen/btn_shadow"
+        android:paddingTop="@dimen/activity_actionbar_margin"
+        android:src="@drawable/moreinfo"
+        android:translationZ="@dimen/btn_z" />
+
+    <ImageButton
+        android:id="@+id/imagebutton_success"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:elevation="@dimen/btn_shadow"
+        android:paddingTop="@dimen/activity_actionbar_margin"
+        android:src="@drawable/moreinfo"
         android:translationZ="@dimen/btn_z"
-         />
+        android:visibility="invisible"
+
+        />
+
+    <ImageButton
+        android:id="@+id/imagebutton_skipFont"
+        android:layout_width="wrap_content"
+        android:layout_height="70dp"
+        android:layout_alignBottom="@+id/imagebutton_moreInfo"
+        android:layout_marginStart="222dp"
+        android:layout_toEndOf="@+id/imagebutton_success"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:src="@drawable/nextword" />
+
 </RelativeLayout>

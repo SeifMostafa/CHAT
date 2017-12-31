@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
     private int lesson_index = 1;
 
     private String firstPhrase = "أنا إسمي ";
-    private Handler mHandler = new Handler();
 
 
     public static Direction[] getDirections(String filepath, int version) {
@@ -184,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
             lesson_index = Integer.parseInt(sharedPreferences_words.getString(LessonKey, "1"));
 
             word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
+
             SF = sharedPreferences_words.getString(SFKEY, SF);
             WordsFilePath = SF + WordsFilePath;
             PhrasesFilePath = SF + PhrasesFilePath;
@@ -193,14 +193,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private Word form_word(String txt, String phrase) {
         try {
             Word resultWord = new Word(txt, SF + txt + ".png", SF + txt, phrase);
             int version = 0;
             Direction[][] gvVersion = prepareWordGuidedVectors(txt, version);
             do {
-              //  Log.i("MainActivity", "form_word: gvVersion.sz: " + gvVersion[0].length);
+                //  Log.i("MainActivity", "form_word: gvVersion.sz: " + gvVersion[0].length);
                 resultWord.setFV(gvVersion);
                 version++;
                 gvVersion = prepareWordGuidedVectors(txt, version);
@@ -213,7 +212,6 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
-
     private Direction[][] prepareWordGuidedVectors(String word, int version) {
         char charConnector = 'ـ';
         Direction[][] result_directions = new Direction[word.length()][];
@@ -240,6 +238,8 @@ public class MainActivity extends AppCompatActivity {
                     result_directions[i] = getDirections(SF + character, version);
                 } else if (differentchars.contains(word.charAt(i - 1)) && !differentchars.contains(character)) {
                     result_directions[i] = getDirections(SF + character + charConnector, version);
+                } else if (!differentchars.contains(word.charAt(i - 1)) && differentchars.contains(character)) {
+                    result_directions[i] = getDirections(SF + charConnector + character, version);
                 } else {
                     result_directions[i] = getDirections(SF + charConnector + character + charConnector, version);
                 }
@@ -452,19 +452,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void openLessonFragment(int i) {
+    /* private void openLessonFragment(int i) {
+
+         FragmentManager fragmentManager = getFragmentManager();
+         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+         LessonFragment lessonFragment = new LessonFragment();
+         Bundle bundle = new Bundle();
+         Word[] lesson = lessons.get(i);
+
+         Log.i("MainActivity", "openLessonFragment: am here with i(lesson_index)= " + i);
+         Log.i("MainActivity", "openLessonFragment: & lesson.sz= " + lesson.length);
+
+         bundle.putParcelableArray(LessonKey, lesson);
+
+         lessonFragment.setArguments(bundle);
+         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment, LessonFragment_TAG);
+         fragmentTransaction.addToBackStack(LessonFragment_TAG);
+         fragmentTransaction.commit();
+
+         Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
+     }*/
+    public void openLessonFragment(int i) {
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         LessonFragment lessonFragment = new LessonFragment();
         Bundle bundle = new Bundle();
         Word[] lesson = lessons.get(i);
+        word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
+
 
         Log.i("MainActivity", "openLessonFragment: am here with i(lesson_index)= " + i);
         Log.i("MainActivity", "openLessonFragment: & lesson.sz= " + lesson.length);
 
-        bundle.putParcelableArray(LessonKey, lesson);
 
+        bundle.putParcelableArray(LessonKey, lesson);
+        bundle.putInt(WordIndexKey, word_index);
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment, LessonFragment_TAG);
         fragmentTransaction.addToBackStack(LessonFragment_TAG);
@@ -477,18 +500,24 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         LessonFragment lessonFragment = new LessonFragment();
+
+        word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
+
         Bundle bundle = new Bundle();
 
+
         if (lesson_index == 1) {
-            word = form_word(word.getText(), null);
+            word = form_word(word.getText(), word.getPhrase());
             bundle.putBoolean(firstTimekey, true);
             bundle.putParcelableArray(LessonKey, lessons.get(1));
+
         } else {
             bundle.putBoolean(firstTimekey, false);
             bundle.putParcelableArray(LessonKey, lessons.get(lesson_index));
         }
 
         bundle.putParcelable(WordKey, word);
+        bundle.putInt(WordIndexKey, word_index);
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment, LessonFragment_TAG);
         fragmentTransaction.addToBackStack(LessonFragment_TAG);
@@ -548,13 +577,22 @@ public class MainActivity extends AppCompatActivity {
 
     public void OpenHelpFragment() {
 
+
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         HelpFragment helpFragment = new HelpFragment();
+
+        Bundle bundle = new Bundle();
+
+        word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
+
+        bundle.putInt(WordIndexKey, word_index);
+        bundle.putParcelableArray(LessonKey, lessons.get(1));
+        helpFragment.setArguments(bundle);
+
         fragmentTransaction.replace(R.id.fragment_replacement, helpFragment);
         // fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
-
     }
 
     public void assignWordAsFinished(String Word) {
@@ -638,4 +676,5 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 }

@@ -1,50 +1,46 @@
 package com.example.seif.seshatplayer.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-
-
 public class Character {
 
-	char ch;
-	/*
-	 * Syllabus folder will contain CharactersFolder for data for this class
+    char ch;
+    /*
+     * Syllabus folder will contain CharactersFolder for data for this class
 	 */
 
-	private String SpeechesFilePath[]= null;  // movements if arabic
-	private Direction[][] FV= null;
+    private String SpeechesFilePath[] = null;  // movements if arabic
+    private Direction[][] FV = null;
 
-	public char getCh() {
-		return ch;
-	}
+    public Character(char ch) {
+        super();
+        this.ch = ch;
+    }
 
-	public void setCh(char ch) {
-		this.ch = ch;
-	}
+    public char getCh() {
+        return ch;
+    }
 
-	public String[] getSpeechFilePath() {
-		return SpeechesFilePath;
-	}
+    public void setCh(char ch) {
+        this.ch = ch;
+    }
 
-	public void setSpeechesFilePath(String[] speechesFilePath) {
-		SpeechesFilePath = speechesFilePath;
-	}
+    public String[] getSpeechFilePath() {
+        return SpeechesFilePath;
+    }
 
-	public Direction[][] getFV() {
-		return FV;
-	}
+    public void setSpeechesFilePath(String[] speechesFilePath) {
+        SpeechesFilePath = speechesFilePath;
+    }
 
-	public void setFV(Direction[][] fv) {
-		FV = fv;
-	}
+    public Direction[][] getFV() {
+        return FV;
+    }
 
-	public Character(char ch) {
-		super();
-		this.ch = ch;
-	}
-	@Override
-	public String toString() {
-		return "char: "+this.ch +"fv: "+  this.FV.toString() +"SpeechFilePath: "+ this.SpeechesFilePath;
-	}
+    public void setFV(Direction[][] fv) {
+        FV = fv;
+    }
+
+    @Override
+    public String toString() {
+        return "char: " + this.ch + "fv: " + this.FV.toString() + "SpeechFilePath: " + this.SpeechesFilePath;
+    }
 }

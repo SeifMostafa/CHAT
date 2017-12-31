@@ -20,6 +20,7 @@ public class AnimationFragment extends Fragment {
     String word;
     TypeWriter custTextView;
     ImageButton helpiBtn;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,13 +71,13 @@ public class AnimationFragment extends Fragment {
         super.onResume();
 
         int time2waitbeforeOpenningPickPhraseFragment = (
-                word.length()+ 2) * 1000;
+                word.length() + 2) * 1000;
 
         Handler handler = new Handler();
         Runnable r = new Runnable() {
             public void run() {
-                if(isVisible())
-                ((MainActivity)getActivity()).backToLessonFragment();
+                if (isVisible())
+                    ((MainActivity) getActivity()).backToLessonFragment();
             }
         };
         handler.postDelayed(r, time2waitbeforeOpenningPickPhraseFragment);

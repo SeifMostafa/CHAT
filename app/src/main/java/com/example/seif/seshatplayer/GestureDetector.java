@@ -12,68 +12,83 @@ import java.util.ArrayList;
 
 public class GestureDetector {
 
-    private Direction[] gesture;
-    public double THRESHOLD = 60;
+    private double THRESHOLD = 76;
+    private ArrayList<Direction> wholeWord;
 
 
-    public GestureDetector(Direction[] Gesture) {
-        this.gesture = Gesture;
-        if (this.gesture.length < 2) Log.e("GestureDetector", "Hasn't gesture to detect!");
-        THRESHOLD += 40/this.gesture.length;
+    GestureDetector(Direction[][] Gesture) {
+        wholeWord = new ArrayList<>();
+        for (int j = 0; j < Gesture.length; j++) {
+            for (int l = 0; l < Gesture[j].length; l++) {
+                wholeWord.add(Gesture[j][l]);
+            }
+        }
+        if (this.wholeWord.size() < 2)
+            Log.i("GestureDetector", "Hasn't gesture to detect!");
+        THRESHOLD += Gesture.length * 10 / wholeWord.size();
     }
 
-    public boolean check(ArrayList<Direction> mUserGV) {
+    boolean check(ArrayList<Direction> mUserGV) {
+        Log.i("GestureDetector", "wholeWord.size() = " + this.wholeWord.size());
+        Log.i("GestureDetector", "mUserGV = " + mUserGV.toString());
+        Log.i("GestureDetector", "wholeWord = " + wholeWord.toString());
+
         double successPercentage = 100;
-        double progressStep = (100.0 / (double) gesture.length);
+        double progressStep = (100.0 / (double) wholeWord.size());
         boolean isDetected = false;
         try {
-            if (mUserGV.size() >= gesture.length) {
-                for (int i = 0; i < gesture.length - 1; i += 2 ) {
+            if (mUserGV.size() <= wholeWord.size()) {
+                for (int i = 0; i < mUserGV.size() - 1; i += 2) {
                     Direction d_X = mUserGV.get(i);
                     Direction d_Y = mUserGV.get(i + 1);
-                    Direction ORG_d_X = gesture[i];
-                    Direction ORG_d_Y = gesture[i + 1];
-
-                    /*Log.i("GestureDetector", "CompareGuidedVector" + "XD:  " + ORG_d_X);
-                    Log.i("GestureDetector", "CompareGuidedVector" + "UXD:  " + d_X);
-                    Log.i("GestureDetector", "CompareGuidedVector" + "YD:  " + ORG_d_Y);
-                    Log.i("GestureDetector", "CompareGuidedVector" + "UYD:" + d_Y);*/
-
+                    Direction ORG_d_X = wholeWord.get(i);
+                    Direction ORG_d_Y = wholeWord.get(i + 1);
                     try {
                         if (ORG_d_X == Direction.NOMATTER || ORG_d_Y == Direction.NOMATTER) {
+
                             if (ORG_d_X == Direction.NOMATTER && ORG_d_Y != Direction.NOMATTER) {
                                 if (d_Y != ORG_d_Y) {
-                                    if (!approximateCheck(mUserGV,ORG_d_X, ORG_d_Y, i)){
-                                        successPercentage-=progressStep;
+                                    if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)) {
+                                        successPercentage -= progressStep;
                                     }
                                 }
-                            } else if (ORG_d_X != Direction.NOMATTER && ORG_d_Y == Direction.NOMATTER) {
+                            } else if (ORG_d_X != Direction.NOMATTER) {
                                 if (d_X != ORG_d_X) {
-                                    if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)){
-                                        successPercentage-=progressStep;
+                                    if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)) {
+                                        successPercentage -= progressStep;
                                     }
                                 }
                             }
                         } else {
                             if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
                                 if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)) {
-                                    successPercentage-=progressStep;
+                                    successPercentage -= progressStep;
                                 }
                             }
                         }
                     } catch (Exception e) {
                         Log.e("GestureDetector", "CompareGuidedVector" + e.toString());
                     }
+
                 }
-                if(successPercentage > THRESHOLD) isDetected = true;
+                if (successPercentage > THRESHOLD) {
+                    isDetected = true;
+                }
+
+                Log.i("GestureDetector", "successPercentage = " + successPercentage);
+                Log.i("GestureDetector", "THRESHOLD = " + THRESHOLD);
+                Log.i("GestureDetector", "isDetected = " + isDetected);
+
             } else {
-                Log.i("GestureDetector", "check" + "shortage in touched points data");
+
+                Log.i("GestureDetector", "check " + "shortage in touched points data");
             }
         } catch (Exception e) {
             Log.e("GestureDetector", "check:: e: " + e.getMessage());
         }
         return isDetected;
     }
+
 
     private boolean approximateCheck(ArrayList<Direction> mUserGV, Direction XDirection, Direction YDirection, int index) {
         boolean isDetected = false;
@@ -106,7 +121,8 @@ public class GestureDetector {
         }
         return isDetected;
     }
-    public void setThreshold(double t){
-        THRESHOLD=t;
+
+    public void setThreshold(double t) {
+        THRESHOLD = t;
     }
 }

@@ -6,8 +6,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.TextView;
 
-import com.example.seif.seshatplayer.model.Word;
-
 import java.io.IOException;
 
 public class TypeWriter extends TextView {
