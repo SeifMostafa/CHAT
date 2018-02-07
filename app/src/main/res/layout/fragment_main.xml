@@ -1,4 +1,4 @@
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,30 +8,33 @@
 
     <com.example.seif.seshatplayer.WordView
         android:id="@+id/textView_maintext"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
+        android:layout_centerInParent="true"
         android:background="@color/colorWhity"
         android:text="@string/text"
         android:textAlignment="center"
-        android:textSize="@dimen/activity_word_textsize"
 
+        android:textSize="@dimen/activity_word_textsize"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignTop="@id/textView_maintext">
 
         <ImageButton
             android:id="@+id/imagebutton_prevword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:elevation="10dp"
-            android:padding="@dimen/activity_horizontal_margin"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:src="@drawable/prevword"
-            android:translationZ="10dp"
             tools:ignore="RtlHardcoded" />
 
         <ImageButton
@@ -39,34 +42,33 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:elevation="10dp"
-            android:padding="@dimen/activity_horizontal_margin"
             android:src="@drawable/nextword"
-            android:translationZ="10dp"
             tools:ignore="RtlHardcoded" />
 
     </RelativeLayout>
 
-
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/textView_maintext">
     <ImageButton
         android:id="@+id/imagebutton_soundhelp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_double_actionbar_margin"
+        android:layout_alignParentRight="true"
         android:layout_marginEnd="@dimen/activity_double_actionbar_margin"
         android:layout_marginRight="@dimen/activity_double_actionbar_margin"
         android:elevation="10dp"
         android:src="@drawable/sound"
-        android:translationZ="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-
         app:layout_constraintRight_toRightOf="parent" />
 
     <ImageButton
         android:id="@+id/imagebutton_photohelp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_double_actionbar_margin"
+        android:layout_alignParentLeft="true"
         android:layout_marginLeft="@dimen/activity_double_actionbar_margin"
         android:layout_marginStart="@dimen/activity_double_actionbar_margin"
         android:elevation="10dp"
@@ -77,5 +79,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         tools:ignore="ContentDescription,RtlHardcoded" />
 
+    </RelativeLayout>
 
-</android.support.constraint.ConstraintLayout>
+
+</RelativeLayout>

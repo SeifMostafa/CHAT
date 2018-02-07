@@ -66,6 +66,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         wordView_MainText = (WordView) view.findViewById(R.id.textView_maintext);
         wordView_MainText.setText(word.getText());
@@ -162,7 +163,6 @@ public class LessonFragment extends Fragment implements UpdateWord {
         super.onResume();
 
         if (!firstTime && !isAnimated) {
-
             ((MainActivity) getActivity()).openAnimationFragment(word.getText());
             isAnimated = true;
         } else if (!firstTime && instance.isWritten &&/* instance.isPronunced &&*/ !isPicked) {
@@ -264,7 +264,6 @@ public class LessonFragment extends Fragment implements UpdateWord {
     @Override
     public Typeface updateWordLoop(Typeface typeface, int word_loop) {
         Typeface tf;
-
 
         if (word_loop < 14) {
             if (word_loop % DEFAULT_LOOP_COUNTER == 0) {

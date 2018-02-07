@@ -1,6 +1,7 @@
 package com.example.seif.seshatplayer;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -48,7 +49,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
-import java.util.concurrent.locks.Lock;
 
 import static com.example.seif.seshatplayer.layout.LessonFragment.LessonFragment_TAG;
 import static java.lang.Thread.sleep;
@@ -57,10 +57,9 @@ import static java.lang.Thread.sleep;
 public class MainActivity extends AppCompatActivity {
 
 
-    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordIndexKey = "i", WordKey = "w", PhraseKey = "p", LessonKey = "L";
+    public static final String WORDS_PREFS_NAME = "WordsPrefsFile", WordIndexKey = "i", WordKey = "w", PhraseKey = "p", LessonKey = "L", WordLoopKey = "wl";
     public static final String SFKEY = "0";
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 122;
-    public static Lock mLockPhraselessonFragments;
     public static String firstTimekey = "1stTime";
 
     SharedPreferences sharedPreferences_words = null;
@@ -131,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
     /*
       * read file into string and the end = \n and return this string
       */
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

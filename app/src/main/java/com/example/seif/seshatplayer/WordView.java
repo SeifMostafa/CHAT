@@ -49,9 +49,7 @@ public class WordView extends TextView {
     private GestureDetector mGestureDetector;
     private int charsPassed = 0;
     private Map<Integer, Direction[][]> gesture;
-    //private int trials = 0;
     private int gestureSize = 0;
-    private int numOfFail = 0;
 
 
     public WordView(Context context) throws IOException {
@@ -82,6 +80,7 @@ public class WordView extends TextView {
     }
 
     public void init() {
+        //word_loop=context.getSharedPreferences(MainActivity.WORDS_PREFS_NAME,0).getInt(MainActivity.WordLoopKey,0);
         newTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
         this.setTypeface(newTypeface);
         Log.i("init", "AM HERE!");
@@ -108,12 +107,9 @@ public class WordView extends TextView {
         updateWord = new LessonFragment();
         successBtn = (ImageButton) ((MainActivity) context).findViewById(R.id.imagebutton_success);
         fontBtn = (ImageButton) ((MainActivity) context).findViewById(R.id.imagebutton_skipFont);
-        fontBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                indx++;
-                fontCreator();
-            }
+        fontBtn.setOnClickListener(view -> {
+            indx++;
+            fontCreator();
         });
     }
 
@@ -266,7 +262,7 @@ public class WordView extends TextView {
                     }
                 }
             }
-            if (gestureSize - outputUserGV.size() <= gestureSize / gesture.get(0).length && checkResult) {
+            if (checkResult) {
                 gestureSize = 0;
                 reset();
                 ((MainActivity) context).voiceoffer(null, context.getString(R.string.congrats));
@@ -274,6 +270,7 @@ public class WordView extends TextView {
 
                 updateWord.setmContext(context);
                 updateWord.setLessonFragment(this.mLessonFragment);
+                // ((MainActivity)context).SaveOnSharedPref(MainActivity.WordLoopKey, String.valueOf(word_loop));
 
                 newTypeface = updateWord.updateWordLoop(this.getTypeface(), ++word_loop);
 
@@ -335,7 +332,6 @@ public class WordView extends TextView {
         }
 
         mGestureDetector = new GestureDetector(gesture.get(0));
-
     }
 
 
