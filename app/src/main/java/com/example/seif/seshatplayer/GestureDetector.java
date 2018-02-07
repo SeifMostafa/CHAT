@@ -4,7 +4,12 @@ import android.util.Log;
 
 import com.example.seif.seshatplayer.model.Direction;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by seif on 10/9/17.
@@ -12,9 +17,10 @@ import java.util.ArrayList;
 
 public class GestureDetector {
 
+    int counter = 0;
     private double THRESHOLD = 76;
     private ArrayList<Direction> wholeWord;
-
+    private HashMap<String, Integer> wrongDirectionscounter = new HashMap<>();
 
     GestureDetector(Direction[][] Gesture) {
         wholeWord = new ArrayList<>();
@@ -50,12 +56,16 @@ public class GestureDetector {
                                 if (d_Y != ORG_d_Y) {
                                     if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)) {
                                         successPercentage -= progressStep;
+                                        checkWrongDirection(ORG_d_X, ORG_d_Y);
+
                                     }
                                 }
                             } else if (ORG_d_X != Direction.NOMATTER) {
                                 if (d_X != ORG_d_X) {
                                     if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)) {
                                         successPercentage -= progressStep;
+                                        checkWrongDirection(ORG_d_X, ORG_d_Y);
+
                                     }
                                 }
                             }
@@ -63,6 +73,7 @@ public class GestureDetector {
                             if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
                                 if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)) {
                                     successPercentage -= progressStep;
+                                    checkWrongDirection(ORG_d_X, ORG_d_Y);
                                 }
                             }
                         }
@@ -89,37 +100,59 @@ public class GestureDetector {
         return isDetected;
     }
 
+    private void checkWrongDirection(Direction ORG_d_X, Direction ORG_d_Y) throws IOException {
+        if (wrongDirectionscounter.containsKey((ORG_d_X.toString()) + (ORG_d_Y.toString()))) {
+            counter = wrongDirectionscounter.get((ORG_d_X.toString()) + (ORG_d_Y.toString()));
+            wrongDirectionscounter.replace((ORG_d_X.toString()) + (ORG_d_Y.toString()), counter++);
+        } else {
+            wrongDirectionscounter.put((ORG_d_X.toString()) + (ORG_d_Y.toString()), counter++);
+        }
+        Log.i("GestureDetector", wrongDirectionscounter.toString());
+        writeMapToFile(wrongDirectionscounter);
+    }
 
     private boolean approximateCheck(ArrayList<Direction> mUserGV, Direction XDirection, Direction YDirection, int index) {
         boolean isDetected = false;
         if (index + 3 <= mUserGV.size()) {
-            Direction nextDx, nextDy, cuurentDx, cuurentDy;
+            Direction nextDx, nextDy, currentDx, currentDy;
 
             nextDx = mUserGV.get(index + 2);
             nextDy = mUserGV.get(index + 3);
 
-            cuurentDx = mUserGV.get(index);
-            cuurentDy = mUserGV.get(index + 1);
+            currentDx = mUserGV.get(index);
+            currentDy = mUserGV.get(index + 1);
 
-            if (nextDx == Direction.SAME || cuurentDx == Direction.SAME) {
+            if (nextDx == Direction.SAME || currentDx == Direction.SAME) {
                 if (nextDx == Direction.SAME) {
-                    if ((XDirection == cuurentDx || XDirection == Direction.NOMATTER) && (YDirection == cuurentDy || YDirection == nextDy || YDirection == Direction.NOMATTER))
+                    if ((XDirection == currentDx || XDirection == Direction.NOMATTER) && (YDirection == currentDy || YDirection == nextDy || YDirection == Direction.NOMATTER))
                         isDetected = true;
                 } else {
-                    if ((XDirection == nextDx || XDirection == Direction.NOMATTER) && (YDirection == cuurentDy || YDirection == nextDy || YDirection == Direction.NOMATTER))
+                    if ((XDirection == nextDx || XDirection == Direction.NOMATTER) && (YDirection == currentDy || YDirection == nextDy || YDirection == Direction.NOMATTER))
                         isDetected = true;
                 }
-            } else if (nextDy == Direction.SAME || cuurentDy == Direction.SAME) {
+            } else if (nextDy == Direction.SAME || currentDy == Direction.SAME) {
                 if (nextDy == Direction.SAME) {
-                    if ((YDirection == cuurentDy || YDirection == Direction.NOMATTER) && (XDirection == cuurentDx || XDirection == nextDx || XDirection == Direction.NOMATTER))
+                    if ((YDirection == currentDy || YDirection == Direction.NOMATTER) && (XDirection == currentDx || XDirection == nextDx || XDirection == Direction.NOMATTER))
                         isDetected = true;
                 } else {
-                    if ((YDirection == nextDy || YDirection == Direction.NOMATTER) && (XDirection == cuurentDx || XDirection == nextDx || XDirection == Direction.NOMATTER))
+                    if ((YDirection == nextDy || YDirection == Direction.NOMATTER) && (XDirection == currentDx || XDirection == nextDx || XDirection == Direction.NOMATTER))
                         isDetected = true;
                 }
             }
         }
         return isDetected;
+    }
+
+    private void writeMapToFile(HashMap<String, Integer> hashMap) throws IOException {
+        FileWriter fStream;
+        BufferedWriter out;
+        fStream = new FileWriter("values.txt");
+        out = new BufferedWriter(fStream);
+        for (Map.Entry<String, Integer> pairs : hashMap.entrySet()) {
+            out.write(pairs.getKey() + " " + pairs.getValue() + "\n");
+        }
+
+        out.close();
     }
 
     public void setThreshold(double t) {

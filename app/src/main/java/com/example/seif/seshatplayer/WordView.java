@@ -47,7 +47,7 @@ public class WordView extends TextView {
     private Point lastPoint;
     private ArrayList<Point> mTouchedPoints;
     private GestureDetector mGestureDetector;
-    private int charsPassed = 0;
+    //private int charsPassed = 0;
     private Map<Integer, Direction[][]> gesture;
     private int gestureSize = 0;
 
@@ -89,14 +89,14 @@ public class WordView extends TextView {
         circlePaint = new Paint();
         circlePath = new Path();
         circlePaint.setAntiAlias(true);
-        circlePaint.setColor(Color.BLUE);
+        circlePaint.setColor(Color.RED);
         circlePaint.setStyle(Paint.Style.STROKE);
         circlePaint.setStrokeJoin(Paint.Join.MITER);
         circlePaint.setStrokeWidth(8f);
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
-        mPaint.setColor(Color.RED);
+        mPaint.setColor(Color.BLUE);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -320,7 +320,6 @@ public class WordView extends TextView {
 
         if (gestureSize - outputUserGV.size() <= gestureSize / gesture.get(0).length) {
             successBtn.setVisibility(VISIBLE);
-
             successBtn.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -328,9 +327,7 @@ public class WordView extends TextView {
                     wholeCheck(mUserGuidedVectors);
                 }
             });
-
         }
-
         mGestureDetector = new GestureDetector(gesture.get(0));
     }
 
@@ -340,11 +337,11 @@ public class WordView extends TextView {
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
-        float fingerfat = 20;
+        float fingerFat = 20;
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                touch_start(x, y, fingerfat);
+                touch_start(x, y, fingerFat);
                 invalidate();
                 break;
 
