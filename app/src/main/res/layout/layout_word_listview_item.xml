@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
 
     <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/photo"
         android:id="@+id/imageButton_word_item_photohelp"
-        android:elevation="@dimen/btn_shadow"
-        android:translationZ="@dimen/btn_z"/>
-
-    <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/sound"
-        android:id="@+id/imageButton_word_item_soundhelp"
         android:elevation="@dimen/btn_shadow"
         android:translationZ="@dimen/btn_z"
-        />
-
-    <TextView
-        android:text="TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/activity_word_textsize_listitem"
-        android:id="@+id/textView_word_item_txt"
-        android:textAlignment="center"
-        android:layout_weight="1" />
+        app:srcCompat="@drawable/photo" />
 
     <ImageButton
+        android:id="@+id/imageButton_word_item_soundhelp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/reset"
+        android:elevation="@dimen/btn_shadow"
+        android:translationZ="@dimen/btn_z"
+        app:srcCompat="@drawable/sound" />
+
+    <TextView
+        android:id="@+id/textView_word_item_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textSize="@dimen/activity_word_textsize_listitem" />
+
+    <ImageButton
         android:id="@+id/imageButton_word_item_back_to"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:elevation="@dimen/btn_shadow"
-        android:translationZ="@dimen/btn_z"/>
+        android:translationZ="@dimen/btn_z"
+        app:srcCompat="@drawable/reset" />
 </LinearLayout>

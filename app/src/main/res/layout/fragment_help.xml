@@ -1,5 +1,4 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,69 +14,73 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_gravity="left|center"
-            >
+            android:orientation="vertical">
+
             <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_prevlesson"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
 
+                android:elevation="@dimen/btn_shadow"
                 android:src="@drawable/prevlesson"
-                android:elevation="@dimen/btn_shadow"
-                android:translationZ="@dimen/btn_z"
-                />
+                android:translationZ="@dimen/btn_z" />
+
             <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_prevlesson_help"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:elevation="@dimen/btn_shadow"
-                android:translationZ="@dimen/btn_z"
-                android:src="@drawable/sound"/>
+                android:src="@drawable/sound"
+                android:translationZ="@dimen/btn_z" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_gravity="center"
+            android:orientation="vertical"
             android:paddingLeft="@dimen/activity_double_actionbar_margin">
+
             <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_currentlesson"
-                android:elevation="@dimen/btn_shadow"
-                android:translationZ="@dimen/btn_z"
-                android:src="@drawable/reset"/>
-            <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/imagebutton_currentlesson_help"
                 android:elevation="@dimen/btn_shadow"
-                android:translationZ="@dimen/btn_z"
-                android:src="@drawable/sound"/>
+                android:src="@drawable/reset"
+                android:translationZ="@dimen/btn_z" />
+
+            <ImageButton
+                android:id="@+id/imagebutton_currentlesson_help"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/btn_shadow"
+                android:src="@drawable/sound"
+                android:translationZ="@dimen/btn_z" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_gravity="right|center"
+            android:orientation="vertical"
             android:paddingLeft="@dimen/activity_double_actionbar_margin">
+
             <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:id="@+id/imagebutton_achievedlessons"
-                android:elevation="@dimen/btn_shadow"
-                android:translationZ="@dimen/btn_z"
-                android:src="@drawable/achieved"/>
-            <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/imagebutton_achievedlessons_help"
                 android:elevation="@dimen/btn_shadow"
-                android:translationZ="@dimen/btn_z"
-                android:src="@drawable/sound"/>
+                android:src="@drawable/achieved"
+                android:translationZ="@dimen/btn_z" />
+
+            <ImageButton
+                android:id="@+id/imagebutton_achievedlessons_help"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/btn_shadow"
+                android:src="@drawable/sound"
+                android:translationZ="@dimen/btn_z" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

@@ -1,13 +1,17 @@
 package com.example.seif.seshatplayer;
 
+import android.os.Environment;
 import android.util.Log;
 
 import com.example.seif.seshatplayer.model.Direction;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,10 +28,8 @@ public class GestureDetector {
 
     GestureDetector(Direction[][] Gesture) {
         wholeWord = new ArrayList<>();
-        for (int j = 0; j < Gesture.length; j++) {
-            for (int l = 0; l < Gesture[j].length; l++) {
-                wholeWord.add(Gesture[j][l]);
-            }
+        for (Direction[] aGesture : Gesture) {
+            wholeWord.addAll(Arrays.asList(aGesture));
         }
         if (this.wholeWord.size() < 2)
             Log.i("GestureDetector", "Hasn't gesture to detect!");
@@ -101,11 +103,15 @@ public class GestureDetector {
     }
 
     private void checkWrongDirection(Direction ORG_d_X, Direction ORG_d_Y) throws IOException {
+        if (wrongDirectionscounter.isEmpty()) {
+            wrongDirectionscounter = readFileToMap();
+        }
         if (wrongDirectionscounter.containsKey((ORG_d_X.toString()) + (ORG_d_Y.toString()))) {
             counter = wrongDirectionscounter.get((ORG_d_X.toString()) + (ORG_d_Y.toString()));
-            wrongDirectionscounter.replace((ORG_d_X.toString()) + (ORG_d_Y.toString()), counter++);
+            wrongDirectionscounter.replace((ORG_d_X.toString()) + (ORG_d_Y.toString()), counter, ++counter);
         } else {
-            wrongDirectionscounter.put((ORG_d_X.toString()) + (ORG_d_Y.toString()), counter++);
+            counter = 0;
+            wrongDirectionscounter.put((ORG_d_X.toString()) + (ORG_d_Y.toString()), ++counter);
         }
         Log.i("GestureDetector", wrongDirectionscounter.toString());
         writeMapToFile(wrongDirectionscounter);
@@ -144,18 +150,38 @@ public class GestureDetector {
     }
 
     private void writeMapToFile(HashMap<String, Integer> hashMap) throws IOException {
+        String file = Environment.getExternalStorageDirectory() + "/SeShatSF/wrongDirections.txt";
         FileWriter fStream;
         BufferedWriter out;
-        fStream = new FileWriter("values.txt");
+        fStream = new FileWriter(file, false);
         out = new BufferedWriter(fStream);
         for (Map.Entry<String, Integer> pairs : hashMap.entrySet()) {
-            out.write(pairs.getKey() + " " + pairs.getValue() + "\n");
+            out.write(pairs.getKey() + ":" + pairs.getValue() + "\n");
         }
-
         out.close();
     }
 
-    public void setThreshold(double t) {
-        THRESHOLD = t;
+    private HashMap<String, Integer> readFileToMap() throws IOException {
+        String file = Environment.getExternalStorageDirectory() + "/SeShatSF/wrongDirections.txt";
+        HashMap<String, Integer> map = new HashMap<>();
+        String line;
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(":", 2);
+            if (parts.length >= 2) {
+                String key = parts[0];
+                String value = parts[1];
+                map.put(key, Integer.parseInt(value));
+            } else {
+                System.out.println("ignoring line: " + line);
+            }
+        }
+        reader.close();
+        return map;
     }
+
+
+    /*public void setThreshold(double t) {
+        THRESHOLD = t;
+    }*/
 }

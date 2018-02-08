@@ -35,7 +35,6 @@ public class TypeWriter extends TextView {
                 Log.i("TypeWriter::characterAdder Runnable " + idx, mText.charAt(idx) + "");
                 idx++;
             } else {
-
                 ((MainActivity) context).voiceoffer(null, mText.toString());
 
                 Log.i("TypeWriter: ", "finished");
@@ -61,14 +60,13 @@ public class TypeWriter extends TextView {
         mText = text;
         mIndex = 0;
         idx = 0;
-
         setText("");
         mHandler.removeCallbacks(characterAdder);
         mHandler.postDelayed(characterAdder, mDelay);
     }
 
-    public void setCharacterDelay(long millis) {
-        mDelay = millis;
+    public void setCharacterDelay() {
+        mDelay = (long) 400;
     }
 
     public void setWord(String w) {

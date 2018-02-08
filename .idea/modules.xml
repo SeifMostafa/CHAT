@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CHAT.iml" filepath="$PROJECT_DIR$/CHAT.iml" />
-      <module fileurl="file://C:\Users\Maged Soham\Desktop\CHAT\CHAT.iml" filepath="C:\Users\Maged Soham\Desktop\CHAT\CHAT.iml" />
-      <module fileurl="file://C:\Users\Admin\Desktop\CHAT\SeShatPlayer.iml" filepath="C:\Users\Admin\Desktop\CHAT\SeShatPlayer.iml" />
+      <module fileurl="file://$USER_HOME$/Desktop/CHAT/CHAT.iml" filepath="$USER_HOME$/Desktop/CHAT/CHAT.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

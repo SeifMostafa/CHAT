@@ -20,7 +20,6 @@ public class AnimationFragment extends Fragment {
     String word;
     TypeWriter custTextView;
     ImageButton helpiBtn;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +40,7 @@ public class AnimationFragment extends Fragment {
         custTextView = (TypeWriter) view.findViewById(R.id.textView_maintext);
         custTextView.setTypeface(tf);
         custTextView.setVisibility(View.VISIBLE);
-        custTextView.setCharacterDelay(400);
+        custTextView.setCharacterDelay();
         custTextView.animateText(word);
 
         custTextView.setWord(word);

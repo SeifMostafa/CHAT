@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -72,12 +71,12 @@ public class WordView extends TextView {
         init();
     }
 
-    public WordView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+  /*  public WordView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         this.context = context;
 
         init();
-    }
+    }*/
 
     public void init() {
         //word_loop=context.getSharedPreferences(MainActivity.WORDS_PREFS_NAME,0).getInt(MainActivity.WordLoopKey,0);
@@ -133,6 +132,7 @@ public class WordView extends TextView {
 
         }
     }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -320,12 +320,9 @@ public class WordView extends TextView {
 
         if (gestureSize - outputUserGV.size() <= gestureSize / gesture.get(0).length) {
             successBtn.setVisibility(VISIBLE);
-            successBtn.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    successBtn.setVisibility(INVISIBLE);
-                    wholeCheck(mUserGuidedVectors);
-                }
+            successBtn.setOnClickListener(view -> {
+                successBtn.setVisibility(INVISIBLE);
+                wholeCheck(mUserGuidedVectors);
             });
         }
         mGestureDetector = new GestureDetector(gesture.get(0));
