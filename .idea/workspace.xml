@@ -11,15 +11,8 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="No Filters" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5bf74d18-9cc4-4eab-abf3-1212411f41a5" name="Default" comment="To Start Word Journey &#10;">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/Utils.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+    <list default="true" id="5bf74d18-9cc4-4eab-abf3-1212411f41a5" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/app.iml" afterPath="$PROJECT_DIR$/app/app.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/GestureDetector.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/GestureDetector.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/WordView.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/WordView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/local.properties" afterPath="$PROJECT_DIR$/local.properties" />
     </list>
     <ignored path="SeShatPlayer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -89,8 +82,8 @@
       <file leaf-file-name="GestureDetector.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/GestureDetector.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="106" column="99" lean-forward="true" selection-start-line="106" selection-start-column="99" selection-end-line="106" selection-end-column="99" />
+            <state relative-caret-position="221">
+              <caret line="101" column="0" lean-forward="true" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -2181,7 +2174,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1518021178135" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1518021264004" />
       </method>
     </configuration>
     <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests">
@@ -2229,7 +2222,7 @@
       </Profilers>
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1518021178136" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1518021264004" />
       </method>
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -2391,7 +2384,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1518021178136" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1518021264007" />
       </method>
     </configuration>
     <list size="1">
@@ -2465,7 +2458,14 @@
       <option name="project" value="LOCAL" />
       <updated>1511192463187</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="new Curve algorithm">
+      <created>1518021238359</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1518021238359</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TodoView">
@@ -2566,7 +2566,8 @@
     <MESSAGE value="Edit on LessonFragment in loop of word &#10;Removing Lock &#10; Media not Solved&#10; PickPhrase has issues&#10;" />
     <MESSAGE value="To Start Word Journey &#10;" />
     <MESSAGE value="New Fonts" />
-    <option name="LAST_COMMIT_MESSAGE" value="New Fonts" />
+    <MESSAGE value="new Curve algorithm" />
+    <option name="LAST_COMMIT_MESSAGE" value="new Curve algorithm" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
@@ -2857,8 +2858,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/seif/seshatplayer/GestureDetector.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="106" column="99" lean-forward="true" selection-start-line="106" selection-start-column="99" selection-end-line="106" selection-end-column="99" />
+        <state relative-caret-position="221">
+          <caret line="101" column="0" lean-forward="true" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
           <folding />
         </state>
       </provider>
