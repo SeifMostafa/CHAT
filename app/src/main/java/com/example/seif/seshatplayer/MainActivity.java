@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
     private Map<Integer, Word[]> lessons;
     private int word_index = 0;
     private int lesson_index = 1;
-
     private String firstPhrase = "أنا إسمي ";
 
 
@@ -126,15 +125,15 @@ public class MainActivity extends AppCompatActivity {
         return directions.toArray(result);
     }
 
-
     /*
       * read file into string and the end = \n and return this string
       */
-    @SuppressLint("CommitPrefEdits")
+    @SuppressLint({"CommitPrefEdits", "UseSparseArrays"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        lessons = new HashMap<>();
 
         sharedPreferences_words = this.getSharedPreferences(WORDS_PREFS_NAME, Context.MODE_PRIVATE);
         sharedPreferences_words_editor = sharedPreferences_words.edit();
@@ -172,7 +171,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         // do something
-                        updatelesson(0, true);
+                        // updatelesson(0, true);
+                        updatelesson(0);
                     }
                 }, 1500);
             } catch (InterruptedException e) {
@@ -198,11 +198,13 @@ public class MainActivity extends AppCompatActivity {
             Word resultWord = new Word(txt, SF + txt + ".png", SF + txt, phrase);
             int version = 0;
             Direction[][] gvVersion = prepareWordGuidedVectors(txt, version);
+
             do {
                 //  Log.i("MainActivity", "form_word: gvVersion.sz: " + gvVersion[0].length);
                 resultWord.setFV(gvVersion);
                 version++;
                 gvVersion = prepareWordGuidedVectors(txt, version);
+
             } while (gvVersion[0].length > 0);
             Log.i("MainActivity", "form_word: version: " + version);
             return resultWord;
@@ -212,7 +214,8 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
-    private Direction[][] prepareWordGuidedVectors(String word, int version) {
+
+    private Direction[][] prepareWordGuidedVectors(String word, int version) throws FileNotFoundException {
         char charConnector = 'ـ';
         Direction[][] result_directions = new Direction[word.length()][];
         ArrayList<Character> differentchars = new ArrayList<>();
@@ -226,16 +229,19 @@ public class MainActivity extends AppCompatActivity {
                     result_directions[i] = getDirections(SF + character, version);
                 } else {
                     result_directions[i] = getDirections(SF + character + charConnector, version);
+
                 }
             } else if (i == word.length() - 1) {
                 if (differentchars.contains(word.charAt(i - 1))) {
                     result_directions[i] = getDirections(SF + character, version);
+
                 } else {
                     result_directions[i] = getDirections(SF + charConnector + character, version);
                 }
             } else {
                 if (differentchars.contains(word.charAt(i - 1)) && differentchars.contains(character)) {
                     result_directions[i] = getDirections(SF + character, version);
+
                 } else if (differentchars.contains(word.charAt(i - 1)) && !differentchars.contains(character)) {
                     result_directions[i] = getDirections(SF + character + charConnector, version);
                 } else if (!differentchars.contains(word.charAt(i - 1)) && differentchars.contains(character)) {
@@ -253,8 +259,10 @@ public class MainActivity extends AppCompatActivity {
     ToFlag: if 0 = current, if -1 = prev , if 1 = next; flag to obtain the ToFlag cretira
     else to navigate to ToFlag as lesson index
      */
-    public void updatelesson(int ToFlag, boolean flag) {
-        if (flag) {
+    //public void updatelesson(int ToFlag, boolean flag) {
+    public void updatelesson(int ToFlag) {
+        // if (flag) {
+
             switch (ToFlag) {
                 case 0:
                     openLessonFragment(lesson_index);
@@ -266,11 +274,11 @@ public class MainActivity extends AppCompatActivity {
                     openLessonFragment(lesson_index + 1);
                     break;
             }
-        } else {
+        /*} else {
             lesson_index = ToFlag;
             setLessons();
             openLessonFragment(ToFlag);
-        }
+        }*/
     }
 
 
@@ -292,13 +300,6 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.setDataSource(SF + DataPath2Bplayed);
             mediaPlayer.prepare();
             mediaPlayer.start();
-
-          /*  mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                public void onPrepared(MediaPlayer mp) {
-                    mp.start();
-
-                }
-            });*/
 
         } catch (IllegalStateException | IOException e) {
             Log.e("MainActivity", "voiceoffer::e: " + e.toString());
@@ -351,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
         final AlertDialog dialog = builder.create();
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogLayout = inflater.inflate(R.layout.layout_sample_pic_help, null);
-        ImageView imageView = (ImageView) dialogLayout.findViewById(R.id.picsample);
+        ImageView imageView = dialogLayout.findViewById(R.id.picsample);
         File imgFile = new File(SF + img2Bdisplayed);
         if (imgFile.exists()) {
 
@@ -398,15 +399,10 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar.make(this.findViewById(android.R.id.content),
                         "Please Grant Permissions to upload profile photo",
                         Snackbar.LENGTH_INDEFINITE).setAction("ENABLE",
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                requestPermissions(
-                                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                                Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO},
-                                        PERMISSIONS_MULTIPLE_REQUEST);
-                            }
-                        }).show();
+                        v -> requestPermissions(
+                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                        Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO},
+                                PERMISSIONS_MULTIPLE_REQUEST)).show();
             } else {
                 requestPermissions(
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO},
@@ -437,41 +433,15 @@ public class MainActivity extends AppCompatActivity {
                         Snackbar.make(this.findViewById(android.R.id.content),
                                 "Please Grant Permissions to be able to work",
                                 Snackbar.LENGTH_INDEFINITE).setAction("ENABLE",
-                                new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        requestPermissions(
-                                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET,
-                                                        Manifest.permission.RECORD_AUDIO},
-                                                PERMISSIONS_MULTIPLE_REQUEST);
-                                    }
-                                }).show();
+                                v -> requestPermissions(
+                                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET,
+                                                Manifest.permission.RECORD_AUDIO},
+                                        PERMISSIONS_MULTIPLE_REQUEST)).show();
                     }
                 }
                 break;
         }
     }
-
-    /* private void openLessonFragment(int i) {
-
-         FragmentManager fragmentManager = getFragmentManager();
-         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-         LessonFragment lessonFragment = new LessonFragment();
-         Bundle bundle = new Bundle();
-         Word[] lesson = lessons.get(i);
-
-         Log.i("MainActivity", "openLessonFragment: am here with i(lesson_index)= " + i);
-         Log.i("MainActivity", "openLessonFragment: & lesson.sz= " + lesson.length);
-
-         bundle.putParcelableArray(LessonKey, lesson);
-
-         lessonFragment.setArguments(bundle);
-         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment, LessonFragment_TAG);
-         fragmentTransaction.addToBackStack(LessonFragment_TAG);
-         fragmentTransaction.commit();
-
-         Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
-     }*/
     public void openLessonFragment(int i) {
 
         FragmentManager fragmentManager = getFragmentManager();
@@ -483,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         Log.i("MainActivity", "openLessonFragment: am here with i(lesson_index)= " + i);
-        Log.i("MainActivity", "openLessonFragment: & lesson.sz= " + lesson.length);
+        // Log.i("MainActivity", "openLessonFragment: & lesson.sz= " + lesson.length);
 
 
         bundle.putParcelableArray(LessonKey, lesson);
@@ -551,16 +521,9 @@ public class MainActivity extends AppCompatActivity {
         bundle.putString(WordKey, word);
         phrasePickFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, phrasePickFragment);
-        //  fragmentTransaction.addToBackStack(PhrasePickFragment_TAG);
+        //fragmentTransaction.addToBackStack(PhrasePickFragment_TAG);
         fragmentTransaction.commit();
     }
-
-   /* public void removeLessonFragment(){
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        LessonFragment lessonFragment = new LessonFragment();
-        fragmentTransaction.remove(lessonFragment).commit();
-    }*/
 
     public void openAnimationFragment(String word) {
 
@@ -571,7 +534,7 @@ public class MainActivity extends AppCompatActivity {
         bundle.putString(WordKey, word);
         animationFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, animationFragment);
-        // fragmentTransaction.addToBackStack(LessonFragment_TAG);
+        //fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
     }
 
@@ -628,6 +591,39 @@ public class MainActivity extends AppCompatActivity {
         return words;
     }
 
+    @SuppressLint("UseSparseArrays")
+    private void setLessons() {
+        // int lessonNum = lesson_index - 1;
+        try {
+            FileReader wordsReader = new FileReader(WordsFilePath);
+            FileReader phraseReader = new FileReader(PhrasesFilePath);
+            BufferedReader WordsBufferedReader = new BufferedReader(wordsReader);
+            BufferedReader PhrasesBufferedReader = new BufferedReader(phraseReader);
+            String StringlessonCapacity = WordsBufferedReader.readLine();
+            if (StringlessonCapacity != null) {
+                int k = 1;
+                while (true) {
+                    int lessonCapacity = Integer.parseInt(StringlessonCapacity);
+                    Word[] lessonWords = new Word[lessonCapacity];
+                    for (int i = 0; i < lessonCapacity; i++) {
+                        String word_txt = WordsBufferedReader.readLine();
+                        String phrase = PhrasesBufferedReader.readLine();
+                        lessonWords[i] = form_word(word_txt, phrase);
+                    }
+                    lessons.put(k, lessonWords);
+                    StringlessonCapacity = WordsBufferedReader.readLine();
+                    k++;
+                    if (StringlessonCapacity == null)
+                        break;
+                }
+            }
+
+            wordsReader.close();
+            // phrasesReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }/*    @SuppressLint("UseSparseArrays")
     private void setLessons() {
         lessons = new HashMap<>();
         int lessonNum = lesson_index - 1;
@@ -675,6 +671,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
 }

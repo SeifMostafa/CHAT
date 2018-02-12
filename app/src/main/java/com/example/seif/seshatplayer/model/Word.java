@@ -3,7 +3,6 @@ package com.example.seif.seshatplayer.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +21,6 @@ public class Word implements Parcelable {
     private String Text, ImageFilePath = null, SpeechFilePath = null, Phrase = null;
     private Map<Integer, Direction[][]> gvVersions;
     private boolean Achieved = false;
-    private ArrayList<Direction> wordDirections;
 
     protected Word(Parcel in) {
         Text = in.readString();
@@ -125,11 +123,5 @@ public class Word implements Parcelable {
 
     }
 
-    public ArrayList<Direction> getWordDirections() {
-        return wordDirections;
-    }
 
-    public void setWordDirections(ArrayList<Direction> wordDirections) {
-        this.wordDirections = wordDirections;
-    }
 }

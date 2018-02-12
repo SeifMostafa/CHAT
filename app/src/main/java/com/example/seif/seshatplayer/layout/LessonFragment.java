@@ -20,12 +20,12 @@ import com.example.seif.seshatplayer.model.Word;
 public class LessonFragment extends Fragment implements UpdateWord {
 
     public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1000;
-    public static int DEFAULT_LOOP_COUNTER = 4;
-    public static int DEFAULT_TYPEFACE_LEVELS = 4;
+    public static int DEFAULT_LOOP_COUNTER = 1;
+    public static int DEFAULT_TYPEFACE_LEVELS = 1;
     public static String LessonFragment_TAG = "LessonFragment";
     public static boolean isAnimated = false;
     public static boolean isPicked = false;
-    ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn, successBtn;
+    ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
     WordView wordView_MainText = null;
     Thread Thread_WordJourney = null;
     LessonFragment instance;
@@ -68,7 +68,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         // Inflate the layout for this fragment
 
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        wordView_MainText = (WordView) view.findViewById(R.id.textView_maintext);
+        wordView_MainText = view.findViewById(R.id.textView_maintext);
         wordView_MainText.setText(word.getText());
         wordView_MainText.setmLessonFragment(this);
 
@@ -85,7 +85,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         }
 
 
-        helpiBtn = (ImageButton) getActivity().findViewById(R.id.imagebutton_moreInfo);
+        helpiBtn = getActivity().findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(view15 -> {
             Log.i("helpiBtn", "is clicked!");
             try {
@@ -104,7 +104,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
             isAnimated = false;
         });
 
-        PreviBtn = (ImageButton) view.findViewById(R.id.imagebutton_prevword);
+        PreviBtn = view.findViewById(R.id.imagebutton_prevword);
         PreviBtn.setOnClickListener(view13 -> {
             // request prev word
 
@@ -112,11 +112,10 @@ public class LessonFragment extends Fragment implements UpdateWord {
             setPreviBtnVisibilty();
             setNextiBtnVisibility();
 
-
         });
 
 
-        NextiBtn = (ImageButton) view.findViewById(R.id.imagebutton_skipword);
+        NextiBtn = view.findViewById(R.id.imagebutton_skipword);
         NextiBtn.setOnClickListener(view14 -> {
             // request nxt word
             nextWordCall();
@@ -126,7 +125,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         });
 
 
-        PlaySoundiBtn = (ImageButton) view.findViewById(R.id.imagebutton_soundhelp);
+        PlaySoundiBtn = view.findViewById(R.id.imagebutton_soundhelp);
         PlaySoundiBtn.setOnClickListener(view12 -> {
             try {
                 ((MainActivity) getActivity()).voiceoffer(PlaySoundiBtn, word.getText());
@@ -138,7 +137,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
             }
         });
 
-        DisplayImageiBtn = (ImageButton) view.findViewById(R.id.imagebutton_photohelp);
+        DisplayImageiBtn = view.findViewById(R.id.imagebutton_photohelp);
         DisplayImageiBtn.setOnClickListener(view1 -> {
             try {
                 ((MainActivity) getActivity()).helpbypic(DisplayImageiBtn, word.getText());
@@ -176,6 +175,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 isPicked = false;
                 instance.isWritten = false;
                 instance.isPronunced = false;
+                isAnimated = false;
 
                 instance.wordView_MainText.setGuidedVector(instance.word.getFV());
                 instance.wordView_MainText.setText(
@@ -185,7 +185,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 setNextiBtnVisibility();
                 setPreviBtnVisibilty();
 
-                //((MainActivity) instance.mContext).updatelesson(1, true);
+                // ((MainActivity) instance.mContext).updatelesson(1, true);
+                ((MainActivity) instance.mContext).updatelesson(1);
             } else {
                 instance.nextWordCall();
                 instance.setPreviBtnVisibilty();
@@ -264,16 +265,29 @@ public class LessonFragment extends Fragment implements UpdateWord {
     @Override
     public Typeface updateWordLoop(Typeface typeface, int word_loop) {
         Typeface tf;
-
-        if (word_loop < 14) {
+        // ((MainActivity) mContext).SaveOnSharedPref("WordLoop", String.valueOf(word_loop));
+        if (word_loop < (DEFAULT_LOOP_COUNTER * DEFAULT_TYPEFACE_LEVELS) - 2) {
             if (word_loop % DEFAULT_LOOP_COUNTER == 0) {
                 // change font
                 if (word_loop > 0 && word_loop == DEFAULT_LOOP_COUNTER) {
                     tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl2.ttf");
+                    //((MainActivity) mContext).openAnimationFragment(instance.word.getText());
+                    //isAnimated=true;
+
+
                 } else if (word_loop > DEFAULT_LOOP_COUNTER && word_loop == DEFAULT_LOOP_COUNTER * 2) {
                     tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl3.ttf");
+                    // ((MainActivity) mContext).openAnimationFragment(instance.word.getText());
+                    // isAnimated=true;
+
+
+
                 } else {
+                    //  ((MainActivity) mContext).openAnimationFragment(instance.word.getText());
+                    // isAnimated=true;
+
                     return null;
+
                 }
             } else {
                 tf = typeface;

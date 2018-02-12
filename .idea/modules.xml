@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$USER_HOME$/Desktop/CHAT/CHAT.iml" filepath="$USER_HOME$/Desktop/CHAT/CHAT.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SeShatPlayer.iml" filepath="$PROJECT_DIR$/SeShatPlayer.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
