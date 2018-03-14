@@ -38,11 +38,12 @@ public class PhrasePickFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_phrase_pick, container, false);
-        textView_phrase = (TextView) view.findViewById(R.id.textView_phrase);
-        textView_picked = (TextView) view.findViewById(R.id.textView_picked);
+        textView_phrase = view.findViewById(R.id.textView_phrase);
+        textView_picked = view.findViewById(R.id.textView_picked);
 
         textView_picked.setText("");
         textView_phrase.setMovementMethod(LinkMovementMethod.getInstance());
+
         textView_phrase.setText(phrase, TextView.BufferType.SPANNABLE);
 
         Spannable spans = (Spannable) textView_phrase.getText();
@@ -63,7 +64,7 @@ public class PhrasePickFragment extends Fragment {
         textView_phrase.setVisibility(View.VISIBLE);
 
 
-        helpiBtn = (ImageButton) getActivity().findViewById(R.id.imagebutton_moreInfo);
+        helpiBtn = getActivity().findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

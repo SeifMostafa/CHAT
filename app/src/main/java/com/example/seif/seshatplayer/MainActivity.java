@@ -262,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
     //public void updatelesson(int ToFlag, boolean flag) {
     public void updatelesson(int ToFlag) {
         // if (flag) {
+        lesson_index = Integer.parseInt(sharedPreferences_words.getString(LessonKey, "1"));
 
             switch (ToFlag) {
                 case 0:
@@ -292,7 +293,9 @@ public class MainActivity extends AppCompatActivity {
             if (mediaPlayer.isLooping() || mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
             }
+            mediaPlayer.reset();
             mediaPlayer.release();
+            mediaPlayer = null;
         }
         try {
 
@@ -449,7 +452,8 @@ public class MainActivity extends AppCompatActivity {
         LessonFragment lessonFragment = new LessonFragment();
         Bundle bundle = new Bundle();
         Word[] lesson = lessons.get(i);
-        word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
+        //word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
+        SaveOnSharedPref(LessonKey, String.valueOf(i));
 
 
         Log.i("MainActivity", "openLessonFragment: am here with i(lesson_index)= " + i);
@@ -457,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         bundle.putParcelableArray(LessonKey, lesson);
-        bundle.putInt(WordIndexKey, word_index);
+        bundle.putInt(WordIndexKey, 0);
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment, LessonFragment_TAG);
         fragmentTransaction.addToBackStack(LessonFragment_TAG);
@@ -471,12 +475,13 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         LessonFragment lessonFragment = new LessonFragment();
 
-        word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
+        //word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
 
         Bundle bundle = new Bundle();
 
+        word = form_word(word.getText(), word.getPhrase());
 
-        if (lesson_index == 1) {
+        /*if (lesson_index == 1) {
             word = form_word(word.getText(), word.getPhrase());
             bundle.putBoolean(firstTimekey, true);
             bundle.putParcelableArray(LessonKey, lessons.get(1));
@@ -484,10 +489,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             bundle.putBoolean(firstTimekey, false);
             bundle.putParcelableArray(LessonKey, lessons.get(lesson_index));
-        }
+        }*/
 
         bundle.putParcelable(WordKey, word);
-        bundle.putInt(WordIndexKey, word_index);
+        bundle.putInt(WordIndexKey, 0);
         lessonFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_replacement, lessonFragment, LessonFragment_TAG);
         fragmentTransaction.addToBackStack(LessonFragment_TAG);
@@ -617,6 +622,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             }
+
 
             wordsReader.close();
             // phrasesReader.close();

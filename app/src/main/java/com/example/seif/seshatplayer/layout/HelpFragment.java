@@ -221,7 +221,7 @@ public class HelpFragment extends Fragment {
                         try {
                             AchievedDialog.dismiss();
                             AchievedDialog.cancel();
-                            ((MainActivity) getActivity()).openLessonFragment(lesson[position]);
+                            ((MainActivity) getActivity()).openLessonFragment(new Word(p));
 
 
                         } catch (Exception e) {

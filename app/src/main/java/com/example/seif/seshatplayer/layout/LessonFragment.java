@@ -23,7 +23,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public static int DEFAULT_LOOP_COUNTER = 1;
     public static int DEFAULT_TYPEFACE_LEVELS = 1;
     public static String LessonFragment_TAG = "LessonFragment";
-    public static boolean isAnimated = false;
+    public static boolean phraseIsAnimated = false;
+    public static boolean wordIsAnimated = false;
     public static boolean isPicked = false;
     ImageButton helpiBtn, PreviBtn, NextiBtn, PlaySoundiBtn, DisplayImageiBtn;
     WordView wordView_MainText = null;
@@ -52,7 +53,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
             }
         }
 
-    /*    Log.i("onCreate", "from LessonFragment");
+     /*    Log.i("onCreate", "from LessonFragment");
         Log.i("LessonFragment", "1st time: " + firstTime);
         Log.i("LessonFragment", "word:" + word);
         Log.i("LessonFragment", "words: " + words.length + ": " + words.toString());*/
@@ -101,7 +102,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
             }
             ((MainActivity) getActivity()).OpenHelpFragment();
 
-            isAnimated = false;
+            wordIsAnimated = false;
+            phraseIsAnimated = false;
         });
 
         PreviBtn = view.findViewById(R.id.imagebutton_prevword);
@@ -117,6 +119,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
 
         NextiBtn = view.findViewById(R.id.imagebutton_skipword);
         NextiBtn.setOnClickListener(view14 -> {
+            wordIsAnimated = false;
+            phraseIsAnimated = false;
             // request nxt word
             nextWordCall();
             setPreviBtnVisibilty();
@@ -161,9 +165,14 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public void onResume() {
         super.onResume();
 
-        if (!firstTime && !isAnimated) {
-            ((MainActivity) getActivity()).openAnimationFragment(word.getText());
-            isAnimated = true;
+        if (!firstTime && !wordIsAnimated) {
+            if (!phraseIsAnimated) {
+                ((MainActivity) getActivity()).openAnimationFragment(word.getPhrase());
+                phraseIsAnimated = true;
+            } else {
+                ((MainActivity) getActivity()).openAnimationFragment(word.getText());
+                wordIsAnimated = true;
+            }
         } else if (!firstTime && instance.isWritten &&/* instance.isPronunced &&*/ !isPicked) {
             ((MainActivity) mContext).voiceoffer(instance.wordView_MainText, mContext.getString(R.string.pickwordinstr));
             ((MainActivity) getActivity()).openPhraseFragment(word.getPhrase(), word.getText());
@@ -175,7 +184,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 isPicked = false;
                 instance.isWritten = false;
                 instance.isPronunced = false;
-                isAnimated = false;
+                wordIsAnimated = false;
+                phraseIsAnimated = false;
 
                 instance.wordView_MainText.setGuidedVector(instance.word.getFV());
                 instance.wordView_MainText.setText(
@@ -188,6 +198,8 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 // ((MainActivity) instance.mContext).updatelesson(1, true);
                 ((MainActivity) instance.mContext).updatelesson(1);
             } else {
+                phraseIsAnimated = false;
+                wordIsAnimated = false;
                 instance.nextWordCall();
                 instance.setPreviBtnVisibilty();
                 instance.setNextiBtnVisibility();
@@ -197,10 +209,15 @@ public class LessonFragment extends Fragment implements UpdateWord {
 
 
     private void setNextiBtnVisibility() {
-        if (CurrentWordsArrayIndex == words.length - 1) {
+        if (words == null) {
             NextiBtn.setVisibility(View.INVISIBLE);
+
         } else {
-            NextiBtn.setVisibility(View.VISIBLE);
+            if (CurrentWordsArrayIndex == words.length - 1) {
+                NextiBtn.setVisibility(View.INVISIBLE);
+            } else {
+                NextiBtn.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -227,11 +244,15 @@ public class LessonFragment extends Fragment implements UpdateWord {
                     try {
                         ((MainActivity) mContext).voiceoffer(null, instance.word.getText());
                         sleep(1500);
-                        ((MainActivity) mContext).voiceoffer(instance.wordView_MainText, mContext.getString(R.string.pickwordinstr));
-                        sleep(2500);
-                        //  instance.voicerec(null);
-                        ((MainActivity) getActivity()).openPhraseFragment(word.getPhrase(), word.getText());
 
+                        if (words == null) {
+                            ((MainActivity) getActivity()).OpenHelpFragment();
+                        } else {
+                            ((MainActivity) mContext).voiceoffer(instance.wordView_MainText, mContext.getString(R.string.pickwordinstr));
+                            sleep(2500);
+                            //  instance.voicerec(null);
+                            ((MainActivity) getActivity()).openPhraseFragment(word.getPhrase(), word.getText());
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -265,26 +286,17 @@ public class LessonFragment extends Fragment implements UpdateWord {
     @Override
     public Typeface updateWordLoop(Typeface typeface, int word_loop) {
         Typeface tf;
-        // ((MainActivity) mContext).SaveOnSharedPref("WordLoop", String.valueOf(word_loop));
         if (word_loop < (DEFAULT_LOOP_COUNTER * DEFAULT_TYPEFACE_LEVELS) - 2) {
             if (word_loop % DEFAULT_LOOP_COUNTER == 0) {
                 // change font
                 if (word_loop > 0 && word_loop == DEFAULT_LOOP_COUNTER) {
                     tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl2.ttf");
-                    //((MainActivity) mContext).openAnimationFragment(instance.word.getText());
-                    //isAnimated=true;
 
 
                 } else if (word_loop > DEFAULT_LOOP_COUNTER && word_loop == DEFAULT_LOOP_COUNTER * 2) {
                     tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl3.ttf");
-                    // ((MainActivity) mContext).openAnimationFragment(instance.word.getText());
-                    // isAnimated=true;
-
-
 
                 } else {
-                    //  ((MainActivity) mContext).openAnimationFragment(instance.word.getText());
-                    // isAnimated=true;
 
                     return null;
 
@@ -363,9 +375,14 @@ public class LessonFragment extends Fragment implements UpdateWord {
         instance.word = instance.words[++instance.CurrentWordsArrayIndex];
 
         ((MainActivity) getActivity()).SaveOnSharedPref(MainActivity.WordIndexKey, String.valueOf(instance.CurrentWordsArrayIndex));
-        ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
+        if (!phraseIsAnimated) {
+            ((MainActivity) getActivity()).openAnimationFragment(instance.word.getPhrase());
+            phraseIsAnimated = true;
+        } else {
+            ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
 
-        isAnimated = true;
+            wordIsAnimated = true;
+        }
         isPicked = false;
         instance.isWritten = false;
         instance.isPronunced = false;
@@ -383,8 +400,14 @@ public class LessonFragment extends Fragment implements UpdateWord {
         instance.word = instance.words[--instance.CurrentWordsArrayIndex];
 
         ((MainActivity) getActivity()).SaveOnSharedPref(MainActivity.WordIndexKey, String.valueOf(instance.CurrentWordsArrayIndex));
-        ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
-        isAnimated = true;
+        if (!phraseIsAnimated) {
+            ((MainActivity) getActivity()).openAnimationFragment(instance.word.getPhrase());
+            phraseIsAnimated = true;
+        } else {
+            ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
+
+            wordIsAnimated = true;
+        }
         isPicked = false;
         instance.isPronunced = false;
 

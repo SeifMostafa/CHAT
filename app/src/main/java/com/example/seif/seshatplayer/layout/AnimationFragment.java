@@ -20,6 +20,7 @@ public class AnimationFragment extends Fragment {
     String word;
     TypeWriter custTextView;
     ImageButton helpiBtn;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +29,7 @@ public class AnimationFragment extends Fragment {
             this.word = getArguments().getString(MainActivity.WordKey);
             if (word != null) Log.i("AnimationFragment", "Word != null");
             else Log.i("AnimationFragment", "Word = null");
+
         }
     }
 
@@ -35,31 +37,32 @@ public class AnimationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Typeface tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_animation, container, false);
-        custTextView = (TypeWriter) view.findViewById(R.id.textView_maintext);
+        custTextView = view.findViewById(R.id.textView_maintext);
         custTextView.setTypeface(tf);
         custTextView.setVisibility(View.VISIBLE);
-        custTextView.setCharacterDelay();
-        custTextView.animateText(word);
+        custTextView.setCharacterDelay(500);
+        if (word.contains(" "))
+            custTextView.animatePhrase();
+        else
+            custTextView.animateText(word);
+
 
         custTextView.setWord(word);
-        helpiBtn = (ImageButton) getActivity().findViewById(R.id.imagebutton_moreInfo);
+        helpiBtn = getActivity().findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.i("helpiBtn", "is clicked!");
                 try {
                     custTextView.clearAnimation();
-                    /*if () {
-
-                            Log.i("helpiBtn", "is clicked!" + "Thread_WordJourney.is alive");
-                    }*/
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }
                 ((MainActivity) getActivity()).OpenHelpFragment();
-                LessonFragment.isAnimated = false;
+                LessonFragment.wordIsAnimated = false;
             }
         });
         return view;
@@ -68,10 +71,14 @@ public class AnimationFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        int time2waitbeforeOpenningPickPhraseFragment = (
-                word.length() + 2) * 1000;
-
+        int time2waitbeforeOpenningPickPhraseFragment;
+        if (word.contains(" ")) {
+            time2waitbeforeOpenningPickPhraseFragment = (
+                    word.length()) * 1000;
+        } else {
+            time2waitbeforeOpenningPickPhraseFragment = (
+                    word.length() + 2) * 1000;
+        }
         Handler handler = new Handler();
         Runnable r = new Runnable() {
             public void run() {

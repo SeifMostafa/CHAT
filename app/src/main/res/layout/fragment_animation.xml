@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:text="@string/text"
         android:textAlignment="center"
-        android:textSize="@dimen/activity_word_textsize"
+        android:textSize="@dimen/activity_phrase_textsize"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
