@@ -44,11 +44,13 @@ public class AnimationFragment extends Fragment {
         custTextView.setTypeface(tf);
         custTextView.setVisibility(View.VISIBLE);
         custTextView.setCharacterDelay(500);
-        if (word.contains(" "))
+        if (word.contains(" ")) {
+            custTextView.setCharacterDelay(500);
             custTextView.animatePhrase();
-        else
+        } else {
+            custTextView.setCharacterDelay(600);
             custTextView.animateText(word);
-
+        }
 
         custTextView.setWord(word);
         helpiBtn = getActivity().findViewById(R.id.imagebutton_moreInfo);

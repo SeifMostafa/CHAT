@@ -20,8 +20,8 @@ import com.example.seif.seshatplayer.model.Word;
 public class LessonFragment extends Fragment implements UpdateWord {
 
     public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1000;
-    public static int DEFAULT_LOOP_COUNTER = 1;
-    public static int DEFAULT_TYPEFACE_LEVELS = 1;
+    public static int DEFAULT_LOOP_COUNTER = 4;
+    public static int DEFAULT_TYPEFACE_LEVELS = 4;
     public static String LessonFragment_TAG = "LessonFragment";
     public static boolean phraseIsAnimated = false;
     public static boolean wordIsAnimated = false;
@@ -62,7 +62,6 @@ public class LessonFragment extends Fragment implements UpdateWord {
 
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -72,7 +71,6 @@ public class LessonFragment extends Fragment implements UpdateWord {
         wordView_MainText = view.findViewById(R.id.textView_maintext);
         wordView_MainText.setText(word.getText());
         wordView_MainText.setmLessonFragment(this);
-
 
         if (word.getFV() != null) {
             wordView_MainText.setGuidedVector(word.getFV());
@@ -84,7 +82,6 @@ public class LessonFragment extends Fragment implements UpdateWord {
             Log.d("LessonFragment", "FV = " + word.getFV());
 
         }
-
 
         helpiBtn = getActivity().findViewById(R.id.imagebutton_moreInfo);
         helpiBtn.setOnClickListener(view15 -> {
@@ -166,7 +163,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         super.onResume();
 
         if (!firstTime && !wordIsAnimated) {
-            if (!phraseIsAnimated) {
+            if (!phraseIsAnimated && words != null) {
                 ((MainActivity) getActivity()).openAnimationFragment(word.getPhrase());
                 phraseIsAnimated = true;
             } else {
