@@ -125,9 +125,7 @@ public class MainActivity extends AppCompatActivity {
         return directions.toArray(result);
     }
 
-    /*
-      * read file into string and the end = \n and return this string
-      */
+
     @SuppressLint({"CommitPrefEdits", "UseSparseArrays"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,22 +140,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //Start app
     private void startApp() {
         if (Boolean.valueOf(sharedPreferences_words.getString(firstTimekey, "true"))) {
             lesson_index = 1;
             word_index = 0;
-
+//setting file paths
             SF = Environment.getExternalStorageDirectory() + SF;
 
             WordsFilePath = SF + WordsFilePath;
             PhrasesFilePath = SF + PhrasesFilePath;
             FileWordsAchieved = SF + FileWordsAchieved;
             new File(FileWordsAchieved);
-
+//setting lessons
             setLessons();
             Word phrase = new Word(firstPhrase + lessons.get(lesson_index)[0].getText());
             openLessonFragment(phrase);
 
+//saving indexes on shared preferences
             SaveOnSharedPref(LessonKey, String.valueOf(lesson_index));
             SaveOnSharedPref(WordIndexKey, String.valueOf(word_index));
             SaveOnSharedPref(SFKEY, SF);
@@ -170,8 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        // do something
-                        // updatelesson(0, true);
+                        //starting lesson
                         updatelesson(0);
                     }
                 }, 1500);
@@ -193,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //create word
     private Word form_word(String txt, String phrase) {
         try {
             Word resultWord = new Word(txt, SF + txt + ".png", SF + txt, phrase);
@@ -215,6 +215,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //creating Guided Vectors for words.
     private Direction[][] prepareWordGuidedVectors(String word, int version) throws FileNotFoundException {
         char charConnector = 'ـ';
         Direction[][] result_directions = new Direction[word.length()][];
@@ -264,17 +265,17 @@ public class MainActivity extends AppCompatActivity {
         // if (flag) {
         lesson_index = Integer.parseInt(sharedPreferences_words.getString(LessonKey, "1"));
 
-            switch (ToFlag) {
-                case 0:
-                    openLessonFragment(lesson_index);
-                    break;
-                case -1:
-                    openLessonFragment(lesson_index - 1);
-                    break;
-                case 1:
-                    openLessonFragment(lesson_index + 1);
-                    break;
-            }
+        switch (ToFlag) {
+            case 0:
+                openLessonFragment(lesson_index);
+                break;
+            case -1:
+                openLessonFragment(lesson_index - 1);
+                break;
+            case 1:
+                openLessonFragment(lesson_index + 1);
+                break;
+        }
         /*} else {
             lesson_index = ToFlag;
             setLessons();
@@ -282,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
         }*/
     }
 
-
+    //play voice of any Audio file path
     public void voiceoffer(View view, String DataPath2Bplayed) {
         if (view != null) {
             Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
@@ -339,6 +340,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // stopping the media player
     public void StopMediaPlayer() {
         Log.i("MainActivity", "StopMediaPlayer");
         if (mediaPlayer.isPlaying() || mediaPlayer.isLooping()) {
@@ -346,6 +348,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //displaying help Photo
     public void helpbypic(View view, String img2Bdisplayed) {
         if (view != null) {
             Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
@@ -368,11 +371,13 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    //To save on SharedPreference
     public void SaveOnSharedPref(String key, String value) {
         sharedPreferences_words_editor.putString(key, value).apply();
         sharedPreferences_words_editor.commit();
     }
 
+    //Check Android version
     private void checkPermission_AndroidVersion() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
@@ -382,6 +387,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Check Permission
     private void checkPermission() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) + ContextCompat.checkSelfPermission(this,
@@ -445,6 +451,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
+    //open Lesson Fragment by Lesson ID
     public void openLessonFragment(int i) {
 
         FragmentManager fragmentManager = getFragmentManager();
@@ -470,17 +478,13 @@ public class MainActivity extends AppCompatActivity {
         Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
     }
 
+    //open Lesson Fragment for just one word -- using in animation fragment
     public void openLessonFragment(Word word) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         LessonFragment lessonFragment = new LessonFragment();
-
-        //word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
-
         Bundle bundle = new Bundle();
-
         word = form_word(word.getText(), word.getPhrase());
-
         /*if (lesson_index == 1) {
             word = form_word(word.getText(), word.getPhrase());
             bundle.putBoolean(firstTimekey, true);
@@ -490,7 +494,6 @@ public class MainActivity extends AppCompatActivity {
             bundle.putBoolean(firstTimekey, false);
             bundle.putParcelableArray(LessonKey, lessons.get(lesson_index));
         }*/
-
         bundle.putParcelable(WordKey, word);
         bundle.putInt(WordIndexKey, 0);
         lessonFragment.setArguments(bundle);
@@ -500,6 +503,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i("MainActivity", "openLessonFragment:: lesson_index" + lesson_index);
     }
 
+    //Return back to the latest state of Lesson fragment
     public void backToLessonFragment() {
         Log.i("MainActivity", "backToLessonFragment :: am here!");
 
@@ -517,6 +521,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //open phrase fragment to pick the word learned
     public void openPhraseFragment(String phrase, String word) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -530,8 +535,8 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+    //open animation fragment to analyse phrases' words and words' chars
     public void openAnimationFragment(String word) {
-
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         AnimationFragment animationFragment = new AnimationFragment();
@@ -543,26 +548,22 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+    //open Help Fragment
     public void OpenHelpFragment() {
-
-
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         HelpFragment helpFragment = new HelpFragment();
-
         Bundle bundle = new Bundle();
-
         word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
-
         bundle.putInt(WordIndexKey, word_index);
         bundle.putParcelableArray(LessonKey, lessons.get(1));
         helpFragment.setArguments(bundle);
-
         fragmentTransaction.replace(R.id.fragment_replacement, helpFragment);
         // fragmentTransaction.addToBackStack(LessonFragment_TAG);
         fragmentTransaction.commit();
     }
 
+    //putting finished words into archive
     public void assignWordAsFinished(String Word) {
         if (!readArchiveWords().contains(Word)) {
             try {
@@ -577,6 +578,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //reading from archive file finished words
     public ArrayList<String> readArchiveWords() {
         ArrayList<String> words = new ArrayList<>();
         try {
@@ -596,6 +598,7 @@ public class MainActivity extends AppCompatActivity {
         return words;
     }
 
+    //reading phrases and words from WORDS.txt and store it into lessons
     @SuppressLint("UseSparseArrays")
     private void setLessons() {
         // int lessonNum = lesson_index - 1;
@@ -622,14 +625,13 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             }
-
-
             wordsReader.close();
             // phrasesReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }/*    @SuppressLint("UseSparseArrays")
+    }
+    /*    @SuppressLint("UseSparseArrays")
     private void setLessons() {
         lessons = new HashMap<>();
         int lessonNum = lesson_index - 1;
