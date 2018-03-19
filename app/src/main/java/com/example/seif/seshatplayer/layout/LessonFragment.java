@@ -16,7 +16,6 @@ import com.example.seif.seshatplayer.UpdateWord;
 import com.example.seif.seshatplayer.WordView;
 import com.example.seif.seshatplayer.model.Word;
 
-
 public class LessonFragment extends Fragment implements UpdateWord {
 
     public static final int RESULT_SPEECH = 177, WAIT2SayInstructions = 1000;
@@ -42,21 +41,23 @@ public class LessonFragment extends Fragment implements UpdateWord {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            words = (Word[]) getArguments().getParcelableArray(MainActivity.LessonKey);
-            word = getArguments().getParcelable(MainActivity.WordKey);
+            //getting lesson words when sending lesson key through openLessonFragment(int i)
+            words = (Word[]) getArguments().getParcelableArray(MainActivity.LessonKey);//will be null when calling animation
+
+            //getting text when sending word text through openLessonFragment(String word)
+            word = getArguments().getParcelable(MainActivity.WordKey);//will be not null when calling animation
+            //getting boolean to check if first time or not
             firstTime = getArguments().getBoolean(MainActivity.firstTimekey);
+            //getting word index (till now always 0 for each lesson )
             CurrentWordsArrayIndex = getArguments().getInt(MainActivity.WordIndexKey);
 
             if (word == null && words != null) {
+                //filling when calling by openLessonFragment(int i)
                 word = words[CurrentWordsArrayIndex];
                 Log.i("onCreate", "from LessonFragment" + "word == null");
             }
         }
 
-     /*    Log.i("onCreate", "from LessonFragment");
-        Log.i("LessonFragment", "1st time: " + firstTime);
-        Log.i("LessonFragment", "word:" + word);
-        Log.i("LessonFragment", "words: " + words.length + ": " + words.toString());*/
         instance = this;
         mContext = getActivity();
 
@@ -73,11 +74,16 @@ public class LessonFragment extends Fragment implements UpdateWord {
         wordView_MainText.setmLessonFragment(this);
 
         if (word.getFV() != null) {
+
+            //setting word guided vector in the wordView to help you check writing
             wordView_MainText.setGuidedVector(word.getFV());
             Log.d("LessonFragment", "FV = " + word.getFV());
         } else if (!firstTime) {
+            //setting word from lessons' words
             word = words[CurrentWordsArrayIndex];
+            //setting word guided vector in the wordView to help you check writing
             wordView_MainText.setGuidedVector(word.getFV());
+            //putting text into wordView
             wordView_MainText.setText(word.getText());
             Log.d("LessonFragment", "FV = " + word.getFV());
 
@@ -97,6 +103,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
+
             ((MainActivity) getActivity()).OpenHelpFragment();
 
             wordIsAnimated = false;
@@ -106,7 +113,6 @@ public class LessonFragment extends Fragment implements UpdateWord {
         PreviBtn = view.findViewById(R.id.imagebutton_prevword);
         PreviBtn.setOnClickListener(view13 -> {
             // request prev word
-
             prevWordCall();
             setPreviBtnVisibilty();
             setNextiBtnVisibility();
@@ -129,6 +135,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         PlaySoundiBtn = view.findViewById(R.id.imagebutton_soundhelp);
         PlaySoundiBtn.setOnClickListener(view12 -> {
             try {
+                //playing Audio file of word
                 ((MainActivity) getActivity()).voiceoffer(PlaySoundiBtn, word.getText());
                 Log.i("PlaySoundiBtn", word.getText());
 
@@ -141,6 +148,7 @@ public class LessonFragment extends Fragment implements UpdateWord {
         DisplayImageiBtn = view.findViewById(R.id.imagebutton_photohelp);
         DisplayImageiBtn.setOnClickListener(view1 -> {
             try {
+                //displaying image file of word
                 ((MainActivity) getActivity()).helpbypic(DisplayImageiBtn, word.getText());
                 Log.i("DisplayImageiBtn", word.getText());
 
@@ -161,20 +169,27 @@ public class LessonFragment extends Fragment implements UpdateWord {
     @Override
     public void onResume() {
         super.onResume();
-
         if (!firstTime && !wordIsAnimated) {
+            //word not animated yet
             if (!phraseIsAnimated && words != null) {
+                //word's phrase not animated
                 ((MainActivity) getActivity()).openAnimationFragment(word.getPhrase());
                 phraseIsAnimated = true;
             } else {
+                //word phrase animated but word not animated
                 ((MainActivity) getActivity()).openAnimationFragment(word.getText());
                 wordIsAnimated = true;
             }
         } else if (!firstTime && instance.isWritten &&/* instance.isPronunced &&*/ !isPicked) {
+            //word has been written and not picked from phrase
+            //saying picking instructions and start phrase fragment to pick word
             ((MainActivity) mContext).voiceoffer(instance.wordView_MainText, mContext.getString(R.string.pickwordinstr));
             ((MainActivity) getActivity()).openPhraseFragment(word.getPhrase(), word.getText());
         } else if (!firstTime && isPicked  /*&& instance.isPronunced*/) {
+            //word has been picked
             if (instance.CurrentWordsArrayIndex + 1 == instance.words.length) {
+                //if it's the last word
+                //update lesson, reset all word and phrase booleans, get the next lesson word and setting it's guided vector
                 Log.i("LessonFragment: ", "UpdateLesson: ");
                 CurrentWordsArrayIndex = 0;
                 instance.word = instance.words[CurrentWordsArrayIndex];
@@ -193,8 +208,9 @@ public class LessonFragment extends Fragment implements UpdateWord {
                 setPreviBtnVisibilty();
 
                 // ((MainActivity) instance.mContext).updatelesson(1, true);
-                ((MainActivity) instance.mContext).updatelesson(1);
+                ((MainActivity) instance.mContext).updateLesson(1);
             } else {
+                //not the last word in lesson so get next word
                 phraseIsAnimated = false;
                 wordIsAnimated = false;
                 instance.nextWordCall();
@@ -204,29 +220,36 @@ public class LessonFragment extends Fragment implements UpdateWord {
         }
     }
 
-
+    //next button visibility checking
     private void setNextiBtnVisibility() {
         if (words == null) {
+            //when calling openAnimationFragment(String word) and words == null
             NextiBtn.setVisibility(View.INVISIBLE);
 
         } else {
+            //during the lesson adventure
             if (CurrentWordsArrayIndex == words.length - 1) {
+                //if last word
                 NextiBtn.setVisibility(View.INVISIBLE);
             } else {
+                //not last word
                 NextiBtn.setVisibility(View.VISIBLE);
             }
         }
     }
+//previous button visibility checking
 
     private void setPreviBtnVisibilty() {
         if (CurrentWordsArrayIndex == 0) {
+            //if first word
             PreviBtn.setVisibility(View.INVISIBLE);
         } else {
+            //not first word
             PreviBtn.setVisibility(View.VISIBLE);
         }
     }
 
-
+    //instructions after finishing word trip
     private Thread Thread_WordJourney_voice_speech() {
 
         Thread_WordJourney = new Thread() {
@@ -243,8 +266,11 @@ public class LessonFragment extends Fragment implements UpdateWord {
                         sleep(1500);
 
                         if (words == null) {
+                            //when calling openAnimationFragment(String word) and words == null
+                            //using archive words
                             ((MainActivity) getActivity()).OpenHelpFragment();
                         } else {
+
                             ((MainActivity) mContext).voiceoffer(instance.wordView_MainText, mContext.getString(R.string.pickwordinstr));
                             sleep(2500);
                             //  instance.voicerec(null);

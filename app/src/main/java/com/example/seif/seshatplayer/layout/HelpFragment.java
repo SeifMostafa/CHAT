@@ -56,9 +56,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    // ((MainActivity) getActivity()).updatelesson(-1, true);
-                    ((MainActivity) getActivity()).updatelesson(-1);
-                    // ((MainActivity) getActivity()).openLessonFragment(lesson[wordIndex - 1]);
+                    ((MainActivity) getActivity()).updateLesson(-1);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("PrevlessoniBtn", e.toString());
@@ -70,15 +68,9 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    //((MainActivity) getActivity()).openLessonFragment();
                     LessonFragment.isPicked = false;
                     ((MainActivity) getActivity()).SaveOnSharedPref(MainActivity.WordIndexKey, String.valueOf(wordIndex));
-                    // ((MainActivity) getActivity()).updatelesson(0, true);
-                    ((MainActivity) getActivity()).updatelesson(0);
-
-                    // ((MainActivity) getActivity()).openLessonFragment(1);
-
-
+                    ((MainActivity) getActivity()).updateLesson(0);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("CurrentlessoniBtn", e.toString());

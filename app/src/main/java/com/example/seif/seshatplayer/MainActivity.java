@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         //starting lesson
-                        updatelesson(0);
+                        updateLesson(0);
                     }
                 }, 1500);
             } catch (InterruptedException e) {
@@ -230,19 +230,16 @@ public class MainActivity extends AppCompatActivity {
                     result_directions[i] = getDirections(SF + character, version);
                 } else {
                     result_directions[i] = getDirections(SF + character + charConnector, version);
-
                 }
             } else if (i == word.length() - 1) {
                 if (differentchars.contains(word.charAt(i - 1))) {
                     result_directions[i] = getDirections(SF + character, version);
-
                 } else {
                     result_directions[i] = getDirections(SF + charConnector + character, version);
                 }
             } else {
                 if (differentchars.contains(word.charAt(i - 1)) && differentchars.contains(character)) {
                     result_directions[i] = getDirections(SF + character, version);
-
                 } else if (differentchars.contains(word.charAt(i - 1)) && !differentchars.contains(character)) {
                     result_directions[i] = getDirections(SF + character + charConnector, version);
                 } else if (!differentchars.contains(word.charAt(i - 1)) && differentchars.contains(character)) {
@@ -255,16 +252,12 @@ public class MainActivity extends AppCompatActivity {
         return result_directions;
     }
 
-
     /*
     ToFlag: if 0 = current, if -1 = prev , if 1 = next; flag to obtain the ToFlag cretira
     else to navigate to ToFlag as lesson index
      */
-    //public void updatelesson(int ToFlag, boolean flag) {
-    public void updatelesson(int ToFlag) {
-        // if (flag) {
+    public void updateLesson(int ToFlag) {
         lesson_index = Integer.parseInt(sharedPreferences_words.getString(LessonKey, "1"));
-
         switch (ToFlag) {
             case 0:
                 openLessonFragment(lesson_index);
@@ -276,11 +269,6 @@ public class MainActivity extends AppCompatActivity {
                 openLessonFragment(lesson_index + 1);
                 break;
         }
-        /*} else {
-            lesson_index = ToFlag;
-            setLessons();
-            openLessonFragment(ToFlag);
-        }*/
     }
 
     //play voice of any Audio file path
@@ -460,14 +448,8 @@ public class MainActivity extends AppCompatActivity {
         LessonFragment lessonFragment = new LessonFragment();
         Bundle bundle = new Bundle();
         Word[] lesson = lessons.get(i);
-        //word_index = Integer.parseInt(sharedPreferences_words.getString(WordIndexKey, "0"));
         SaveOnSharedPref(LessonKey, String.valueOf(i));
-
-
         Log.i("MainActivity", "openLessonFragment: am here with i(lesson_index)= " + i);
-        // Log.i("MainActivity", "openLessonFragment: & lesson.sz= " + lesson.length);
-
-
         bundle.putParcelableArray(LessonKey, lesson);
         bundle.putInt(WordIndexKey, 0);
         lessonFragment.setArguments(bundle);
@@ -485,15 +467,6 @@ public class MainActivity extends AppCompatActivity {
         LessonFragment lessonFragment = new LessonFragment();
         Bundle bundle = new Bundle();
         word = form_word(word.getText(), word.getPhrase());
-        /*if (lesson_index == 1) {
-            word = form_word(word.getText(), word.getPhrase());
-            bundle.putBoolean(firstTimekey, true);
-            bundle.putParcelableArray(LessonKey, lessons.get(1));
-
-        } else {
-            bundle.putBoolean(firstTimekey, false);
-            bundle.putParcelableArray(LessonKey, lessons.get(lesson_index));
-        }*/
         bundle.putParcelable(WordKey, word);
         bundle.putInt(WordIndexKey, 0);
         lessonFragment.setArguments(bundle);
