@@ -270,10 +270,11 @@ public class LessonFragment extends Fragment implements UpdateWord {
                             //using archive words
                             ((MainActivity) getActivity()).OpenHelpFragment();
                         } else {
-
+                            //playing pick instruction when finish writing
                             ((MainActivity) mContext).voiceoffer(instance.wordView_MainText, mContext.getString(R.string.pickwordinstr));
                             sleep(2500);
                             //  instance.voicerec(null);
+                            //start picking word
                             ((MainActivity) getActivity()).openPhraseFragment(word.getPhrase(), word.getText());
                         }
                     } catch (Exception e) {
@@ -306,36 +307,38 @@ public class LessonFragment extends Fragment implements UpdateWord {
         startActivityForResult(voicerecogize, RESULT_SPEECH);
     }*/
 
+    //an override method from UpdateWord interface to make WordView interact with LessonFragment to update word's fonts levels
     @Override
     public Typeface updateWordLoop(Typeface typeface, int word_loop) {
         Typeface tf;
+        //check word loop counter
         if (word_loop < (DEFAULT_LOOP_COUNTER * DEFAULT_TYPEFACE_LEVELS) - 2) {
             if (word_loop % DEFAULT_LOOP_COUNTER == 0) {
                 // change font
                 if (word_loop > 0 && word_loop == DEFAULT_LOOP_COUNTER) {
+                    //level 2 (less dots level)
                     tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl2.ttf");
-
-
                 } else if (word_loop > DEFAULT_LOOP_COUNTER && word_loop == DEFAULT_LOOP_COUNTER * 2) {
+                    //level 3 (less dots and arrows level)
                     tf = Typeface.createFromAsset(mContext.getAssets(), "fonts/lvl3.ttf");
-
                 } else {
-
+                    //level 4 (Blank level)
                     return null;
-
                 }
             } else {
                 tf = typeface;
             }
         } else {
+            //finish writing
             // change word
             isWritten = true;
+            //store word in archive
             ((MainActivity) mContext).assignWordAsFinished(instance.word.getText());
             instance.Thread_WordJourney_voice_speech().start();
             Log.i("LessonFragment: ", "UpdateWordLoop: changeword");
+            //return to font level 1 (hollow with arrows)
             tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lvl1.ttf");
         }
-
         return tf;
     }
 
@@ -392,24 +395,34 @@ public class LessonFragment extends Fragment implements UpdateWord {
         super.onPause();
     }
 
+    //request next word
     private void nextWordCall() {
         instance = this;
         if (instance.Thread_WordJourney != null) instance.Thread_WordJourney.interrupt();
+
+        //get next word
         instance.word = instance.words[++instance.CurrentWordsArrayIndex];
 
+        //save word index
         ((MainActivity) getActivity()).SaveOnSharedPref(MainActivity.WordIndexKey, String.valueOf(instance.CurrentWordsArrayIndex));
+
         if (!phraseIsAnimated) {
+
+            //animate the new phrase if not animated
             ((MainActivity) getActivity()).openAnimationFragment(instance.word.getPhrase());
             phraseIsAnimated = true;
         } else {
+
+            //animate the new word if not animated
             ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
 
             wordIsAnimated = true;
         }
+        //reset word operations
         isPicked = false;
         instance.isWritten = false;
         instance.isPronunced = false;
-
+        //set word guided vector
         instance.wordView_MainText.setGuidedVector(instance.word.getFV());
         instance.wordView_MainText.setText(
                 instance.word.getText());
@@ -418,22 +431,32 @@ public class LessonFragment extends Fragment implements UpdateWord {
 
     }
 
+    //request previous word
     private void prevWordCall() {
         if (instance.Thread_WordJourney != null) instance.Thread_WordJourney.interrupt();
+
+        //getting previous word
         instance.word = instance.words[--instance.CurrentWordsArrayIndex];
 
+        //store word index
         ((MainActivity) getActivity()).SaveOnSharedPref(MainActivity.WordIndexKey, String.valueOf(instance.CurrentWordsArrayIndex));
         if (!phraseIsAnimated) {
+
+            //animate the new phrase if not animated
             ((MainActivity) getActivity()).openAnimationFragment(instance.word.getPhrase());
             phraseIsAnimated = true;
         } else {
-            ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
 
+            //animate the new word if not animated
+            ((MainActivity) getActivity()).openAnimationFragment(instance.word.getText());
             wordIsAnimated = true;
         }
+
+        //reset word operation
         isPicked = false;
         instance.isPronunced = false;
 
+        //set word guided vector
         instance.wordView_MainText.setGuidedVector(instance.word.getFV());
         instance.wordView_MainText.setText(
                 instance.word.getText());
