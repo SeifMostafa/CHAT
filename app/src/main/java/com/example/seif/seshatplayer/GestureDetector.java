@@ -24,15 +24,18 @@ public class GestureDetector {
     int counter = 0;
     private double THRESHOLD = 76;
     private ArrayList<Direction> wholeWord;
-    private HashMap<String, Integer> wrongDirectionscounter = new HashMap<>();
+    private HashMap<String, Integer> wrongDirectionsCounter = new HashMap<>();
 
+    //constructor
     GestureDetector(Direction[][] Gesture) {
+        //getting word directions
         wholeWord = new ArrayList<>();
         for (Direction[] aGesture : Gesture) {
             wholeWord.addAll(Arrays.asList(aGesture));
         }
         if (this.wholeWord.size() < 2)
             Log.i("GestureDetector", "Hasn't gesture to detect!");
+        //setting customized Threshold for each word
         THRESHOLD += Gesture.length * 10 / wholeWord.size();
     }
 
@@ -46,6 +49,7 @@ public class GestureDetector {
         boolean isDetected = false;
         try {
             if (mUserGV.size() <= wholeWord.size()) {
+                //when painted directions less than the actual one
                 for (int i = 0; i < mUserGV.size() - 1; i += 2) {
                     Direction d_X = mUserGV.get(i);
                     Direction d_Y = mUserGV.get(i + 1);
@@ -103,18 +107,18 @@ public class GestureDetector {
     }
 
     private void checkWrongDirection(Direction ORG_d_X, Direction ORG_d_Y) throws IOException {
-        if (wrongDirectionscounter.isEmpty()) {
-            wrongDirectionscounter = readFileToMap();
+        if (wrongDirectionsCounter.isEmpty()) {
+            wrongDirectionsCounter = readFileToMap();
         }
-        if (wrongDirectionscounter.containsKey((ORG_d_X.toString()) + (ORG_d_Y.toString()))) {
-            counter = wrongDirectionscounter.get((ORG_d_X.toString()) + (ORG_d_Y.toString()));
-            wrongDirectionscounter.replace((ORG_d_X.toString()) + (ORG_d_Y.toString()), counter, ++counter);
+        if (wrongDirectionsCounter.containsKey((ORG_d_X.toString()) + (ORG_d_Y.toString()))) {
+            counter = wrongDirectionsCounter.get((ORG_d_X.toString()) + (ORG_d_Y.toString()));
+            wrongDirectionsCounter.replace((ORG_d_X.toString()) + (ORG_d_Y.toString()), counter, ++counter);
         } else {
             counter = 0;
-            wrongDirectionscounter.put((ORG_d_X.toString()) + (ORG_d_Y.toString()), ++counter);
+            wrongDirectionsCounter.put((ORG_d_X.toString()) + (ORG_d_Y.toString()), ++counter);
         }
-        Log.i("GestureDetector", wrongDirectionscounter.toString());
-        writeMapToFile(wrongDirectionscounter);
+        Log.i("GestureDetector", wrongDirectionsCounter.toString());
+        writeMapToFile(wrongDirectionsCounter);
     }
 
     private boolean approximateCheck(ArrayList<Direction> mUserGV, Direction XDirection, Direction YDirection, int index) {

@@ -33,7 +33,9 @@ public class HelpFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            //getting lesson
             lesson = (Word[]) getArguments().getParcelableArray(MainActivity.LessonKey);
+            //getting word index through lesson
             wordIndex = getArguments().getInt(MainActivity.WordIndexKey);
         }
     }
@@ -47,6 +49,7 @@ public class HelpFragment extends Fragment {
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //playing audio of help instruction
                 ((MainActivity) getActivity()).voiceoffer(helpiBtn, getActivity().getString(R.string.helpfragmenthelpbtninstr));
             }
         });
@@ -56,6 +59,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
+                    //return back to previous lesson
                     ((MainActivity) getActivity()).updateLesson(-1);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -68,6 +72,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
+                    //return to current lesson
                     LessonFragment.isPicked = false;
                     ((MainActivity) getActivity()).SaveOnSharedPref(MainActivity.WordIndexKey, String.valueOf(wordIndex));
                     ((MainActivity) getActivity()).updateLesson(0);
@@ -81,6 +86,7 @@ public class HelpFragment extends Fragment {
         AchievedlessoniBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //reading archived words (finished) from Archive file
                 ArrayList<String> data_donewords = ((MainActivity) getActivity()).readArchiveWords();
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -89,9 +95,10 @@ public class HelpFragment extends Fragment {
                 View dialogLayout = inflater.inflate(R.layout.layout_listview, null);
 
                 ListView listview_donewords = dialogLayout.findViewById(R.id.listview);
+                //define adapter to list finished words
                 AchievedWordsListAdapter customAdapter = new AchievedWordsListAdapter(getActivity(), R.layout.layout_word_listview_item, data_donewords);
                 listview_donewords.setAdapter(customAdapter);
-
+                //showing as dialog
                 dialog.setView(dialogLayout);
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog.setCancelable(true);
@@ -105,6 +112,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
+                    //help instruction for btn played
                     ((MainActivity) getActivity()).voiceoffer(PrevlessoniBtn_help, getActivity().getString(R.string.backprevlesson));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -117,6 +125,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
+                    //help instruction for btn played
                     ((MainActivity) getActivity()).voiceoffer(CurrentlessoniBtn_help, getActivity().getString(R.string.backcurrentlesson));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -131,6 +140,7 @@ public class HelpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
+                    //help instruction for btn played
                     ((MainActivity) getActivity()).voiceoffer(AchievedlessoniBtn_help, getActivity().getString(R.string.urachievements));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -156,6 +166,7 @@ public class HelpFragment extends Fragment {
         super.onStop();
     }
 
+    //custom list adapter to list finished word
     public class AchievedWordsListAdapter extends ArrayAdapter<String> {
 
         public AchievedWordsListAdapter(Context context, int resource, ArrayList<String> items) {
@@ -186,6 +197,7 @@ public class HelpFragment extends Fragment {
                     public void onClick(View view) {
                         Log.i("ArchiveListAdapter", getItem(position) + " imageButton_photo_help is clicked");
                         try {
+                            //display image for the word selected
                             ((MainActivity) getActivity()).helpbypic(imageButton_photo_help, getItem(position));
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -198,6 +210,7 @@ public class HelpFragment extends Fragment {
                     public void onClick(View view) {
                         Log.i("ArchiveListAdapter", getItem(position) + " imageButton_sound_help is clicked");
                         try {
+                            //play sound for the word selected
                             ((MainActivity) getActivity()).voiceoffer(imageButton_sound_help, getItem(position));
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -213,6 +226,7 @@ public class HelpFragment extends Fragment {
                         try {
                             AchievedDialog.dismiss();
                             AchievedDialog.cancel();
+                            //open word again for just writing it
                             ((MainActivity) getActivity()).openLessonFragment(new Word(p));
 
 

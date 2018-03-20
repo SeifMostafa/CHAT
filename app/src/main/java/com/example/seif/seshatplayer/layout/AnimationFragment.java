@@ -26,6 +26,7 @@ public class AnimationFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
+            //getting word text from MainActivity
             this.word = getArguments().getString(MainActivity.WordKey);
             if (word != null) Log.i("AnimationFragment", "Word != null");
             else Log.i("AnimationFragment", "Word = null");
@@ -45,10 +46,16 @@ public class AnimationFragment extends Fragment {
         custTextView.setVisibility(View.VISIBLE);
         custTextView.setCharacterDelay(500);
         if (word.contains(" ")) {
+            //if word acts as a phrase
+            //setting word delay
             custTextView.setCharacterDelay(500);
+            //animate phrase
             custTextView.animatePhrase();
         } else {
+            //if word acts as a word
+            //setting char delay
             custTextView.setCharacterDelay(600);
+            //animate word
             custTextView.animateText(word);
         }
 
@@ -63,6 +70,7 @@ public class AnimationFragment extends Fragment {
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }
+                //open help fragment
                 ((MainActivity) getActivity()).OpenHelpFragment();
                 LessonFragment.wordIsAnimated = false;
             }
@@ -73,22 +81,26 @@ public class AnimationFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        int time2waitbeforeOpenningPickPhraseFragment;
+        int timeToWaitBeforeOpeningPickPhraseFragment;
         if (word.contains(" ")) {
-            time2waitbeforeOpenningPickPhraseFragment = (
+            //time to wait for a phrase
+            timeToWaitBeforeOpeningPickPhraseFragment = (
                     word.length()) * 1000;
         } else {
-            time2waitbeforeOpenningPickPhraseFragment = (
+            //time to wait for a word
+            timeToWaitBeforeOpeningPickPhraseFragment = (
                     word.length() + 2) * 1000;
         }
+        //waiting to finish animation
         Handler handler = new Handler();
         Runnable r = new Runnable() {
             public void run() {
+                //return Back to lesson fragment
                 if (isVisible())
                     ((MainActivity) getActivity()).backToLessonFragment();
             }
         };
-        handler.postDelayed(r, time2waitbeforeOpenningPickPhraseFragment);
+        handler.postDelayed(r, timeToWaitBeforeOpeningPickPhraseFragment);
     }
 
     @Override

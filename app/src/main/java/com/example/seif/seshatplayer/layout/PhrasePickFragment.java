@@ -29,6 +29,7 @@ public class PhrasePickFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            //getting word and phrase text
             word = getArguments().getString(MainActivity.WordKey);
             phrase = getArguments().getString(MainActivity.PhraseKey);
         }
@@ -45,7 +46,7 @@ public class PhrasePickFragment extends Fragment {
         textView_phrase.setMovementMethod(LinkMovementMethod.getInstance());
 
         textView_phrase.setText(phrase, TextView.BufferType.SPANNABLE);
-
+        //used for click on part of text in TextView
         Spannable spans = (Spannable) textView_phrase.getText();
         Locale loc = new Locale("ar");
         BreakIterator iterator = BreakIterator.getWordInstance(loc);
@@ -68,6 +69,7 @@ public class PhrasePickFragment extends Fragment {
         helpiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //play sound of picking word
                 ((MainActivity) getActivity()).voiceoffer(helpiBtn, getActivity().getString(R.string.pickwordinstr));
             }
         });
@@ -81,6 +83,7 @@ public class PhrasePickFragment extends Fragment {
         Log.i("PhrasePickFragment", "onResume");
     }
 
+    //responsible of clickable on each word of the phrase
     private ClickableSpan getClickableSpan(final String w) {
         return new ClickableSpan() {
             @Override
