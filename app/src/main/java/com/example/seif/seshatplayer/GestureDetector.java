@@ -56,28 +56,31 @@ public class GestureDetector {
                     Direction ORG_d_X = wholeWord.get(i);
                     Direction ORG_d_Y = wholeWord.get(i + 1);
                     try {
+                        //start comparing
                         if (ORG_d_X == Direction.NOMATTER || ORG_d_Y == Direction.NOMATTER) {
-
+                            //when point is a dot
                             if (ORG_d_X == Direction.NOMATTER && ORG_d_Y != Direction.NOMATTER) {
                                 if (d_Y != ORG_d_Y) {
+                                    //when painted not equal actual
                                     if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)) {
                                         successPercentage -= progressStep;
                                         checkWrongDirection(ORG_d_X, ORG_d_Y);
-
                                     }
                                 }
                             } else if (ORG_d_X != Direction.NOMATTER) {
                                 if (d_X != ORG_d_X) {
+                                    //when painted not equal actual
                                     if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)) {
                                         successPercentage -= progressStep;
                                         checkWrongDirection(ORG_d_X, ORG_d_Y);
-
                                     }
                                 }
                             }
                         } else {
+                            //word at any direction
                             if ((d_X != ORG_d_X || d_Y != ORG_d_Y)) {
                                 if (!approximateCheck(mUserGV, ORG_d_X, ORG_d_Y, i)) {
+                                    //when painted not equal actual
                                     successPercentage -= progressStep;
                                     checkWrongDirection(ORG_d_X, ORG_d_Y);
                                 }
@@ -86,7 +89,6 @@ public class GestureDetector {
                     } catch (Exception e) {
                         Log.e("GestureDetector", "CompareGuidedVector" + e.toString());
                     }
-
                 }
                 if (successPercentage > THRESHOLD) {
                     isDetected = true;
@@ -99,6 +101,7 @@ public class GestureDetector {
             } else {
 
                 Log.i("GestureDetector", "check " + "shortage in touched points data");
+
             }
         } catch (Exception e) {
             Log.e("GestureDetector", "check:: e: " + e.getMessage());
@@ -121,6 +124,7 @@ public class GestureDetector {
         writeMapToFile(wrongDirectionsCounter);
     }
 
+    //approximate check
     private boolean approximateCheck(ArrayList<Direction> mUserGV, Direction XDirection, Direction YDirection, int index) {
         boolean isDetected = false;
         if (index + 3 <= mUserGV.size()) {
@@ -153,6 +157,7 @@ public class GestureDetector {
         return isDetected;
     }
 
+    //write your map of wrong direction to file
     private void writeMapToFile(HashMap<String, Integer> hashMap) throws IOException {
         String file = Environment.getExternalStorageDirectory() + "/SeShatSF/wrongDirections.txt";
         FileWriter fStream;
@@ -164,6 +169,7 @@ public class GestureDetector {
         }
         out.close();
     }
+//read your map of wrong direction to make changes on it
 
     private HashMap<String, Integer> readFileToMap() throws IOException {
         String file = Environment.getExternalStorageDirectory() + "/SeShatSF/wrongDirections.txt";

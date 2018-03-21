@@ -71,15 +71,15 @@ public class WordView extends TextView {
         init();
     }
 
-  /*  public WordView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        this.context = context;
+    /*  public WordView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+          super(context, attrs, defStyleAttr, defStyleRes);
+          this.context = context;
 
-        init();
-    }*/
-
+          init();
+      }*/
+//defining all attributes
     public void init() {
-        //word_loop=context.getSharedPreferences(MainActivity.WORDS_PREFS_NAME,0).getInt(MainActivity.WordLoopKey,0);
+
         newTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
         this.setTypeface(newTypeface);
         Log.i("init", "AM HERE!");
@@ -104,8 +104,9 @@ public class WordView extends TextView {
         mUserGuidedVectors = new ArrayList<>();
         setTextColor(Color.BLACK);
         updateWord = new LessonFragment();
-        successBtn = (ImageButton) ((MainActivity) context).findViewById(R.id.imagebutton_success);
-        fontBtn = (ImageButton) ((MainActivity) context).findViewById(R.id.imagebutton_skipFont);
+        successBtn = ((MainActivity) context).findViewById(R.id.imagebutton_success);
+        //valid for testing
+        fontBtn = ((MainActivity) context).findViewById(R.id.imagebutton_skipFont);
         fontBtn.setOnClickListener(view -> {
             indx++;
             fontCreator();
@@ -141,6 +142,7 @@ public class WordView extends TextView {
         mCanvas = new Canvas(mBitmap);
     }
 
+    //reset all attributes
     public void reset() {
         mBitmap.recycle();
         mBitmap = Bitmap.createBitmap(this.mBitmap.getWidth(), this.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
@@ -160,21 +162,23 @@ public class WordView extends TextView {
 
     }
 
+    //after putting your first point
     private void touch_start(float x, float y, float ff) {
 
         mPath.reset();
         mPath.moveTo(x, y);
-
 
         mX = x;
         mY = y;
         mFingerFat = ff;
         mPath.addCircle(mX, mY, POINT_WIDTH, Path.Direction.CW);
         mTouchedPoints = new ArrayList<>();
+        //add the point touched
         mTouchedPoints.add(new Point((int) x, (int) y));
 
     }
 
+    //after moving from your point (Drag)
     private void touch_move(float x, float y) {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
@@ -184,12 +188,13 @@ public class WordView extends TextView {
             mY = y;
             circlePath.reset();
             circlePath.addCircle(mX, mY, 20, Path.Direction.CW);
+            //add points touched
             mTouchedPoints.add(new Point((int) x, (int) y));
         }
 
     }
 
-
+    //change points to directions
     private ArrayList<Direction> appendPoints(ArrayList<Point> touchedPoints, ArrayList<Direction> outputUserGV) {
         if (touchedPoints.size() >= 2) {
             for (int i = 0; i < touchedPoints.size() - 1; i++) {
@@ -232,9 +237,11 @@ public class WordView extends TextView {
     /*
         called every time user touch screen to draw something and up his/her finger
      */
+    //check directions
     private void wholeCheck(ArrayList<Direction> outputUserGV) {
 
         if (gestureSize == 0) {
+            //filling of actual directions
             for (int j = 0; j < gesture.get(0).length; j++) {
                 for (int l = 0; l < gesture.get(0)[j].length; l++) {
                     gestureSize++;
@@ -252,7 +259,7 @@ public class WordView extends TextView {
             if (!checkResult) {
                 int trials = 1;  // already checked for 1st time
                 while (trials < gesture.size()) {
-
+                    //check other versions
                     GestureDetector GD_otherV = new GestureDetector(gesture.get(trials++));
                     //  if(charsPassed+2==gesture.get(0).length) GD_otherV.setThreshold(50);
                     if (GD_otherV.check(outputUserGV)) {

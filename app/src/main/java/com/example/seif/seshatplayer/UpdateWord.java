@@ -10,6 +10,7 @@ import com.example.seif.seshatplayer.layout.LessonFragment;
  */
 
 public interface UpdateWord {
+    //interface to make a connection between WordView and LessonFragment
     Typeface updateWordLoop(Typeface typeface, int word_loop);
 
     void setmContext(Context context);
